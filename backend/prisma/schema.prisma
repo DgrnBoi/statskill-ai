@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  designation String
+  department  String
+  
+  assessments Assessment[]
+  enrollments Enrollment[]
+}
+
+model Competency {
+  id          String   @id @default(uuid())
+  skillName   String   @unique
+  targetLevel Int      // 1-5 scale
+  category    String   // e.g., "Statistical", "Technical"
+}
+
+model Course {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  skillsCovered String[] 
+  provider      String   @default("iGOT")
+  
+  enrollments   Enrollment[]
+}
+
+model Assessment {
+  id          String   @id @default(uuid())
+  userId      String
+  skillName   String
+  score       Int      // e.g., 0-100
+  takenAt     DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Enrollment {
+  id          String   @id @default(uuid())
+  userId      String
+  courseId    String
+  enrolledAt  DateTime @default(now())
+  status      String   @default("IN_PROGRESS")
+
+  user        User     @relation(fields: [userId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+}

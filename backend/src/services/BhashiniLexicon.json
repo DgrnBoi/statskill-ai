@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "Project Bhashini & MoSPI Statistical Glossary",
+    "version": "1.0",
+    "description": "Strict key-value mapping for technical statistical terminology to prevent AI hallucination during regional language translation."
+  },
+  "lexicon": {
+    "Gross Domestic Product": {
+      "hi": "सकल घरेलू उत्पाद (GDP)",
+      "mr": "स्थूल देशांतर्गत उत्पादन"
+    },
+    "Consumer Price Index": {
+      "hi": "उपभोक्ता मूल्य सूचकांक (CPI)",
+      "mr": "ग्राहक किंमत निर्देशांक"
+    },
+    "Sampling Bias": {
+      "hi": "प्रतिचयन पूर्वाग्रह",
+      "mr": "नमुना पूर्वग्रह"
+    },
+    "Standard Deviation": {
+      "hi": "मानक विचलन",
+      "mr": "प्रमाण विचलन"
+    },
+    "National Sample Survey": {
+      "hi": "राष्ट्रीय प्रतिदर्श सर्वेक्षण (NSS)",
+      "mr": "राष्ट्रीय नमुना सर्वेक्षण"
+    },
+    "Extrapolation": {
+      "hi": "बहिर्वेशन (Extrapolation)",
+      "mr": "बहिर्वेशन"
+    },
+    "Demographic Dividend": {
+      "hi": "जनसांख्यिकीय लाभांश",
+      "mr": "लोकसंख्याशास्त्रीय लाभांश"
+    }
+  }
+}
