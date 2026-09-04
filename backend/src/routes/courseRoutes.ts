@@ -27,14 +27,28 @@ router.get('/search', (req, res) => {
 
 // GET /api/courses/:id
 router.get('/:id', (req, res) => {
-  // Simple fetch by ID without writing a dedicated method, since search returns all
-  const courses = searchService.search(''); // gets all top ones, wait, we need full fetch
-  // Let's cheat slightly and use the loaded courses inside searchService
-  // For a real DB we'd do a direct query. For now, we can just return a mock or search the array.
-  return res.status(200).json({
-    success: true,
-    message: "Course detail endpoint ready for integration."
-  });
+  try {
+    const courseId = req.params.id;
+    const course = searchService.getById(courseId);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        error: `Course with id '${courseId}' was not found.`
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      course
+    });
+  } catch (error: any) {
+    console.error('Course Detail Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve course details.'
+    });
+  }
 });
 
 export default router;

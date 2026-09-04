@@ -174,5 +174,50 @@
     "correctAnswer": "Masking or perturbing direct identifiers like respondent names, phone numbers, and precise village codes",
     "explanation": "To prevent re-identification attacks while preserving research utility, statistical agencies perform k-anonymity, top-coding, and suppression of direct geographic and personal identifiers.",
     "sourceCitation": "MoSPI National Microdata Policy & Data Anonymization Guidelines"
+  },
+  {
+    "question": "According to the system architecture and recommendation flow, what is the primary mechanism that ensures a training pathway is valid and trustworthy before it is presented to the user?",
+    "options": [
+      "The Large Language Model (LLM) generates the pathway based on the user's natural language input and verifies its existence in real-time.",
+      "The recommendation service filters and ranks pathways strictly from a pre-existing, verified catalogue, while the LLM only explains the match.",
+      "The beneficiary confirms the pathway's validity through a secondary verification step after the initial AI suggestion.",
+      "The facilitator manually creates the pathway entry in the database if it does not already exist in the system."
+    ],
+    "correctAnswer": "The recommendation service filters and ranks pathways strictly from a pre-existing, verified catalogue, while the LLM only explains the match.",
+    "explanation": "Section 12 explicitly states: 'A recommendation is trustworthy only when the pathway exists in the catalogue. The LLM explains the match, but the application’s recommendation service controls which pathways may be shown.' This distinguishes the role of the deterministic recommendation engine (filtering/ranking from a fixed source) from the generative role of the LLM (explanation), preventing the AI from hallucinating non-existent courses.",
+    "sourceCitation": "Section 12: Recommendation flow",
+    "id": "qb-ai-1788540825262-1",
+    "courseId": "SRS.pdf",
+    "bloomLevel": "Application"
+  },
+  {
+    "question": "In the context of the 'Complete system flow' and 'Beneficiary journey', what is the specific purpose of the step where the system displays a readable summary of the extracted information before identifying skill gaps?",
+    "options": [
+      "To allow the administrator to audit the data quality before the profile is saved to the central database.",
+      "To enable the user to confirm or edit the information, thereby preventing the AI from silently making incorrect assumptions.",
+      "To generate a final PDF report that the beneficiary can download for future reference.",
+      "To trigger the voice-to-text conversion process for the next set of questions."
+    ],
+    "correctAnswer": "To enable the user to confirm or edit the information, thereby preventing the AI from silently making incorrect assumptions.",
+    "explanation": "Section 6.4 ('Confirming the profile') states: 'The user can confirm or edit the information. This prevents the AI from silently making incorrect assumptions.' The flowchart in Section 5 also shows a decision node 'User confirms?' leading to 'Correct profile' or 'Identify skill gaps', confirming that this step is a human-in-the-loop validation mechanism for data accuracy, not an administrative audit or output generation step.",
+    "sourceCitation": "Section 6.4: Confirming the profile; Section 5: Complete system flow",
+    "id": "qb-ai-1788540825262-2",
+    "courseId": "SRS.pdf",
+    "bloomLevel": "Application"
+  },
+  {
+    "question": "Based on the 'External service connections' table, what is the designated fallback strategy if the Sarvam speech-to-text (STT) service is unavailable or access is not granted?",
+    "options": [
+      "The system automatically switches to the AI4Bharat Indic Parler-TTS provider to handle input processing.",
+      "The system relies solely on the LLM to interpret the raw audio file without text conversion.",
+      "The user can provide a typed answer or use prerecorded audio.",
+      "The system disables the voice interface and requires the facilitator to manually enter all data."
+    ],
+    "correctAnswer": "The user can provide a typed answer or use prerecorded audio.",
+    "explanation": "Section 10 ('External service connections') lists 'Sarvam STT' with the purpose 'Convert short voice recordings into text.' In the 'Fallback' column for this specific service, it explicitly states: 'Typed answer or prerecorded audio.' This indicates a graceful degradation strategy that maintains user agency without requiring manual data entry by a third party (facilitator) or relying on unverified external APIs.",
+    "sourceCitation": "Section 10: External service connections",
+    "id": "qb-ai-1788540825262-3",
+    "courseId": "SRS.pdf",
+    "bloomLevel": "Application"
   }
 ]

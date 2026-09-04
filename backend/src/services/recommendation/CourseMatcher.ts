@@ -50,16 +50,21 @@ const IGOT_CATALOG: Course[] = [
  * (In a full prod environment, we would use transformers.js for actual vector dot-products)
  */
 function calculateSimilarity(gapDescription: string, courseKeywords: string[]): number {
-  const gapWords = gapDescription.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
+  if (!gapDescription || typeof gapDescription !== 'string') return 0;
+  if (!courseKeywords || !Array.isArray(courseKeywords) || courseKeywords.length === 0) return 0;
+
+  const gapWords = gapDescription.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
   let score = 0;
   
   for (const keyword of courseKeywords) {
-    if (gapWords.includes(keyword)) {
+    if (!keyword) continue;
+    const lowerKeyword = keyword.toLowerCase();
+    if (gapWords.includes(lowerKeyword)) {
       score += 1.5; // Exact match
     } else {
       // Partial match
       for (const word of gapWords) {
-        if (word.length > 3 && keyword.includes(word)) {
+        if (word.length > 3 && lowerKeyword.includes(word)) {
           score += 0.5;
         }
       }
@@ -73,8 +78,8 @@ export class CourseMatcherService {
   /**
    * Semantically matches a failed topic to the best iGOT course.
    */
-  async recommendCourse(gapTopic: string, gapDescription: string): Promise<Course> {
-    const query = `${gapTopic} ${gapDescription}`;
+  async recommendCourse(gapTopic?: string, gapDescription?: string): Promise<Course> {
+    const query = `${gapTopic || ''} ${gapDescription || ''}`.trim();
     
     let bestCourse = IGOT_CATALOG[0];
     let highestScore = -1;

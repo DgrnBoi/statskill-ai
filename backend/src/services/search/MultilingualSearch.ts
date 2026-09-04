@@ -135,4 +135,13 @@ export class MultilingualSearchService {
     // Return top 20 max to save bandwidth
     return results.slice(0, 20);
   }
+
+  /**
+   * Retrieves an authentic government course by unique identifier.
+   */
+  public getById(id: string): Course | null {
+    if (!id || typeof id !== 'string') return null;
+    const cleanId = id.trim().toLowerCase();
+    return this.courses.find(c => (c.id || '').toLowerCase() === cleanId) || null;
+  }
 }

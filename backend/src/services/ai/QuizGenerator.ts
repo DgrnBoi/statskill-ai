@@ -66,8 +66,8 @@ export class QuizGeneratorService {
     mode: string = 'CLOUD_RAG',
     courseId: string = 'Survey Design and Stratification'
   ): Promise<QuizResult> {
-    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || "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";
-    const isPotatoOrOffline = mode === 'POTATO_DEVICE' || mode === 'OFFLINE';
+    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY;
+    const isPotatoOrOffline = mode === 'POTATO_DEVICE' || mode === 'OFFLINE' || !apiKey;
 
     // -------------------------------------------------------------
     // PATHWAY 1: OFFLINE / POTATO / LOW-NETWORK MODE
@@ -113,12 +113,17 @@ export class QuizGeneratorService {
       }
 
       // 2. Cache miss -> Parse PDF text
-      const dataBuffer = fs.readFileSync(filePath);
-      const pdfData = await pdfParse(dataBuffer);
-      const textContent = pdfData.text;
-
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath); // Cleanup temp file
+      let textContent = '';
+      try {
+        const dataBuffer = fs.readFileSync(filePath);
+        const pdfData = await pdfParse(dataBuffer);
+        textContent = pdfData.text;
+      } finally {
+        if (filePath && fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (_) {}
+        }
       }
 
       if (!textContent || textContent.trim().length === 0) {

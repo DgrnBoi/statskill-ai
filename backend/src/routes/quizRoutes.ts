@@ -3,7 +3,17 @@ import multer from 'multer';
 import { QuizGeneratorService } from '../services/ai/QuizGenerator';
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' }); // Temp storage for PDFs
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max limit
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF documents are permitted for assessment generation.'));
+    }
+  }
+});
 const quizService = new QuizGeneratorService();
 
 // In-memory queue for hackathon prototype (Use Redis in production)

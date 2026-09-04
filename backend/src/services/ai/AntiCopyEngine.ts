@@ -33,6 +33,9 @@ export class AntiCopyEngine {
    * Time Complexity: O(n), Space Complexity: O(n).
    */
   public static shuffleArray<T>(array: T[]): T[] {
+    if (!array || !Array.isArray(array) || array.length <= 1) {
+      return array ? [...array] : [];
+    }
     const clone = [...array];
     for (let i = clone.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -46,11 +49,14 @@ export class AntiCopyEngine {
    * while strictly preserving the correct answer string.
    */
   public static shuffleOptions(question: QuestionItem): QuestionItem {
+    if (!question || !Array.isArray(question.options)) {
+      return question;
+    }
     const shuffledOptions = this.shuffleArray(question.options);
     
     // Integrity Guardrail: Ensure correct answer is still present
     if (!shuffledOptions.includes(question.correctAnswer)) {
-      console.warn(`[AntiCopyGuard] Correct answer missing in options for question: "${question.question.substring(0, 30)}...". Preserving original options.`);
+      console.warn(`[AntiCopyGuard] Correct answer missing in options for question: "${(question.question || '').substring(0, 30)}...". Preserving original options.`);
       return { ...question };
     }
 
@@ -75,8 +81,9 @@ export class AntiCopyEngine {
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
     const paperSetId = `SET-${chosenSet}-${randomCode}`;
 
-    // 1. Shuffle the pool of questions
-    const shuffledQuestionsPool = this.shuffleArray(rawQuestions);
+    // 1. Shuffle the pool of questions safely
+    const safeQuestions = Array.isArray(rawQuestions) ? rawQuestions : [];
+    const shuffledQuestionsPool = this.shuffleArray(safeQuestions);
 
     // 2. Slice to requested count
     const selectedSubset = shuffledQuestionsPool.slice(0, Math.min(requestedCount, shuffledQuestionsPool.length));

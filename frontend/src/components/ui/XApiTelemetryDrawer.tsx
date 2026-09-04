@@ -52,9 +52,22 @@ interface XApiTelemetryDrawerProps {
 export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetryDrawerProps) {
   const [copied, setCopied] = useState(false);
 
+  // Keyboard listener for Escape key to close modal
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // Fallback representative statement if not yet triggered by user quiz action
+
   const currentStatement: XApiStatementPayload = statement || {
     actor: {
       name: 'Eshaan Sunthankar (JSO)',
@@ -116,19 +129,19 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
       />
 
       {/* Slide-out Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10" role="dialog" aria-modal="true" aria-labelledby="xapi-drawer-title">
         <div className="w-screen max-w-xl bg-slate-900 text-slate-100 shadow-2xl flex flex-col border-l border-slate-800 animate-slide-in">
           {/* Header */}
           <div className="px-6 py-5 border-b border-slate-800 bg-slate-950 flex items-start justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
                 <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
                   iGOT LRS Telemetry Stream
                 </span>
               </div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-amber-400" />
+              <h3 id="xapi-drawer-title" className="text-base font-bold text-white flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-amber-400" aria-hidden="true" />
                 xAPI / CMI-5 Statement Inspector
               </h3>
               <p className="text-xs text-slate-400">
@@ -138,9 +151,10 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              aria-label="Close statement inspector drawer"
+              className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
 

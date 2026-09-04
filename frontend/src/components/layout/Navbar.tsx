@@ -51,7 +51,8 @@ export function Navbar({ activeTab, setActiveTab, isLoggedIn, setIsLoggedIn }: N
               <button
                 type="button"
                 onClick={() => setIsLoggedIn(true)}
-                className="bg-primary-800 hover:bg-primary-700 text-amber-300 hover:text-amber-200 border border-amber-400/60 px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
+                aria-label="Login via Jan Parichay Single Sign-On"
+                className="bg-primary-800 hover:bg-primary-700 text-amber-300 hover:text-amber-200 border border-amber-400/60 px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
               >
                 <UserCheck className="w-3.5 h-3.5 text-amber-400" />
                 Login via Jan Parichay (SSO)
@@ -60,9 +61,10 @@ export function Navbar({ activeTab, setActiveTab, isLoggedIn, setIsLoggedIn }: N
               <button
                 type="button"
                 onClick={() => setIsLoggedIn(false)}
-                className="bg-emerald-800 text-emerald-100 border border-emerald-500 px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
+                aria-label="Log out of authenticated session for officer JSO_1042"
+                className="bg-emerald-800 text-emerald-100 border border-emerald-500 px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
                 Officer Authenticated: JSO_1042
               </button>
             )}
@@ -73,6 +75,7 @@ export function Navbar({ activeTab, setActiveTab, isLoggedIn, setIsLoggedIn }: N
       {/* Subtle National Tricolour Accent Line */}
       <div
         className="h-1 w-full"
+        aria-hidden="true"
         style={{
           background:
             'linear-gradient(90deg, #F5811F 0%, #F5811F 33.3%, #FFFFFF 33.3%, #FFFFFF 66.6%, #1E8449 66.6%, #1E8449 100%)',
@@ -81,22 +84,25 @@ export function Navbar({ activeTab, setActiveTab, isLoggedIn, setIsLoggedIn }: N
 
       {/* Navigation Tabs Bar */}
       <div className="max-w-7xl mx-auto px-4 md:px-10">
-        <nav className="flex space-x-1 sm:space-x-4 overflow-x-auto py-2.5 scrollbar-none" aria-label="Tabs">
+        <nav className="flex space-x-1 sm:space-x-4 overflow-x-auto py-2.5 scrollbar-none" aria-label="Portal Navigation">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                type="button"
+                id={`nav-tab-${tab.id}`}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer',
+                  'flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-1',
                   isActive
                     ? 'bg-primary-50 text-primary-900 border border-primary-200 shadow-xs'
-                    : 'text-slate-600 hover:text-primary-900 hover:bg-slate-50'
+                    : 'text-slate-700 hover:text-primary-900 hover:bg-slate-50'
                 )}
               >
-                <Icon className={cn('w-4 h-4', isActive ? 'text-primary-900' : 'text-slate-400')} />
+                <Icon className={cn('w-4 h-4', isActive ? 'text-primary-900' : 'text-slate-500')} aria-hidden="true" />
                 {tab.label}
               </button>
             );

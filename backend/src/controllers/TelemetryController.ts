@@ -42,17 +42,24 @@ export class TelemetryController {
     try {
       const { userId, userName, quizId, quizName, score } = req.body;
 
-      if (!userId || !quizId || score === undefined) {
+      if (!userId || !quizId || score === undefined || typeof score !== 'number' || isNaN(score)) {
         return res.status(400).json({ error: "Missing required telemetry fields." });
       }
+
+      // Sanitize inputs to prevent script injection or telemetry corruption
+      const sanitizedUserId = String(userId).replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 100);
+      const sanitizedUserName = String(userName || 'MoSPI Official').replace(/<[^>]*>?/gm, '').trim().slice(0, 120);
+      const sanitizedQuizId = String(quizId).replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 100);
+      const sanitizedQuizName = String(quizName || 'Statistical Assessment').replace(/<[^>]*>?/gm, '').trim().slice(0, 200);
+      const boundedScore = Math.max(0, Math.min(100, Math.round(score)));
 
       // Convert to strict xAPI Statement
       const statement: XApiStatement = {
         actor: {
-          name: userName || "MoSPI Official",
+          name: sanitizedUserName,
           account: {
             homePage: "https://igotkarmayogi.gov.in",
-            name: userId
+            name: sanitizedUserId
           }
         },
         verb: {
@@ -60,20 +67,20 @@ export class TelemetryController {
           display: { "en-US": "completed" }
         },
         object: {
-          id: `https://statskill.mospi.gov.in/assessments/${quizId}`,
+          id: `https://statskill.mospi.gov.in/assessments/${sanitizedQuizId}`,
           definition: {
-            name: { "en-US": quizName || "Statistical Assessment" },
+            name: { "en-US": sanitizedQuizName },
             type: "http://adlnet.gov/expapi/activities/assessment"
           }
         },
         result: {
           score: {
-            scaled: score / 100,
-            raw: score,
+            scaled: boundedScore / 100,
+            raw: boundedScore,
             min: 0,
             max: 100
           },
-          success: score >= 60 // 60% passing threshold
+          success: boundedScore >= 60 // 60% passing threshold
         },
         timestamp: new Date().toISOString()
       };

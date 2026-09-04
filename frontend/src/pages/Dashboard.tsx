@@ -26,12 +26,46 @@ import {
   Terminal,
 } from 'lucide-react';
 
-interface Competency {
+export interface Competency {
   id: string;
   skillName: string;
   targetLevel: number;
   category: string;
   description?: string;
+}
+
+export interface QuizQuestionItem {
+  id?: string;
+  courseId?: string;
+  topic?: string;
+  bloomLevel?: string;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  explanation?: string;
+  sourceCitation?: string;
+}
+
+export interface CourseItem {
+  id?: string;
+  title: string;
+  domain?: string;
+  provider?: string;
+  duration?: string;
+  durationHours?: number;
+  level?: number;
+  targetLevel?: number;
+  description?: string;
+  tags?: string[];
+}
+
+export interface RecommendationItem {
+  id: string;
+  title: string;
+  provider: string;
+  duration: string;
+  link: string;
+  keywords?: string[];
 }
 
 const MOSPI_CADRES_DATA: Record<string, { division: string; description: string; competencies: Competency[] }> = {
@@ -77,12 +111,24 @@ const MOSPI_CADRES_DATA: Record<string, { division: string; description: string;
   },
 };
 
+/**
+ * Unbiased Fisher-Yates array shuffle extracted outside component scope
+ */
+function shuffleArray<T>(arr: T[]): T[] {
+  if (!arr || !Array.isArray(arr) || arr.length <= 1) return arr ? [...arr] : [];
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export default function Dashboard() {
   const [designation, setDesignation] = useState('Junior Statistical Officer (JSO)');
-  const [skills, setSkills] = useState<Competency[]>([]);
   const [proficiency, setProficiency] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
-  const [generatedQuiz, setGeneratedQuiz] = useState<any[]>([]);
+  const [generatedQuiz, setGeneratedQuiz] = useState<QuizQuestionItem[]>([]);
   const [paperSet, setPaperSet] = useState<string>('Set A');
   const [reshufflesLeft, setReshufflesLeft] = useState<number>(3);
   const [deviceMode, setDeviceMode] = useState<DeviceCapability | 'LOADING'>('POTATO_DEVICE');
@@ -91,45 +137,81 @@ export default function Dashboard() {
   // Navigation and Discovery States
   const [activeTab, setActiveTab] = useState<'dashboard' | 'discover' | 'competency' | 'analytics'>('dashboard');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<CourseItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
   const [assessmentsTaken, setAssessmentsTaken] = useState(0);
   const [isTelemetryDrawerOpen, setIsTelemetryDrawerOpen] = useState(false);
   const [latestTelemetryStatement, setLatestTelemetryStatement] = useState<XApiStatementPayload | null>(null);
 
-  // Initialize competencies on cadre change
-  useEffect(() => {
-    const cadreData = MOSPI_CADRES_DATA[designation] || MOSPI_CADRES_DATA['Junior Statistical Officer (JSO)'];
-    setSkills(cadreData.competencies);
+  // Resilient error states
+  const [assessmentError, setAssessmentError] = useState<string | null>(null);
+  const [courseError, setCourseError] = useState<string | null>(null);
 
-    // Initialize default proficiency levels
+  // Ref to track active polling interval and prevent zombie timers on unmount
+  const pollIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Pure state derivation: competencies derived directly from selected cadre
+  const skills = useMemo(() => {
+    const cadreData = MOSPI_CADRES_DATA[designation] || MOSPI_CADRES_DATA['Junior Statistical Officer (JSO)'];
+    return cadreData.competencies;
+  }, [designation]);
+
+  // Synchronize initial proficiency levels when skills change
+  useEffect(() => {
     const initialProf: Record<string, number> = {};
-    cadreData.competencies.forEach((s) => {
+    skills.forEach((s) => {
       initialProf[s.skillName] = Math.max(1, s.targetLevel - 1);
     });
     setProficiency(initialProf);
-  }, [designation]);
+  }, [skills]);
+
+  // Clean up any running polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   // Hardware capability auto-detection
   useEffect(() => {
     assessDeviceCapability().then(setDeviceMode);
   }, []);
 
-  // Fetch real government courses catalog
+  // Fetch real government courses catalog with AbortController for network resilience
   useEffect(() => {
+    const controller = new AbortController();
     const domainQuery = selectedDomain !== 'All' ? `&domain=${encodeURIComponent(selectedDomain)}` : '';
-    fetch(`http://localhost:5000/api/courses/search?q=${encodeURIComponent(searchQuery)}${domainQuery}`)
-      .then((res) => res.json())
+    setCourseError(null);
+
+    fetch(`http://localhost:5000/api/courses/search?q=${encodeURIComponent(searchQuery)}${domainQuery}`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
-        if (data.success && data.courses) {
+        if (data.success && Array.isArray(data.courses)) {
           setCourses(data.courses.slice(0, 9)); // Show top 9 results
+        } else {
+          setCourses([]);
         }
       })
-      .catch((err) => console.error('Course fetch error:', err));
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          console.error('Course fetch error:', err);
+          setCourseError('Unable to refresh courses. Displaying verified local catalog.');
+        }
+      });
+
+    return () => controller.abort();
   }, [searchQuery, selectedDomain]);
 
-  const selectCourseForQuiz = (courseTitle: string) => {
+  const selectCourseForQuiz = useCallback((courseTitle: string) => {
     setSelectedCourseContext(courseTitle);
     setGeneratedQuiz([]);
     setActiveTab('dashboard');
@@ -137,14 +219,14 @@ export default function Dashboard() {
       const el = document.getElementById('quiz-section');
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }, 100);
-  };
+  }, []);
 
   const handleProficiencyChange = useCallback((skillName: string, level: number) => {
     setProficiency((prev) => ({ ...prev, [skillName]: level }));
     setAssessmentsTaken((prev) => prev + 1);
   }, []);
 
-  const handleReshuffle = () => {
+  const handleReshuffle = useCallback(() => {
     if (reshufflesLeft <= 0 || generatedQuiz.length === 0) return;
 
     const setCycle: Record<string, string> = {
@@ -154,15 +236,6 @@ export default function Dashboard() {
       'Set D': 'Set A',
     };
     const nextSet = setCycle[paperSet] || 'Set B';
-
-    const shuffleArray = <T,>(arr: T[]): T[] => {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    };
 
     // Shuffles order and options strictly without adding new questions
     const reorderedQuestions = shuffleArray(generatedQuiz).map((q) => {
@@ -176,10 +249,17 @@ export default function Dashboard() {
     setGeneratedQuiz(reorderedQuestions);
     setPaperSet(nextSet);
     setReshufflesLeft((prev) => prev - 1);
-  };
+  }, [reshufflesLeft, generatedQuiz, paperSet]);
 
   const handleGenerateQuiz = async (file?: File) => {
+    // Clear any active poll before starting new generation
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+
     setIsUploading(true);
+    setAssessmentError(null);
     setGeneratedQuiz([]);
 
     const formData = new FormData();
@@ -198,18 +278,45 @@ export default function Dashboard() {
         body: formData,
       });
 
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${response.status}: Failed to start assessment job`);
+      }
+
       const initData = await response.json();
       if (!initData.jobId) throw new Error(initData.error || 'Failed to start job');
 
-      const pollInterval = setInterval(async () => {
+      let pollAttempts = 0;
+      let consecutiveErrors = 0;
+      const MAX_ATTEMPTS = 40; // 60s max timeout
+
+      pollIntervalRef.current = setInterval(async () => {
+        pollAttempts++;
+        if (pollAttempts > MAX_ATTEMPTS) {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          setIsUploading(false);
+          setAssessmentError('Assessment generation timed out after 60s. Please try again or switch to Edge Offline Bank.');
+          return;
+        }
+
         try {
           const statusRes = await fetch(`http://localhost:5000/api/quiz/status/${initData.jobId}`);
+          if (!statusRes.ok) {
+            throw new Error(`HTTP ${statusRes.status}`);
+          }
           const statusData = await statusRes.json();
+          consecutiveErrors = 0; // reset on success
 
           if (statusData.status === 'complete') {
-            clearInterval(pollInterval);
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
             setIsUploading(false);
-            if (statusData.result && statusData.result.questions) {
+            if (statusData.result && Array.isArray(statusData.result.questions)) {
               setGeneratedQuiz(statusData.result.questions);
               if (statusData.result.setLetter) {
                 setPaperSet(`Set ${statusData.result.setLetter}`);
@@ -219,19 +326,30 @@ export default function Dashboard() {
               setReshufflesLeft(3);
             }
           } else if (statusData.status === 'error') {
-            clearInterval(pollInterval);
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
             setIsUploading(false);
-            console.error('Job Error:', statusData.error);
-            alert('Assessment Engine Failed: ' + statusData.error);
+            setAssessmentError(statusData.error || 'Assessment Engine encountered an error.');
           }
         } catch (err) {
-          console.error('Poll err:', err);
+          consecutiveErrors++;
+          console.error(`Poll attempt ${pollAttempts} failed:`, err);
+          if (consecutiveErrors >= 5) {
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
+            setIsUploading(false);
+            setAssessmentError('Connection to backend assessment service lost. Please verify your network.');
+          }
         }
       }, 1500);
     } catch (error: any) {
-      console.error('Sub err:', error);
+      console.error('Submission error:', error);
       setIsUploading(false);
-      alert(error.message || 'Failed to start assessment.');
+      setAssessmentError(error.message || 'Failed to start assessment.');
     }
   };
 
@@ -254,7 +372,7 @@ export default function Dashboard() {
   }, [skills, proficiency]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-primary-900 selection:text-white">
       {/* Official Government Top Navigation Bar */}
       <Navbar
         activeTab={activeTab}
@@ -350,8 +468,9 @@ export default function Dashboard() {
                     <input
                       type="file"
                       accept="application/pdf"
-                      className="hidden"
+                      className="sr-only"
                       id="pdf-upload"
+                      aria-label="Upload official training circular or manual in PDF format"
                       disabled={isUploading}
                       onChange={(e) => {
                         if (!e.target.files || e.target.files.length === 0) return;
@@ -360,13 +479,20 @@ export default function Dashboard() {
                     />
                     <label
                       htmlFor="pdf-upload"
-                      className={`px-5 py-2.5 rounded-lg text-xs font-bold transition shadow-xs inline-flex items-center gap-2 ${
+                      tabIndex={isUploading ? -1 : 0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          document.getElementById('pdf-upload')?.click();
+                        }
+                      }}
+                      className={`px-5 py-2.5 rounded-lg text-xs font-bold transition shadow-xs inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-2 ${
                         isUploading
-                          ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                          ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
                           : 'bg-primary-900 text-white hover:bg-primary-800 cursor-pointer'
                       }`}
                     >
-                      <FileText className="w-4 h-4" />
+                      <FileText className="w-4 h-4" aria-hidden="true" />
                       {isUploading ? 'Processing File...' : 'Browse Local PDF'}
                     </label>
 
@@ -378,10 +504,28 @@ export default function Dashboard() {
                       onClick={() => handleGenerateQuiz()}
                       className="text-xs font-bold border-slate-300 text-slate-800 hover:bg-white"
                     >
-                      <BookOpen className="w-4 h-4 text-amber-600" />
+                      <BookOpen className="w-4 h-4 text-amber-700" aria-hidden="true" />
                       Practice from Verified Question Bank
                     </Button>
                   </div>
+
+                  {/* Inline Assessment Error Banner */}
+                  {assessmentError && (
+                    <div role="alert" className="mt-4 p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between text-xs text-red-900 animate-fade-in">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-700 flex-shrink-0" aria-hidden="true" />
+                        <span className="font-medium">{assessmentError}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setAssessmentError(null)}
+                        className="text-xs font-bold text-red-800 hover:underline cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                        aria-label="Dismiss error notice"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Generated Assessment Paper Output */}
@@ -389,12 +533,12 @@ export default function Dashboard() {
                   <div className="mt-10 animate-fade-in border-t border-slate-200 pt-8">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                          <CheckCircle2 className="w-5 h-5" />
+                        <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                          <CheckCircle2 className="w-5 h-5" aria-hidden="true" />
                         </div>
                         <div>
                           <h3 className="text-lg font-bold text-slate-900">Official Assessment Paper</h3>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-600">
                             Candidate Evaluation • MoSPI FRAC Standards
                           </p>
                         </div>
@@ -411,9 +555,10 @@ export default function Dashboard() {
                           type="button"
                           onClick={handleReshuffle}
                           disabled={reshufflesLeft <= 0}
-                          className={`px-3 py-1.5 text-xs font-semibold rounded-md border transition-all flex items-center gap-1.5 ${
+                          aria-label={`Reshuffle question and option sequence (${reshufflesLeft} attempts remaining)`}
+                          className={`px-3 py-1.5 text-xs font-semibold rounded-md border transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 ${
                             reshufflesLeft > 0
-                              ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 cursor-pointer shadow-xs active:scale-95'
+                              ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 hover:border-slate-400 cursor-pointer shadow-xs active:scale-95'
                               : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                           }`}
                           title={
@@ -422,7 +567,7 @@ export default function Dashboard() {
                               : 'Maximum 3 reshuffles allowed per session'
                           }
                         >
-                          <RotateCw className="w-3.5 h-3.5 text-slate-500" />
+                          <RotateCw className="w-3.5 h-3.5 text-slate-600" aria-hidden="true" />
                           Reshuffle ({reshufflesLeft} left)
                         </button>
                       </div>
@@ -471,18 +616,27 @@ export default function Dashboard() {
             <CardContent className="p-8 space-y-6">
               {/* Search Bar */}
               <div className="relative">
-                <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
+                <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" aria-hidden="true" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search authentic government courses across MoSPI, iGOT, and NSSTA"
                   placeholder="Search 880+ official courses (e.g., 'Sampling', 'CPI', 'National Accounts', 'Python', 'DPDPA')..."
                   className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-primary-900 focus:ring-2 focus:ring-primary-100 shadow-xs text-sm text-slate-900 bg-white"
                 />
               </div>
 
+              {/* Course Fetch Error Banner if offline */}
+              {courseError && (
+                <div role="alert" className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-xs text-amber-900 animate-fade-in">
+                  <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" aria-hidden="true" />
+                  <span>{courseError}</span>
+                </div>
+              )}
+
               {/* Domain Filter Pills */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2" aria-label="Course Domain Filter">
                 {[
                   'All',
                   'Statistical Competencies',
@@ -493,11 +647,12 @@ export default function Dashboard() {
                   <button
                     key={filter}
                     type="button"
+                    aria-pressed={selectedDomain === filter}
                     onClick={() => setSelectedDomain(filter)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 ${
                       selectedDomain === filter
                         ? 'bg-primary-900 text-white border-primary-900 shadow-xs'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     {filter}
@@ -508,9 +663,9 @@ export default function Dashboard() {
               {/* Course Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {courses.length > 0 ? (
-                  courses.map((course: any, idx: number) => (
+                  courses.map((course: CourseItem, idx: number) => (
                     <Card
-                      key={idx}
+                      key={course.id || idx}
                       className="flex flex-col justify-between hover:shadow-md transition-all duration-200 border-slate-200 hover:border-primary-300 bg-white"
                     >
                       <div className="p-5">
@@ -582,11 +737,13 @@ export default function Dashboard() {
                 </div>
 
                 <div className="w-full md:w-auto">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                  <label htmlFor="cadre-select" className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
                     Official Cadre / Designation:
                   </label>
                   <select
+                    id="cadre-select"
                     value={designation}
+                    aria-label="Official Cadre / Designation"
                     onChange={(e) => setDesignation(e.target.value)}
                     className="w-full md:w-auto px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 text-xs font-bold focus:outline-none focus:border-primary-900 focus:ring-2 focus:ring-primary-100 shadow-xs cursor-pointer"
                   >
@@ -627,31 +784,33 @@ export default function Dashboard() {
                             <Badge variant={isGap ? 'destructive' : 'success'} className="text-[10px]">
                               {skill.category}
                             </Badge>
-                            <span className="text-xs text-slate-500 font-medium">
+                            <span className="text-xs text-slate-600 font-medium">
                               Benchmark: Level {skill.targetLevel}
                             </span>
                           </div>
                           <h4 className="font-bold text-base text-slate-900">{skill.skillName}</h4>
-                          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                             {skill.description}
                           </p>
                         </div>
 
                         {/* Interactive FRAC Level Selector */}
                         <div className="flex flex-col items-start md:items-end gap-1.5">
-                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+                          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
                             Proficiency: Level {currentLevel} of 5
                           </span>
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-1.5" role="group" aria-label={`Proficiency level for ${skill.skillName}`}>
                             {[1, 2, 3, 4, 5].map((lvl) => (
                               <button
                                 key={lvl}
                                 type="button"
                                 onClick={() => handleProficiencyChange(skill.skillName, lvl)}
-                                className={`w-9 h-9 rounded-md text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+                                aria-label={`Set ${skill.skillName} proficiency to Level ${lvl}`}
+                                aria-pressed={currentLevel >= lvl}
+                                className={`w-9 h-9 rounded-md text-xs font-bold transition-all flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-1 ${
                                   currentLevel >= lvl
                                     ? 'bg-primary-900 text-white shadow-xs hover:bg-primary-800'
-                                    : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
+                                    : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
                                 }`}
                                 title={`Set ${skill.skillName} to Level ${lvl}`}
                               >
@@ -688,7 +847,7 @@ export default function Dashboard() {
                           <div>
                             <div className="flex items-center justify-between gap-2 mb-2">
                               <Badge variant="destructive">Gap Identified</Badge>
-                              <span className="text-xs font-semibold text-slate-500">
+                              <span className="text-xs font-semibold text-slate-600">
                                 Level {currentLevel} &rarr; Target {s.targetLevel}
                               </span>
                             </div>
@@ -703,10 +862,10 @@ export default function Dashboard() {
                             href="https://igotkarmayogi.gov.in/"
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-4 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2 rounded-lg text-center transition-all shadow-xs flex items-center justify-center gap-1.5"
+                            className="mt-4 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-4 py-2 rounded-lg text-center transition-all shadow-xs flex items-center justify-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
                           >
                             Enroll in Karmayogi Course
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                           </a>
                         </div>
                       );
@@ -845,21 +1004,21 @@ export default function Dashboard() {
   );
 }
 
-function QuizQuestion({
+const QuizQuestion = React.memo(function QuizQuestion({
   q,
   index,
   handleProficiencyChange,
   skillToUpdate,
   onTelemetryStatement,
 }: {
-  q: any;
+  q: QuizQuestionItem;
   index: number;
-  handleProficiencyChange: any;
+  handleProficiencyChange: (skillName: string, level: number) => void;
   skillToUpdate: string;
   onTelemetryStatement?: (statement: XApiStatementPayload) => void;
 }) {
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
-  const [recommendation, setRecommendation] = React.useState<any | null>(null);
+  const [recommendation, setRecommendation] = React.useState<RecommendationItem | null>(null);
   const [loadingRec, setLoadingRec] = React.useState(false);
 
   const isCorrect = selectedOption === q.correctAnswer;
@@ -867,7 +1026,7 @@ function QuizQuestion({
   const handleSelect = async (opt: string) => {
     setSelectedOption(opt);
 
-    // Dispatch live xAPI statement to iGOT Karmayogi LRS
+    // Dispatch live xAPI statement to iGOT Karmayogi LRS with network error handling
     fetch('http://localhost:5000/api/telemetry/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -879,13 +1038,16 @@ function QuizQuestion({
         score: opt === q.correctAnswer ? 100 : 0,
       }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         if (data.success && data.statement && onTelemetryStatement) {
           onTelemetryStatement(data.statement);
         }
       })
-      .catch((err) => console.error('Telemetry sync error:', err));
+      .catch((err) => console.warn('Telemetry offline or sync warning:', err));
 
     if (opt !== q.correctAnswer) {
       handleProficiencyChange(skillToUpdate, 2);
@@ -897,12 +1059,14 @@ function QuizQuestion({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ gapTopic: 'General', gapDescription: q.question }),
         });
-        const data = await res.json();
-        if (data.success) {
-          setRecommendation(data.recommendation);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.recommendation) {
+            setRecommendation(data.recommendation);
+          }
         }
       } catch (err) {
-        console.error(err);
+        console.warn('Course recommendation fetch warning:', err);
       } finally {
         setLoadingRec(false);
       }
@@ -910,6 +1074,8 @@ function QuizQuestion({
       handleProficiencyChange(skillToUpdate, 4);
     }
   };
+
+  const safeOptions = Array.isArray(q.options) ? q.options : [];
 
   return (
     <Card className="overflow-hidden border-slate-200">
@@ -921,20 +1087,23 @@ function QuizQuestion({
       </div>
 
       <div className="p-6 space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {q.options.map((opt: string, i: number) => {
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 gap-3"
+          aria-label={`Options for Question ${index + 1}`}
+        >
+          {safeOptions.map((opt: string, i: number) => {
             let btnStyle =
-              'text-left px-4 py-3.5 border rounded-lg text-xs font-medium transition-all cursor-pointer ';
+              'text-left px-4 py-3.5 border rounded-lg text-xs font-medium transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-1 ';
 
             if (!selectedOption) {
               btnStyle += 'border-slate-200 hover:border-primary-400 hover:bg-slate-50 text-slate-800';
             } else {
               if (opt === q.correctAnswer) {
-                btnStyle += 'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold shadow-xs';
+                btnStyle += 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold shadow-xs';
               } else if (opt === selectedOption) {
-                btnStyle += 'bg-red-50 border-red-400 text-red-900 font-bold shadow-xs';
+                btnStyle += 'bg-red-50 border-red-400 text-red-950 font-bold shadow-xs';
               } else {
-                btnStyle += 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400 border-slate-200';
+                btnStyle += 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-500 border-slate-200';
               }
             }
 
@@ -942,13 +1111,14 @@ function QuizQuestion({
               <button
                 key={i}
                 type="button"
+                aria-pressed={selectedOption === opt}
                 disabled={!!selectedOption}
                 onClick={() => handleSelect(opt)}
                 className={btnStyle}
               >
                 <span
                   className={`inline-block w-5 font-bold mr-1.5 ${
-                    selectedOption && opt === q.correctAnswer ? 'text-emerald-700' : 'text-slate-400'
+                    selectedOption && opt === q.correctAnswer ? 'text-emerald-800' : 'text-slate-700'
                   }`}
                 >
                   {String.fromCharCode(65 + i)}.
@@ -963,7 +1133,7 @@ function QuizQuestion({
         {selectedOption && (
           <div className="animate-fade-in space-y-3 pt-2">
             <div className="bg-primary-50/60 border border-primary-100 rounded-lg p-3.5 flex items-start gap-2.5 text-xs text-primary-950">
-              <BookOpen className="w-4 h-4 text-primary-900 flex-shrink-0 mt-0.5" />
+              <BookOpen className="w-4 h-4 text-primary-900 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <span className="font-bold text-primary-900 block mb-0.5">Source Context:</span>
                 <p className="italic text-slate-700">{q.sourceCitation || 'Official MoSPI Reference'}</p>
@@ -976,24 +1146,24 @@ function QuizQuestion({
             </div>
 
             {!isCorrect && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4" role="alert">
                 <div className="flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" aria-hidden="true" />
                   <div className="w-full">
                     <h5 className="text-xs font-bold text-amber-900">Competency Gap Identified</h5>
-                    <p className="text-xs text-amber-800 mt-0.5">
+                    <p className="text-xs text-amber-900 mt-0.5">
                       Response indicates a need for reinforcement in this competency.
                     </p>
 
                     {loadingRec ? (
-                      <p className="text-xs text-amber-700 animate-pulse mt-2">
+                      <p className="text-xs text-amber-800 animate-pulse mt-2">
                         Querying 880+ Government Catalog for optimal course...
                       </p>
                     ) : recommendation ? (
                       <div className="mt-3 bg-white border border-amber-200 rounded-lg p-3 flex items-center justify-between gap-3 shadow-xs">
                         <div>
                           <h6 className="text-xs font-bold text-slate-900">{recommendation.title}</h6>
-                          <p className="text-[11px] text-slate-500">
+                          <p className="text-[11px] text-slate-600">
                             {recommendation.provider} • {recommendation.duration}
                           </p>
                         </div>
@@ -1001,10 +1171,10 @@ function QuizQuestion({
                           href={recommendation.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-md transition shadow-xs flex items-center gap-1.5 whitespace-nowrap"
+                          className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-3 py-1.5 rounded-md transition shadow-xs flex items-center gap-1.5 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
                         >
                           Enroll in iGOT
-                          <ExternalLink className="w-3 h-3" />
+                          <ExternalLink className="w-3 h-3" aria-hidden="true" />
                         </a>
                       </div>
                     ) : null}
@@ -1014,8 +1184,8 @@ function QuizQuestion({
             )}
 
             {isCorrect && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 flex items-center gap-2.5 text-xs text-emerald-900">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 flex items-center gap-2.5 text-xs text-emerald-950" role="status">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" aria-hidden="true" />
                 <p className="font-semibold">
                   Correct! Your FRAC competency level in this domain has been updated.
                 </p>
@@ -1026,4 +1196,4 @@ function QuizQuestion({
       </div>
     </Card>
   );
-}
+});

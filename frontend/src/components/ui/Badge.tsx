@@ -9,9 +9,9 @@ export function Badge({ className, variant = 'default', children, ...props }: Ba
   const variants = {
     default: 'bg-primary-100 text-primary-900 border-primary-200',
     saffron: 'bg-amber-100 text-amber-900 border-amber-300 font-bold',
-    success: 'bg-emerald-50 text-emerald-800 border-emerald-300 font-semibold',
-    destructive: 'bg-red-50 text-red-800 border-red-300 font-semibold',
-    outline: 'bg-white text-slate-700 border-slate-300',
+    success: 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold',
+    destructive: 'bg-red-50 text-red-900 border-red-300 font-semibold',
+    outline: 'bg-white text-slate-800 border-slate-300',
     neutral: 'bg-slate-100 text-slate-800 border-slate-200',
   };
 
