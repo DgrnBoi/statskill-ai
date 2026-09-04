@@ -1,0 +1,178 @@
+[
+  {
+    "id": "qb-stat-001",
+    "courseId": "Survey Design and Stratification",
+    "topic": "Sampling Theory",
+    "bloomLevel": "Recall",
+    "question": "In a multi-stage stratified survey design adopted by NSSO, what does FSU represent?",
+    "options": [
+      "First Stage Unit",
+      "Final Sampling Unit",
+      "Fundamental Survey Unit",
+      "Field Supervisor Unit"
+    ],
+    "correctAnswer": "First Stage Unit",
+    "explanation": "First Stage Units (FSUs) are the primary sampling units (villages in rural areas, urban frame survey blocks in urban areas) selected in the first stage of sampling.",
+    "sourceCitation": "NSSO Survey Design Manual, Section 2.1"
+  },
+  {
+    "id": "qb-stat-002",
+    "courseId": "Survey Design and Stratification",
+    "topic": "Sampling Variance",
+    "bloomLevel": "Application",
+    "question": "What is the primary statistical objective of creating homogeneous strata prior to sampling?",
+    "options": [
+      "To minimize intra-stratum variance and reduce standard error",
+      "To increase total sample size arbitrarily",
+      "To completely eliminate non-sampling errors",
+      "To avoid calculating survey multipliers"
+    ],
+    "correctAnswer": "To minimize intra-stratum variance and reduce standard error",
+    "explanation": "Stratification groups similar population units together, minimizing variance within each stratum, which maximizes the precision (reduces standard error) of aggregate estimators.",
+    "sourceCitation": "Concepts and Definitions in NSS Surveys, Chapter 4"
+  },
+  {
+    "id": "qb-stat-003",
+    "courseId": "Survey Design and Stratification",
+    "topic": "Estimation & Multipliers",
+    "bloomLevel": "Analysis",
+    "question": "In survey data processing, what does a multiplier (inflation factor) signify for a sampled unit?",
+    "options": [
+      "The reciprocal of its probability of selection",
+      "The square root of the stratum sample variance",
+      "The ratio of response to non-response households",
+      "A correction coefficient for price inflation"
+    ],
+    "correctAnswer": "The reciprocal of its probability of selection",
+    "explanation": "In design-based estimation, the sampling weight or multiplier is the inverse of the inclusion probability of the selected sample unit.",
+    "sourceCitation": "NSSO Estimation Procedure Guidelines, Section 3.2"
+  },
+  {
+    "id": "qb-stat-004",
+    "courseId": "Survey Design and Stratification",
+    "topic": "Sampling Techniques",
+    "bloomLevel": "Recall",
+    "question": "Which sampling technique is standardly employed when selecting households within an NSS FSU?",
+    "options": [
+      "Circular Systematic Sampling",
+      "Cluster Sampling with Replacement",
+      "Convenience Quota Sampling",
+      "Snowball Network Sampling"
+    ],
+    "correctAnswer": "Circular Systematic Sampling",
+    "explanation": "Circular systematic sampling is standardly utilized in secondary stage unit (SSU) selection to ensure an even geographic spread across the selected hamlet/block.",
+    "sourceCitation": "NSS Field Operations Handbook, Part II"
+  },
+  {
+    "id": "qb-tech-001",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "CAPI Operations",
+    "bloomLevel": "Recall",
+    "question": "What is the core operational advantage of Computer Assisted Personal Interviewing (CAPI) over PAPI?",
+    "options": [
+      "Real-time validation checks and instant logic error flagging at the point of data capture",
+      "Elimination of the need for trained field investigators",
+      "Complete immunity from hardware battery drainage",
+      "Automatic replacement of non-responding households without supervisor approval"
+    ],
+    "correctAnswer": "Real-time validation checks and instant logic error flagging at the point of data capture",
+    "explanation": "CAPI software enforces range checks, skip patterns, and consistency conditions immediately during interview, preventing dirty data from entering the central database.",
+    "sourceCitation": "MoSPI CAPI Implementation Guidelines, Chapter 1"
+  },
+  {
+    "id": "qb-tech-002",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "Field Data Sync",
+    "bloomLevel": "Application",
+    "question": "When a field investigator completes interviews in an offline rural village, what protocol must be followed in CAPI?",
+    "options": [
+      "Store records in encrypted local SQLite cache and sync to cloud once network is re-established",
+      "Immediately discard incomplete survey schedules",
+      "Disable tablet GPS geotagging to conserve battery",
+      "Manually re-enter survey data into a paper schedule"
+    ],
+    "correctAnswer": "Store records in encrypted local SQLite cache and sync to cloud once network is re-established",
+    "explanation": "CAPI platforms use store-and-forward architecture: schedules are cryptographically signed and stored locally, then synchronized via HTTPS once cellular connectivity is acquired.",
+    "sourceCitation": "NSSO Digital Survey SOP, Module 4"
+  },
+  {
+    "id": "qb-tech-003",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "Data Validation",
+    "bloomLevel": "Analysis",
+    "question": "In CAPI validation scripting, what does a Hard Check represent compared to a Soft Check?",
+    "options": [
+      "A hard check blocks the enumerator from continuing until an impossible contradiction is resolved",
+      "A hard check only generates an advisory warning message",
+      "A hard check is executed only after the survey is uploaded to the server",
+      "A hard check requires internet connection to validate"
+    ],
+    "correctAnswer": "A hard check blocks the enumerator from continuing until an impossible contradiction is resolved",
+    "explanation": "A hard check enforces strict mathematical/logical consistency (e.g., child older than parent) and refuses form progression until corrected by the enumerator.",
+    "sourceCitation": "BLAISE / CAPI Logic Design Standard, Section 5"
+  },
+  {
+    "id": "qb-econ-001",
+    "courseId": "National Accounts Statistics",
+    "topic": "GDP Compilation",
+    "bloomLevel": "Recall",
+    "question": "What is the fundamental relationship between Gross Domestic Product (GDP) at market prices and Gross Value Added (GVA) at basic prices?",
+    "options": [
+      "GDP = GVA (at basic prices) + Product Taxes - Product Subsidies",
+      "GDP = GVA (at basic prices) - Product Taxes + Product Subsidies",
+      "GDP = GVA (at factor cost) + Operating Surplus",
+      "GDP = GVA (at basic prices) * Wholesale Price Index"
+    ],
+    "correctAnswer": "GDP = GVA (at basic prices) + Product Taxes - Product Subsidies",
+    "explanation": "Under SNA 2008 / National Accounts base year 2011-12 series, GDP at market prices is derived by adding net product taxes (Taxes less Subsidies) to GVA at basic prices.",
+    "sourceCitation": "Sources and Methods: National Accounts Statistics 2011-12, CSO"
+  },
+  {
+    "id": "qb-econ-002",
+    "courseId": "Consumer Price Index (CPI) Methodology",
+    "topic": "Price Index Formulas",
+    "bloomLevel": "Application",
+    "question": "Which index formulation is standardly used for compiling the headline Consumer Price Index (CPI) in India?",
+    "options": [
+      "Modified Laspeyres price index formula with base year consumption weights",
+      "Unweighted Paasche price index with current year weights",
+      "Fisher Ideal Index with geometric chaining",
+      "Simple Marshall-Edgeworth arithmetic mean"
+    ],
+    "correctAnswer": "Modified Laspeyres price index formula with base year consumption weights",
+    "explanation": "All-India CPI (Rural, Urban, Combined) compiled by MoSPI utilizes the Laspeyres index methodology with fixed base-year expenditure weights obtained from the Consumer Expenditure Survey.",
+    "sourceCitation": "Manual on Consumer Price Index Numbers, CSO Price Statistics Division"
+  },
+  {
+    "id": "qb-gov-001",
+    "courseId": "Data Privacy and DPDPA Compliance",
+    "topic": "DPDPA 2023 Framework",
+    "bloomLevel": "Recall",
+    "question": "Under the Digital Personal Data Protection Act (DPDPA), 2023, what is the statutory role of MoSPI when collecting citizen survey data?",
+    "options": [
+      "Data Fiduciary",
+      "Data Principal",
+      "Data Protection Board of India",
+      "Consent Manager"
+    ],
+    "correctAnswer": "Data Fiduciary",
+    "explanation": "Under DPDPA 2023, any government entity or ministry determining the purpose and means of processing citizen personal data acts as a Data Fiduciary.",
+    "sourceCitation": "DPDPA 2023, Section 2(i) & Central Government Guidelines"
+  },
+  {
+    "id": "qb-gov-002",
+    "courseId": "Data Privacy and DPDPA Compliance",
+    "topic": "Micro-Data Anonymization",
+    "bloomLevel": "Analysis",
+    "question": "Before releasing public unit-level micro-data from NSS surveys, which anonymization practice is mandatory?",
+    "options": [
+      "Masking or perturbing direct identifiers like respondent names, phone numbers, and precise village codes",
+      "Removing all demographic variables completely",
+      "Encrypting micro-data so researchers cannot open it in R or Stata",
+      "Releasing data only to central government ministries"
+    ],
+    "correctAnswer": "Masking or perturbing direct identifiers like respondent names, phone numbers, and precise village codes",
+    "explanation": "To prevent re-identification attacks while preserving research utility, statistical agencies perform k-anonymity, top-coding, and suppression of direct geographic and personal identifiers.",
+    "sourceCitation": "MoSPI National Microdata Policy & Data Anonymization Guidelines"
+  }
+]

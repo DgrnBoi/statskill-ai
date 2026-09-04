@@ -1,83 +1,157 @@
 import fs from 'fs';
 import path from 'path';
 import pdfParse from 'pdf-parse';
+import { AntiCopyEngine, QuestionItem, ShuffledExamPaper } from './AntiCopyEngine';
+
+export interface QuizResult extends ShuffledExamPaper {
+  mode: 'CLOUD_RAG' | 'EDGE_OFFLINE';
+  sourceDocument: string;
+}
 
 export class QuizGeneratorService {
-  constructor() {}
+  private bankPath: string;
 
-  async generateFromPdf(filePath: string, numQuestions: number, difficulty: string, mode: string = 'CLOUD_RAG', courseId: string = 'default_course') {
+  constructor() {
+    this.bankPath = path.join(__dirname, '../../data/question_bank.json');
+  }
+
+  /**
+   * Helper: Read local Question Bank safely
+   */
+  private getLocalBank(): QuestionItem[] {
+    try {
+      if (fs.existsSync(this.bankPath)) {
+        return JSON.parse(fs.readFileSync(this.bankPath, 'utf8'));
+      }
+    } catch (err) {
+      console.error("[QuestionBank] Error reading question_bank.json:", err);
+    }
+    return [];
+  }
+
+  /**
+   * Helper: Save questions to the local Question Bank
+   */
+  private saveToBank(newQuestions: QuestionItem[]) {
+    try {
+      const dataDir = path.dirname(this.bankPath);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+
+      const existingBank = this.getLocalBank();
+      const existingQuestions = new Set(existingBank.map(q => q.question.toLowerCase().trim()));
+
+      const toAdd = newQuestions.filter(q => !existingQuestions.has(q.question.toLowerCase().trim()));
+
+      if (toAdd.length > 0) {
+        const updated = [...existingBank, ...toAdd];
+        fs.writeFileSync(this.bankPath, JSON.stringify(updated, null, 2));
+        console.log(`[QuestionBank] Successfully cached ${toAdd.length} fresh questions. Total bank size: ${updated.length}`);
+      }
+    } catch (err) {
+      console.error("[QuestionBank] Error saving to question_bank.json:", err);
+    }
+  }
+
+  /**
+   * Generates or retrieves an examination paper.
+   * - In Offline / Potato Mode: Pulls from the local Question Bank and runs through AntiCopyEngine.
+   * - In Cloud RAG Mode: Parses the PDF, calls the LLM, enriches the local bank, and shuffles with AntiCopyEngine.
+   */
+  async generateFromPdf(
+    filePath?: string,
+    numQuestions: number = 3,
+    difficulty: string = 'intermediate',
+    mode: string = 'CLOUD_RAG',
+    courseId: string = 'Survey Design and Stratification'
+  ): Promise<QuizResult> {
     const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || "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";
-    
-    // In Edge Mock mode, return mock instantly
-    if (mode === 'POTATO_DEVICE') {
+    const isPotatoOrOffline = mode === 'POTATO_DEVICE' || mode === 'OFFLINE';
+
+    // -------------------------------------------------------------
+    // PATHWAY 1: OFFLINE / POTATO / LOW-NETWORK MODE
+    // -------------------------------------------------------------
+    if (isPotatoOrOffline || !filePath) {
+      console.log(`[AntiCopyEngine] Generating offline exam from local Question Bank for: ${courseId}`);
+      const bank = this.getLocalBank();
+
+      // Filter by course/topic if matching questions exist, otherwise use full bank
+      let pool = bank.filter(q => q.courseId && q.courseId.toLowerCase().includes(courseId.toLowerCase()));
+      if (pool.length < numQuestions) {
+        pool = bank; // Fallback to entire verified pool
+      }
+
+      // Generate randomized Anti-Copy Paper (Shuffled questions + Shuffled options)
+      const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(pool, numQuestions);
+
       return {
-        questions: [
-          {
-            question: "What is the primary purpose of stratification in survey design?",
-            options: ["To increase sample size", "To reduce sampling variance", "To eliminate non-sampling errors", "To simplify data collection"],
-            correctAnswer: "To reduce sampling variance",
-            explanation: "Stratification groups similar units together, which reduces the overall variance of the estimates.",
-            sourceCitation: "Module 1: Survey Design"
-          },
-          {
-            question: "In a two-stage stratified design, what does FSU stand for?",
-            options: ["Final Sampling Unit", "First Stage Unit", "Fundamental Survey Unit", "Field Supervisor Unit"],
-            correctAnswer: "First Stage Unit",
-            explanation: "FSU refers to the First Stage Unit selected in a multi-stage sampling design, such as a village or urban block.",
-            sourceCitation: "Module 1: Survey Design"
-          }
-        ]
+        ...antiCopyPaper,
+        mode: 'EDGE_OFFLINE',
+        sourceDocument: courseId
       };
     }
 
-    // 1. Check Local SQLite/JSON Database Cache FIRST
-    const bankPath = path.join(__dirname, '../../data/question_bank.json');
-    if (fs.existsSync(bankPath)) {
-      try {
-        const bank = JSON.parse(fs.readFileSync(bankPath, 'utf8'));
-        const courseQuestions = bank.filter((q: any) => q.courseId === courseId);
+    // -------------------------------------------------------------
+    // PATHWAY 2: ONLINE / CLOUD RAG GENERATION
+    // -------------------------------------------------------------
+    try {
+      // 1. Check local bank first for exact course match to conserve tokens
+      const bank = this.getLocalBank();
+      const existingForCourse = bank.filter(q => q.courseId === courseId);
+      
+      if (existingForCourse.length >= numQuestions) {
+        console.log(`[Cache Hit] Serving ${numQuestions} questions from local DB with anti-copy randomization for: ${courseId}`);
+        if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath); // Cleanup temp upload
         
-        // If we already have enough generated questions in the DB for this PDF, serve from DB!
-        if (courseQuestions.length >= numQuestions) {
-          console.log(`[Cache Hit] Serving ${numQuestions} questions from local DB for course: ${courseId}`);
-          const shuffled = courseQuestions.sort(() => 0.5 - Math.random());
-          return { questions: shuffled.slice(0, numQuestions) };
-        }
-      } catch (err) {
-        console.error("DB Read Error", err);
+        const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(existingForCourse, numQuestions);
+        return {
+          ...antiCopyPaper,
+          mode: 'CLOUD_RAG',
+          sourceDocument: courseId
+        };
       }
-    }
 
-    // 2. Not enough in cache? Parse PDF and hit LLM
-    const dataBuffer = fs.readFileSync(filePath);
-    const pdfData = await pdfParse(dataBuffer);
-    const textContent = pdfData.text;
+      // 2. Cache miss -> Parse PDF text
+      const dataBuffer = fs.readFileSync(filePath);
+      const pdfData = await pdfParse(dataBuffer);
+      const textContent = pdfData.text;
 
-    fs.unlinkSync(filePath); // Clean up temp file
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath); // Cleanup temp file
+      }
 
-    if (!textContent || textContent.trim().length === 0) {
-      throw new Error("Could not extract text from the PDF.");
-    }
+      if (!textContent || textContent.trim().length === 0) {
+        throw new Error("Could not extract readable text from the uploaded PDF.");
+      }
 
-    const truncatedText = textContent.substring(0, 5000); 
+      // Expand context window to 10,000 characters for deeper analysis
+      const extractedSnippet = textContent.substring(0, 10000);
 
-    const systemPrompt = `You are an expert examiner for the Indian Government. Generate ${numQuestions} multiple choice questions based on the text provided. 
-The difficulty should be ${difficulty}.
-Return ONLY a raw valid JSON object with the following schema:
+      const systemPrompt = `You are a senior psychometrician and examiner for the Indian Official Statistical System (MoSPI / NSSTA).
+Generate exactly ${numQuestions} rigorous, non-trivial multiple-choice questions based ONLY on the provided training text.
+Difficulty level: ${difficulty}.
+
+Requirements:
+1. Every question must have exactly 4 plausible options.
+2. Distractors must reflect authentic statistical misconceptions.
+3. The correct answer must be unambiguous and directly verifiable in the text.
+4. Provide a clear pedagogical explanation and specific source citation.
+
+Output MUST be a valid JSON object matching this exact schema:
 {
   "questions": [
     {
-      "question": "The question text?",
+      "question": "Clear question stem?",
       "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctAnswer": "The exact string of the correct option",
-      "explanation": "Why this is correct based on the text",
-      "sourceCitation": "Short reference to the topic"
+      "correctAnswer": "Exact string of correct option",
+      "explanation": "Detailed explanation why this option is correct based on the text.",
+      "sourceCitation": "Section or paragraph reference"
     }
   ]
 }`;
 
-    try {
-      console.log(`[Cloud RAG] Cache miss. Routing prompt to Groq API...`);
+      console.log(`[Cloud RAG] Routing document snippet (${extractedSnippet.length} chars) to Groq API...`);
       
       const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
         method: 'POST',
@@ -89,7 +163,7 @@ Return ONLY a raw valid JSON object with the following schema:
           model: "qwen/qwen3.8-27b",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: `Text:\n${truncatedText}` }
+            { role: "user", content: `Training Document Text:\n${extractedSnippet}` }
           ],
           response_format: { type: "json_object" },
           temperature: 0.2
@@ -102,30 +176,39 @@ Return ONLY a raw valid JSON object with the following schema:
         throw new Error(data.error.message);
       }
 
-      const generatedText = data.choices[0].message.content;
-      const parsedQuiz = JSON.parse(generatedText);
+      const generatedContent = JSON.parse(data.choices[0].message.content);
+      const generatedQuestions: QuestionItem[] = generatedContent.questions || [];
 
-      // 3. Save new questions to the Database Cache
-      parsedQuiz.questions.forEach((q: any) => {
-        q.courseId = courseId; // Tag with metadata
+      // Tag new questions with courseId
+      generatedQuestions.forEach((q, idx) => {
+        q.id = `qb-ai-${Date.now()}-${idx + 1}`;
+        q.courseId = courseId;
+        q.bloomLevel = difficulty === 'hard' ? 'Analysis' : difficulty === 'easy' ? 'Recall' : 'Application';
       });
-      
-      let bank: any[] = [];
-      if (fs.existsSync(bankPath)) {
-        bank = JSON.parse(fs.readFileSync(bankPath, 'utf8'));
-      }
-      // Ensure the data directory exists
-      if (!fs.existsSync(path.join(__dirname, '../../data'))) {
-        fs.mkdirSync(path.join(__dirname, '../../data'), { recursive: true });
-      }
-      bank = [...bank, ...parsedQuiz.questions];
-      fs.writeFileSync(bankPath, JSON.stringify(bank, null, 2));
-      console.log(`[Cache Write] Saved ${parsedQuiz.questions.length} new questions to DB for ${courseId}`);
 
-      return parsedQuiz;
+      // 3. Incrementally enrich the local Question Bank for future offline use!
+      this.saveToBank(generatedQuestions);
+
+      // 4. Pass the newly formulated questions through the Anti-Copy Shuffler
+      const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(generatedQuestions, numQuestions);
+
+      return {
+        ...antiCopyPaper,
+        mode: 'CLOUD_RAG',
+        sourceDocument: courseId
+      };
+
     } catch (error: any) {
-      console.error("[Guardrail] AI Error:", error);
-      throw new Error(`The AI failed to process the document: ${error.message}`);
+      console.error("[QuizGenerator Error]:", error);
+      // Failover Gracefully to the local Question Bank if cloud LLM fails
+      console.log("[Failover] Cloud RAG failed. Falling back to local verified Question Bank...");
+      const bank = this.getLocalBank();
+      const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(bank, numQuestions);
+      return {
+        ...antiCopyPaper,
+        mode: 'EDGE_OFFLINE',
+        sourceDocument: courseId + ' (Local Failover)'
+      };
     }
   }
 }

@@ -71,19 +71,24 @@ export class MultilingualSearchService {
    */
   private scoreCourse(course: Course, queryTokens: string[]): number {
     let score = 0;
+    const title = (course.title || '').toLowerCase();
+    const domain = (course.domain || '').toLowerCase();
+    const tags = (course.tags || []).map(t => (t ? t.toLowerCase() : ''));
+    const keywordsIndic = (course.keywordsIndic || []).map(k => (k ? k.toLowerCase() : ''));
+
     const searchSpace = [
-      course.title.toLowerCase(),
-      course.domain.toLowerCase(),
-      ...course.tags.map(t => t.toLowerCase()),
-      ...course.keywordsIndic.map(k => k.toLowerCase())
+      title,
+      domain,
+      ...tags,
+      ...keywordsIndic
     ].join(' ');
 
     for (const token of queryTokens) {
       if (searchSpace.includes(token)) {
         // Boost score if it's in the title
-        if (course.title.toLowerCase().includes(token)) {
+        if (title.includes(token)) {
           score += 3;
-        } else if (course.keywordsIndic.includes(token)) {
+        } else if (keywordsIndic.includes(token)) {
           score += 2; // High weight for Indic keyword matches
         } else {
           score += 1;
@@ -99,7 +104,11 @@ export class MultilingualSearchService {
 
     // 1. Hard Filtering
     if (domainFilter && domainFilter !== 'All') {
-      results = results.filter(c => c.domain === domainFilter);
+      const dFilterLower = domainFilter.toLowerCase();
+      results = results.filter(c => {
+        const cDomain = (c.domain || '').toLowerCase();
+        return cDomain === dFilterLower || cDomain.includes(dFilterLower) || dFilterLower.includes(cDomain);
+      });
     }
     if (levelFilter && levelFilter > 0) {
       results = results.filter(c => c.level === levelFilter);

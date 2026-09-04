@@ -1,0 +1,152 @@
+{
+  "cadres": [
+    {
+      "id": "jso",
+      "designation": "Junior Statistical Officer (JSO)",
+      "cadre": "Subordinate Statistical Service (SSS)",
+      "division": "Field Operations Division (FOD), NSSO",
+      "description": "Frontline statistical investigator responsible for primary household/enterprise survey enumeration, CAPI digital data entry, and agricultural crop estimation.",
+      "competencies": [
+        {
+          "id": "stat-01",
+          "skillName": "Survey Design & Sampling",
+          "domain": "Statistical Competencies",
+          "targetLevel": 3,
+          "description": "Understanding First Stage Units (FSUs), listing of households, and circular systematic sampling."
+        },
+        {
+          "id": "tech-01",
+          "skillName": "CAPI & Digital Field Enumeration",
+          "domain": "Technical Competencies",
+          "targetLevel": 4,
+          "description": "Operating Computer Assisted Personal Interviewing tablets, GPS geotagging, and cloud data sync."
+        },
+        {
+          "id": "gov-01",
+          "skillName": "Data Privacy & DPDPA 2023",
+          "domain": "Digital Governance",
+          "targetLevel": 2,
+          "description": "Securing informant consent, protecting PII of survey respondents, and complying with data fiduciary rules."
+        },
+        {
+          "id": "behav-01",
+          "skillName": "Public Ethics & Field Communication",
+          "domain": "Behavioural and Managerial Competencies",
+          "targetLevel": 3,
+          "description": "Engaging rural/urban respondents professionally, minimizing non-response bias, and maintaining impartiality."
+        }
+      ]
+    },
+    {
+      "id": "sso",
+      "designation": "Senior Statistical Officer (SSO)",
+      "cadre": "Subordinate Statistical Service (SSS)",
+      "division": "Data Processing Division (DPD), NSSO",
+      "description": "Supervisory statistical officer overseeing field team audits, scrutiny of survey schedules, micro-data cleaning, and tabulation.",
+      "competencies": [
+        {
+          "id": "stat-01",
+          "skillName": "Survey Design & Sampling",
+          "domain": "Statistical Competencies",
+          "targetLevel": 4,
+          "description": "Scrutiny of sampling weights, multiplier estimation, and non-sampling error detection."
+        },
+        {
+          "id": "tech-02",
+          "skillName": "Statistical Data Analytics (R / Python / Stata)",
+          "domain": "Technical Competencies",
+          "targetLevel": 3,
+          "description": "Executing automated consistency checks, missing data imputation, and outlier analysis."
+        },
+        {
+          "id": "gov-01",
+          "skillName": "Data Privacy & DPDPA 2023",
+          "domain": "Digital Governance",
+          "targetLevel": 3,
+          "description": "Anonymization of micro-data files before public release and managing data sharing protocols."
+        },
+        {
+          "id": "behav-02",
+          "skillName": "Team Leadership & Supervision",
+          "domain": "Behavioural and Managerial Competencies",
+          "targetLevel": 4,
+          "description": "Managing field inspection squads, resolving technical queries of enumerators, and quality control."
+        }
+      ]
+    },
+    {
+      "id": "assistant_director",
+      "designation": "Assistant Director",
+      "cadre": "Indian Statistical Service (ISS)",
+      "division": "National Accounts Division (NAD), CSO",
+      "description": "Gazetted ISS officer analyzing macroeconomic aggregates, GDP/CPI compilation, and survey methodology design.",
+      "competencies": [
+        {
+          "id": "stat-02",
+          "skillName": "National Accounts & Price Statistics",
+          "domain": "Statistical Competencies",
+          "targetLevel": 4,
+          "description": "Compiling Gross Value Added (GVA), Consumer Price Index (CPI), and deflator estimation."
+        },
+        {
+          "id": "tech-02",
+          "skillName": "Statistical Data Analytics (R / Python / Stata)",
+          "domain": "Technical Competencies",
+          "targetLevel": 4,
+          "description": "Advanced econometric modeling, seasonal adjustment (X-13ARIMA), and time series forecasting."
+        },
+        {
+          "id": "gov-02",
+          "skillName": "Digital Public Infrastructure & Open Data",
+          "domain": "Digital Governance",
+          "targetLevel": 4,
+          "description": "NDAP (National Data & Analytics Platform) integration, API dissemination, and metadata standards."
+        },
+        {
+          "id": "behav-03",
+          "skillName": "Project & Policy Management",
+          "domain": "Behavioural and Managerial Competencies",
+          "targetLevel": 4,
+          "description": "Directing national survey rounds, liaising with international agencies (UNSD, IMF), and policy briefs."
+        }
+      ]
+    },
+    {
+      "id": "director",
+      "designation": "Director / Joint Director",
+      "cadre": "Indian Statistical Service (ISS)",
+      "division": "Data Informatics & Innovation Division (DIID)",
+      "description": "Senior leadership driving digital transformation, AI/ML adoption, big data integration, and national statistical governance.",
+      "competencies": [
+        {
+          "id": "stat-03",
+          "skillName": "SDG Indicators & Macro Statistical Governance",
+          "domain": "Statistical Competencies",
+          "targetLevel": 5,
+          "description": "Formulating national indicator frameworks for UN Sustainable Development Goals (SDGs)."
+        },
+        {
+          "id": "tech-03",
+          "skillName": "Big Data & AI/ML in Official Statistics",
+          "domain": "Technical Competencies",
+          "targetLevel": 4,
+          "description": "Leveraging satellite imagery, web scraping, and administrative tax data for real-time economic tracking."
+        },
+        {
+          "id": "gov-01",
+          "skillName": "Data Privacy & DPDPA 2023",
+          "domain": "Digital Governance",
+          "targetLevel": 5,
+          "description": "Institutional compliance under Collection of Statistics Act 2008 and DPDPA 2023."
+        },
+        {
+          "id": "behav-04",
+          "skillName": "Strategic Leadership & Change Management",
+          "domain": "Behavioural and Managerial Competencies",
+          "targetLevel": 5,
+          "description": "Driving civil service modernization under Mission Karmayogi and Capacity Building Commission guidelines."
+        }
+      ]
+    }
+  ]
+}

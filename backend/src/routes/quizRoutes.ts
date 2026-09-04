@@ -11,13 +11,16 @@ const jobQueue = new Map<string, { status: 'processing' | 'complete' | 'error', 
 
 // POST /api/quiz/generate-async
 router.post('/generate-async', upload.single('document'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No PDF document uploaded.' });
+  const mode = req.query.mode as string || 'MODERN_DEVICE';
+  const isOffline = mode === 'POTATO_DEVICE' || mode === 'OFFLINE';
+
+  if (!req.file && !isOffline) {
+    return res.status(400).json({ error: 'No PDF document uploaded and not in offline mode.' });
   }
 
-  const { difficulty, numQuestions } = req.body;
-  const mode = req.query.mode as string || 'MODERN_DEVICE';
-  const filePath = req.file.path;
+  const { difficulty, numQuestions, courseId } = req.body;
+  const filePath = req.file ? req.file.path : undefined;
+  const originalName = req.file ? req.file.originalname : (courseId || 'Survey Design and Stratification');
   const jobId = Math.random().toString(36).substring(7); // Simple Job ID
 
   // 1. Immediately acknowledge the request (202 Accepted)
@@ -37,7 +40,7 @@ router.post('/generate-async', upload.single('document'), (req, res) => {
         parseInt(numQuestions) || 3, 
         difficulty || 'intermediate',
         mode,
-        req.file!.originalname || 'default_course'
+        originalName
       );
       
       console.log(`[Job ${jobId}] Generation complete.`);
