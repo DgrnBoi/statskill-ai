@@ -6,6 +6,7 @@ import quizRoutes from './routes/quizRoutes';
 import telemetryRoutes from './routes/telemetryRoutes';
 import recommendRoutes from './routes/recommendRoutes';
 import courseRoutes from './routes/courseRoutes';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/recommend', recommendRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'StatSkill AI Backend Running' });
