@@ -4,6 +4,7 @@ import { Navbar } from '../components/layout/Navbar';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { XApiTelemetryDrawer, XApiStatementPayload } from '../components/ui/XApiTelemetryDrawer';
 import {
   FileText,
   UploadCloud,
@@ -22,6 +23,7 @@ import {
   Clock,
   ChevronRight,
   TrendingUp,
+  Terminal,
 } from 'lucide-react';
 
 interface Competency {
@@ -93,6 +95,8 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
   const [assessmentsTaken, setAssessmentsTaken] = useState(0);
+  const [isTelemetryDrawerOpen, setIsTelemetryDrawerOpen] = useState(false);
+  const [latestTelemetryStatement, setLatestTelemetryStatement] = useState<XApiStatementPayload | null>(null);
 
   // Initialize competencies on cadre change
   useEffect(() => {
@@ -283,8 +287,18 @@ export default function Dashboard() {
                   </CardDescription>
                 </div>
 
-                {/* Device Mode Toggle Button */}
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                {/* Device Mode Toggle & Telemetry Inspector Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsTelemetryDrawerOpen(true)}
+                    className="px-3 py-1.5 text-xs font-bold rounded-md transition-all shadow-xs border flex items-center gap-1.5 bg-slate-900 text-emerald-300 border-emerald-500/40 hover:bg-slate-800 cursor-pointer active:scale-95"
+                    title="Inspect live ADL xAPI learning record sent to iGOT LRS"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>iGOT LRS Telemetry</span>
+                    <Terminal className="w-3.5 h-3.5 text-amber-400" />
+                  </button>
                   <button
                     type="button"
                     onClick={() =>
@@ -300,12 +314,9 @@ export default function Dashboard() {
                   >
                     <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                     {deviceMode === 'MODERN_DEVICE'
-                      ? 'Cloud Live RAG (PDF Extraction)'
-                      : 'Edge Offline Bank (Potato PC Mode)'}
+                      ? 'Cloud Live RAG (PDF)'
+                      : 'Edge Offline Bank'}
                   </button>
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    {deviceMode === 'MODERN_DEVICE' ? 'High Bandwidth' : 'Low RAM / Weak Network'}
-                  </span>
                 </div>
               </CardHeader>
 
@@ -425,6 +436,7 @@ export default function Dashboard() {
                           index={index}
                           handleProficiencyChange={handleProficiencyChange}
                           skillToUpdate={skills.length > 0 ? skills[0].skillName : 'Survey Design & Sampling'}
+                          onTelemetryStatement={setLatestTelemetryStatement}
                         />
                       ))}
                     </div>
@@ -822,6 +834,13 @@ export default function Dashboard() {
           </Card>
         )}
       </main>
+
+      {/* Pillar 3: iGOT Karmayogi LRS Telemetry Inspector Drawer */}
+      <XApiTelemetryDrawer
+        isOpen={isTelemetryDrawerOpen}
+        onClose={() => setIsTelemetryDrawerOpen(false)}
+        statement={latestTelemetryStatement}
+      />
     </div>
   );
 }
@@ -831,11 +850,13 @@ function QuizQuestion({
   index,
   handleProficiencyChange,
   skillToUpdate,
+  onTelemetryStatement,
 }: {
   q: any;
   index: number;
   handleProficiencyChange: any;
   skillToUpdate: string;
+  onTelemetryStatement?: (statement: XApiStatementPayload) => void;
 }) {
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [recommendation, setRecommendation] = React.useState<any | null>(null);
@@ -857,7 +878,14 @@ function QuizQuestion({
         quizName: q.topic || 'MoSPI Official Assessment',
         score: opt === q.correctAnswer ? 100 : 0,
       }),
-    }).catch((err) => console.error('Telemetry sync error:', err));
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.statement && onTelemetryStatement) {
+          onTelemetryStatement(data.statement);
+        }
+      })
+      .catch((err) => console.error('Telemetry sync error:', err));
 
     if (opt !== q.correctAnswer) {
       handleProficiencyChange(skillToUpdate, 2);
