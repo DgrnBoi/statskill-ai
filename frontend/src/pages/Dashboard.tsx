@@ -124,8 +124,34 @@ function shuffleArray<T>(arr: T[]): T[] {
   return copy;
 }
 
-export default function Dashboard() {
-  const [designation, setDesignation] = useState('Junior Statistical Officer (JSO)');
+interface DashboardProps {
+  onOpenLogin?: () => void;
+}
+
+export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
+  // Check if an officer is authenticated via Jan Parichay SSO
+  const savedOfficerInfo = useMemo(() => {
+    try {
+      const saved = window.localStorage.getItem('statskill_demo_login');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {}
+    return null;
+  }, []);
+
+  const [designation, setDesignation] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem('statskill_demo_login');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.officer?.designation && MOSPI_CADRES_DATA[parsed.officer.designation]) {
+          return parsed.officer.designation;
+        }
+      }
+    } catch {}
+    return 'Junior Statistical Officer (JSO)';
+  });
   const [proficiency, setProficiency] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [generatedQuiz, setGeneratedQuiz] = useState<QuizQuestionItem[]>([]);
@@ -136,7 +162,13 @@ export default function Dashboard() {
 
   // Navigation and Discovery States
   const [activeTab, setActiveTab] = useState<'dashboard' | 'discover' | 'competency' | 'analytics'>('dashboard');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    try {
+      return !!window.localStorage.getItem('statskill_demo_login');
+    } catch {
+      return false;
+    }
+  });
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
@@ -378,7 +410,17 @@ export default function Dashboard() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isLoggedIn={isLoggedIn}
-        setIsLoggedIn={setIsLoggedIn}
+        setIsLoggedIn={(logged) => {
+          if (!logged) {
+            try {
+              window.localStorage.removeItem('statskill_demo_login');
+            } catch {}
+          }
+          setIsLoggedIn(logged);
+        }}
+        onOpenLogin={onOpenLogin}
+        officerName={savedOfficerInfo?.officer?.name}
+        officerCadreId={savedOfficerInfo?.officer?.parichayId}
       />
 
       <main className="max-w-7xl mx-auto py-8 px-4 md:px-10 space-y-8">

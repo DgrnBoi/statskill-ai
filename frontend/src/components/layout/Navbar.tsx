@@ -7,9 +7,20 @@ interface NavbarProps {
   setActiveTab: (tab: 'dashboard' | 'discover' | 'competency' | 'analytics') => void;
   isLoggedIn: boolean;
   setIsLoggedIn: (logged: boolean) => void;
+  onOpenLogin?: () => void;
+  officerName?: string;
+  officerCadreId?: string;
 }
 
-export function Navbar({ activeTab, setActiveTab, isLoggedIn, setIsLoggedIn }: NavbarProps) {
+export function Navbar({
+  activeTab,
+  setActiveTab,
+  isLoggedIn,
+  setIsLoggedIn,
+  onOpenLogin,
+  officerName,
+  officerCadreId,
+}: NavbarProps) {
   const tabs = [
     { id: 'dashboard', label: 'Assessment Engine', icon: LayoutDashboard },
     { id: 'discover', label: 'Discover (880+ Catalog)', icon: BookOpen },
@@ -50,7 +61,13 @@ export function Navbar({ activeTab, setActiveTab, isLoggedIn, setIsLoggedIn }: N
             {!isLoggedIn ? (
               <button
                 type="button"
-                onClick={() => setIsLoggedIn(true)}
+                onClick={() => {
+                  if (onOpenLogin) {
+                    onOpenLogin();
+                  } else {
+                    setIsLoggedIn(true);
+                  }
+                }}
                 aria-label="Login via Jan Parichay Single Sign-On"
                 className="bg-primary-800 hover:bg-primary-700 text-amber-300 hover:text-amber-200 border border-amber-400/60 px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
               >
@@ -61,11 +78,11 @@ export function Navbar({ activeTab, setActiveTab, isLoggedIn, setIsLoggedIn }: N
               <button
                 type="button"
                 onClick={() => setIsLoggedIn(false)}
-                aria-label="Log out of authenticated session for officer JSO_1042"
+                aria-label={`Log out of authenticated session for ${officerName || 'MoSPI Officer'}`}
                 className="bg-emerald-800 text-emerald-100 border border-emerald-500 px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
-                Officer Authenticated: JSO_1042
+                {officerName ? `${officerName} (${officerCadreId || 'Authenticated'})` : 'Officer Authenticated: JSO_1042'}
               </button>
             )}
           </div>

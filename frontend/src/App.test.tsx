@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import App from './App';
 
 describe('App login handoff', () => {
-  it('stores the chosen demo identity before returning to the dashboard', () => {
+  it('stores the chosen demo identity before returning to the dashboard', async () => {
     const stored = new Map<string, string>();
     Object.defineProperty(window, 'localStorage', {
       configurable: true,
@@ -15,7 +15,9 @@ describe('App login handoff', () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole('button', { name: /Director \(ISS\).*DIID/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Continue as Director \(ISS\)/i }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Continue as Director \(ISS\)/i }));
+    });
 
     expect(JSON.parse(stored.get('statskill_demo_login') ?? '{}')).toMatchObject({
       method: 'parichay-id',
