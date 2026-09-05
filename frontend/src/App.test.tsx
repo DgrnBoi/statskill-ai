@@ -16,9 +16,11 @@ describe('App login handoff', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: 'signed-demo-token' }) }));
     render(<App />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Director \(ISS\).*DIID/i }));
+    const selectDirectorBtn = await screen.findByRole('button', { name: /Director \(ISS\).*DIID/i });
+    fireEvent.click(selectDirectorBtn);
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Continue as Director \(ISS\)/i }));
+      const continueBtn = await screen.findByRole('button', { name: /Continue as Director \(ISS\)/i });
+      fireEvent.click(continueBtn);
     });
 
     await waitFor(() => expect(stored.get('auth_token')).toBe('signed-demo-token'));

@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Dashboard from './pages/Dashboard';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import LoginPage, { DemoOfficer } from './pages/LoginPage';
+import { DemoOfficer } from './pages/LoginPage';
 import { PortalTab } from './components/layout/Navbar';
 import { AccessibilityModal, AccessibilitySettings, DEFAULT_ACCESSIBILITY_SETTINGS } from './components/ui/AccessibilityModal';
 import { KarmayogiSahayakModal } from './components/ui/KarmayogiSahayakModal';
 import { SecretAdminGatewayModal } from './components/admin/SecretAdminGatewayModal';
 import { OfflineStatusBar } from './components/ui/OfflineStatusBar';
+
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const LoginPage = React.lazy(() => import('./pages/LoginPage'));
 
 interface AppRouteState {
   isLogin: boolean;
@@ -159,34 +161,43 @@ function App() {
     <ErrorBoundary>
       <div className="App min-h-screen bg-slate-50">
         <OfflineStatusBar />
-        {route.isLogin ? (
-          <LoginPage
-            onAuthenticate={handleDemoLogin}
-            onBack={handleBackFromLogin}
-          />
-        ) : route.tab === 'home' ? (
-          <LandingPage
-            onLaunchAssessment={(courseTopic) => {
-              if (courseTopic) {
-                setInitialCourseTopic(courseTopic);
-              }
-              handleTabChange('dashboard');
-            }}
-            onExploreCourses={() => handleTabChange('discover')}
-            onOpenDashboard={() => handleTabChange('overview')}
-            onOpenLogin={handleOpenLogin}
-            onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
-            onOpenAccessibility={() => setIsAccessibilityOpen(true)}
-            onOpenSahayak={() => setIsSahayakOpen(true)}
-          />
-        ) : (
-          <Dashboard
-            activeTab={route.tab}
-            onTabChange={handleTabChange}
-            onOpenLogin={handleOpenLogin}
-            initialCourseTopic={initialCourseTopic}
-          />
-        )}
+        <Suspense
+          fallback={
+            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 p-8">
+              <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Loading StatSkill AI Module...</p>
+            </div>
+          }
+        >
+          {route.isLogin ? (
+            <LoginPage
+              onAuthenticate={handleDemoLogin}
+              onBack={handleBackFromLogin}
+            />
+          ) : route.tab === 'home' ? (
+            <LandingPage
+              onLaunchAssessment={(courseTopic) => {
+                if (courseTopic) {
+                  setInitialCourseTopic(courseTopic);
+                }
+                handleTabChange('dashboard');
+              }}
+              onExploreCourses={() => handleTabChange('discover')}
+              onOpenDashboard={() => handleTabChange('overview')}
+              onOpenLogin={handleOpenLogin}
+              onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
+              onOpenAccessibility={() => setIsAccessibilityOpen(true)}
+              onOpenSahayak={() => setIsSahayakOpen(true)}
+            />
+          ) : (
+            <Dashboard
+              activeTab={route.tab}
+              onTabChange={handleTabChange}
+              onOpenLogin={handleOpenLogin}
+              initialCourseTopic={initialCourseTopic}
+            />
+          )}
+        </Suspense>
 
         {/* Global Modals active on Public Gateway Landing Page */}
         {route.tab === 'home' && !route.isLogin && (

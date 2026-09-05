@@ -7,20 +7,37 @@ const upload = multer({
   dest: 'uploads/',
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max limit
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+    const isPdfMime = file.mimetype === 'application/pdf';
+    const hasPdfExt = file.originalname.toLowerCase().endsWith('.pdf');
+    if (isPdfMime || hasPdfExt) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF documents are permitted for assessment generation.'));
+      cb(new Error('Only official PDF documents are permitted for assessment generation.'));
     }
   }
 });
+
+const handleSafeUpload = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  upload.single('document')(req, res, (err: any) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'File size exceeds the maximum permitted limit of 10MB.' });
+      }
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ error: err.message || 'Invalid file format. Only official PDF documents are permitted.' });
+    }
+    next();
+  });
+};
+
 const quizService = new QuizGeneratorService();
 
 // In-memory queue for hackathon prototype (Use Redis in production)
 const jobQueue = new Map<string, { status: 'processing' | 'complete' | 'error', result?: any, error?: string }>();
 
 // POST /api/quiz/generate-async
-router.post('/generate-async', upload.single('document'), (req, res) => {
+router.post('/generate-async', handleSafeUpload, (req, res) => {
   const mode = req.query.mode as string || 'MODERN_DEVICE';
   const isOffline = mode === 'POTATO_DEVICE' || mode === 'OFFLINE';
 
@@ -30,7 +47,10 @@ router.post('/generate-async', upload.single('document'), (req, res) => {
     return res.status(400).json({ error: 'No PDF document uploaded or course selected.' });
   }
   const filePath = req.file ? req.file.path : undefined;
-  const originalName = req.file ? req.file.originalname : (courseId || 'Survey Design and Stratification');
+  // Sanitize original filename against path traversal and null bytes
+  const originalName = req.file 
+    ? req.file.originalname.replace(/[/\\?%*:|"<>]/g, '_').replace(/\0/g, '').slice(0, 150)
+    : (courseId ? String(courseId).replace(/[/\\?%*:|"<>]/g, '_').slice(0, 100) : 'Survey Design and Stratification');
   const jobId = Math.random().toString(36).substring(7); // Simple Job ID
 
   // 1. Immediately acknowledge the request (202 Accepted)

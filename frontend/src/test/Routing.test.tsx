@@ -16,7 +16,7 @@ describe('App Routing and Browser History Navigation', () => {
     render(<App />);
 
     // Login page should be displayed
-    expect(screen.getByText(/MeriPehchan · Jan Parichay/i)).toBeDefined();
+    expect(await screen.findByText(/MeriPehchan · Jan Parichay/i)).toBeDefined();
     expect(screen.getByText(/Sign in to your StatSkill workspace/i)).toBeDefined();
 
     // Click "Back to Portal"
@@ -45,7 +45,7 @@ describe('App Routing and Browser History Navigation', () => {
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
 
-    expect(screen.getByText(/MeriPehchan · Jan Parichay/i)).toBeDefined();
+    expect(await screen.findByText(/MeriPehchan · Jan Parichay/i)).toBeDefined();
 
     // Trigger popstate to /admin
     await act(async () => {
@@ -53,7 +53,7 @@ describe('App Routing and Browser History Navigation', () => {
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
 
-    expect(screen.getByText(/MoSPI Cadre Capacity & Readiness Command Center/i)).toBeDefined();
+    expect(await screen.findByText(/MoSPI Cadre Capacity & Readiness Command Center/i)).toBeDefined();
   });
 
   it('navigates from Landing Page to Assessment Engine when Launch Assessment CTA is clicked', async () => {
