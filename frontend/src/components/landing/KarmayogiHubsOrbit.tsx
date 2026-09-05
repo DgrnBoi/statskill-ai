@@ -62,6 +62,48 @@ export function KarmayogiHubsOrbit({ onLaunchAssessment }: { onLaunchAssessment?
 
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_0.85fr]">
           <div>
+            {/* Decorative revolving orbit */}
+            <div
+              className="relative mx-auto hidden aspect-square w-full max-w-[320px] sm:block mb-8"
+              aria-hidden="true"
+            >
+              <div className="absolute inset-3 rounded-full border border-white/10" />
+              <div className="absolute inset-12 rounded-full border border-white/10" />
+              {/* center emblem */}
+              <div className="absolute left-1/2 top-1/2 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#123E82] text-amber-400 shadow-xl ring-2 ring-amber-400/40">
+                <IndianFlag variant="circular" width={42} height={42} />
+              </div>
+              {/* rotating ring of nodes */}
+              <div
+                className="absolute inset-0"
+                style={{ animation: 'k-orbit 35s linear infinite' }}
+              >
+                {HUBS.map((hub, i) => {
+                  const angle = (360 / HUBS.length) * i - 90;
+                  const rad = (angle * Math.PI) / 180;
+                  const r = 44;
+                  const x = 50 + r * Math.cos(rad);
+                  const y = 50 + r * Math.sin(rad);
+                  const Icon = hub.icon;
+                  return (
+                    <div
+                      key={hub.name}
+                      className="absolute h-11 w-11 -translate-x-1/2 -translate-y-1/2"
+                      style={{ left: `${x}%`, top: `${y}%` }}
+                    >
+                      <div
+                        className="grid h-full w-full place-items-center rounded-xl bg-white/10 text-white ring-1 ring-white/25 backdrop-blur-xs hover:bg-amber-400 hover:text-slate-950 transition shadow-md"
+                        style={{ animation: 'k-orbit-reverse 35s linear infinite' }}
+                        title={hub.name}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <ul className="grid gap-3 sm:grid-cols-2">
               {HUBS.map((hub) => {
                 const Icon = hub.icon;
