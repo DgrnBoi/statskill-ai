@@ -106,7 +106,22 @@ function App() {
     setRoute({ isLogin: false, tab: 'home' });
   }, []);
 
-  const handleDemoLogin = useCallback((officer: DemoOfficer, method: 'parichay-id' | 'mobile-otp') => {
+  const handleDemoLogin = useCallback(async (officer: DemoOfficer, method: 'parichay-id' | 'mobile-otp') => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/demo-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ officerId: officer.id, method }),
+      });
+      const data = await response.json();
+      if (response.ok && data?.token) {
+        window.localStorage.setItem('auth_token', data.token);
+      }
+    } catch {
+      // Fallback offline mock JWT token
+      window.localStorage.setItem('auth_token', `demo-jwt-${officer.id}`);
+    }
+
     try {
       window.localStorage.setItem('statskill_demo_login', JSON.stringify({ officer, method }));
     } catch {}

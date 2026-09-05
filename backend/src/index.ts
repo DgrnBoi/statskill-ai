@@ -7,6 +7,7 @@ import telemetryRoutes from './routes/telemetryRoutes';
 import recommendRoutes from './routes/recommendRoutes';
 import courseRoutes from './routes/courseRoutes';
 import adminRoutes from './routes/adminRoutes';
+import authRoutes from './routes/authRoutes';
 
 import { inputSanitizerMiddleware } from './middlewares/inputSanitizer';
 import { globalApiLimiter, quizGenLimiter } from './middlewares/rateLimiter';
@@ -28,6 +29,7 @@ app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/recommend', recommendRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get(['/health', '/api/health'], (req, res) => {
   res.status(200).json({ status: 'ok', message: 'StatSkill AI Backend Running' });

@@ -1,10 +1,11 @@
-// @vitest-environment jsdom
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
 describe('App login handoff', () => {
-  it('stores the chosen demo identity before returning to the dashboard', async () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('stores the server-issued JWT before returning to the dashboard', async () => {
     const stored = new Map<string, string>();
     Object.defineProperty(window, 'localStorage', {
       configurable: true,
@@ -12,6 +13,7 @@ describe('App login handoff', () => {
     });
     window.history.pushState({}, '', '/login');
     window.localStorage.clear();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: 'signed-demo-token' }) }));
     render(<App />);
 
     fireEvent.click(screen.getByRole('button', { name: /Director \(ISS\).*DIID/i }));
@@ -19,9 +21,9 @@ describe('App login handoff', () => {
       fireEvent.click(screen.getByRole('button', { name: /Continue as Director \(ISS\)/i }));
     });
 
-    expect(JSON.parse(stored.get('statskill_demo_login') ?? '{}')).toMatchObject({
-      method: 'parichay-id',
-      officer: { id: 'director' },
-    });
+    await waitFor(() => expect(stored.get('auth_token')).toBe('signed-demo-token'));
+    expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api/auth/demo-login', expect.objectContaining({
+      method: 'POST',
+    }));
   });
 });
