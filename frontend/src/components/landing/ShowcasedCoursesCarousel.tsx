@@ -8,6 +8,7 @@ type Course = {
   domain: string;
   level: 'Basic' | 'Intermediate' | 'Advanced';
   gradient: string;
+  emoji: string;
   icon: React.ComponentType<{ className?: string }>;
 };
 
@@ -19,6 +20,7 @@ const COURSES: Course[] = [
     domain: 'NSS Microdata & R',
     level: 'Advanced',
     gradient: 'from-blue-900 via-indigo-900 to-[#0B2E63]',
+    emoji: '📊',
     icon: Database,
   },
   {
@@ -28,6 +30,7 @@ const COURSES: Course[] = [
     domain: 'Sampling & Estimation',
     level: 'Intermediate',
     gradient: 'from-emerald-900 via-teal-900 to-[#0B2E63]',
+    emoji: '📐',
     icon: Layers,
   },
   {
@@ -37,6 +40,7 @@ const COURSES: Course[] = [
     domain: 'Field CAPI Operations',
     level: 'Basic',
     gradient: 'from-amber-900 via-yellow-900 to-[#0B2E63]',
+    emoji: '📱',
     icon: Cpu,
   },
   {
@@ -46,6 +50,7 @@ const COURSES: Course[] = [
     domain: 'Macroeconomic Accounts',
     level: 'Advanced',
     gradient: 'from-purple-900 via-indigo-950 to-[#0B2E63]',
+    emoji: '🧮',
     icon: TrendingUp,
   },
   {
@@ -55,6 +60,7 @@ const COURSES: Course[] = [
     domain: 'Price Statistics & Inflation',
     level: 'Intermediate',
     gradient: 'from-cyan-900 via-sky-950 to-[#0B2E63]',
+    emoji: '📈',
     icon: BookOpen,
   },
   {
@@ -64,6 +70,7 @@ const COURSES: Course[] = [
     domain: 'DPDP Act & Governance',
     level: 'Advanced',
     gradient: 'from-slate-900 via-blue-950 to-[#0B2E63]',
+    emoji: '🛡️',
     icon: Shield,
   },
 ];
@@ -143,8 +150,8 @@ export function ShowcasedCoursesCarousel({
                 {/* Custom Card Banner Cover */}
                 <div className={`relative aspect-video overflow-hidden bg-gradient-to-br ${course.gradient} p-4 flex flex-col justify-between text-white`}>
                   <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-white/20 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-semibold text-white">
-                      {course.level}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-semibold text-white">
+                      <span>{course.emoji}</span> {course.level}
                     </span>
                     <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-slate-900 font-mono">
                       NSSTA Verified
@@ -167,7 +174,10 @@ export function ShowcasedCoursesCarousel({
                     <Clock className="h-3.5 w-3.5 text-amber-600" />
                     {course.duration}
                     <span className="mx-1 text-slate-300">•</span>
-                    <span className="text-[11px] font-mono font-medium text-[#0B2E63]">{course.domain}</span>
+                    <span className="text-[11px] font-mono font-medium text-[#0B2E63] flex items-center gap-1">
+                      <span>{course.emoji}</span>
+                      {course.domain}
+                    </span>
                   </p>
                   <h3 className="mt-2 line-clamp-2 min-h-[2.75rem] text-[14px] font-bold leading-snug text-[#0B2E63] group-hover:text-[#1A56A0] transition">
                     {course.title}

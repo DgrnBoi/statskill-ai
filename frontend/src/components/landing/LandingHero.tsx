@@ -57,18 +57,22 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
             </button>
           </div>
 
-          <div className="mt-8 flex items-center gap-4 text-xs font-medium text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>FRAC Dictionary Aligned</span>
-            </div>
-            <span>•</span>
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>Offline Sets A, B, C, D</span>
-            </div>
-            <span>•</span>
-            <span>xAPI Telemetry Verified</span>
+          <div className="mt-8 flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0B2E63]/10 border border-[#0B2E63]/15 text-[#0B2E63] font-semibold shadow-2xs">
+              <span>🎯</span> FRAC Level 3 Mapped
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-900 font-semibold shadow-2xs">
+              <span>🔄</span> Sets A, B, C, D Reshuffle
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-900 font-semibold shadow-2xs">
+              <span>📱</span> CAPI Field Mode
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-900 font-semibold shadow-2xs">
+              <span>🛡️</span> DPDP Act 2023 Fiduciary
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/25 text-purple-900 font-semibold shadow-2xs">
+              <span>⚡</span> 12ms Edge-AI Engine
+            </span>
           </div>
         </div>
 
@@ -79,9 +83,15 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
             <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-[#1A56A0]/60 blur-2xl" />
 
             <div className="relative">
-              <span className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/40">
-                <Sparkles className="h-3.5 w-3.5" /> MoSPI &amp; National Cadre Milestone
-              </span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/40">
+                  <span>✨</span> MoSPI &amp; National Cadre Milestone
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-[11px] font-mono text-emerald-300">
+                  <span>📡</span> xAPI LRS Synced
+                </span>
+              </div>
+
               <p className="mt-6 font-mono text-5xl md:text-6xl font-bold leading-none tracking-tight text-white tabular-nums">
                 <CountUpNumber end={1.72} decimals={2} suffix=" Crore+" duration={1800} />
               </p>
@@ -91,17 +101,32 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
 
               <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
                 <div className="rounded-xl bg-white/10 p-3 backdrop-blur-xs border border-white/10">
-                  <p className="font-mono text-lg font-bold text-amber-300">
-                    <CountUpNumber end={94.2} decimals={1} suffix="%" duration={1600} />
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-mono text-lg font-bold text-amber-300">
+                      <CountUpNumber end={94.2} decimals={1} suffix="%" duration={1600} />
+                    </p>
+                    <span className="text-sm">📊</span>
+                  </div>
                   <p className="text-slate-300 text-[11px] mt-0.5">NSS CAPI Proficiency</p>
                 </div>
                 <div className="rounded-xl bg-white/10 p-3 backdrop-blur-xs border border-white/10">
-                  <p className="font-mono text-lg font-bold text-emerald-300">
-                    <CountUpNumber end={36} suffix=" States/UTs" duration={1400} />
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-mono text-lg font-bold text-emerald-300">
+                      <CountUpNumber end={36} suffix=" States/UTs" duration={1400} />
+                    </p>
+                    <span className="text-sm">🇮🇳</span>
+                  </div>
                   <p className="text-slate-300 text-[11px] mt-0.5">State DES Integration</p>
                 </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-slate-200">
+                  <span>📶</span> 100% Offline CAPI Ready
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-slate-200">
+                  <span>🏛️</span> Jan Parichay Verified
+                </span>
               </div>
             </div>
           </div>
