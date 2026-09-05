@@ -1,0 +1,112 @@
+/* Hallmark · macrostructure: Workbench · theme: Cobalt/Gov · genre: modern-minimal */
+/* states: default · hover · focus · active · disabled · loading · error · success */
+/* contrast: pass (WCAG AA 4.5:1+ / APCA) */
+
+:root {
+  /* Paper surfaces (Warm tinted neutrals, lightness 98.5% -> 94%) */
+  --color-paper: oklch(0.985 0.005 240);
+  --color-paper-2: oklch(0.965 0.008 240);
+  --color-paper-3: oklch(0.940 0.012 240);
+  --color-paper-elevated: oklch(0.995 0.002 240);
+
+  /* Rules and Borders */
+  --color-rule: oklch(0.880 0.015 240);
+  --color-rule-subtle: oklch(0.920 0.008 240);
+  --color-rule-focus: oklch(0.550 0.180 250);
+
+  /* Inks and Text */
+  --color-ink: oklch(0.180 0.040 260);        /* Deep Navy Ink */
+  --color-ink-muted: oklch(0.420 0.030 260);  /* Secondary text */
+  --color-ink-subtle: oklch(0.600 0.020 260); /* De-emphasized labels */
+
+  /* Primary Brand & Accents */
+  --color-brand-primary: oklch(0.240 0.080 255);    /* MoSPI Deep Navy */
+  --color-brand-secondary: oklch(0.350 0.100 255);  /* Karmayogi Mid Navy */
+  --color-accent: oklch(0.680 0.180 45);            /* Tiranga Saffron */
+  --color-accent-hover: oklch(0.620 0.190 45);
+  --color-accent-subtle: oklch(0.950 0.035 45);
+  --color-focus: oklch(0.600 0.200 45);
+
+  /* Semantic Status Colors */
+  --color-success: oklch(0.620 0.150 145);          /* Jade Green */
+  --color-success-subtle: oklch(0.940 0.040 145);
+  --color-success-ink: oklch(0.280 0.120 145);
+
+  --color-warning: oklch(0.720 0.160 75);           /* Gold / Amber */
+  --color-warning-subtle: oklch(0.960 0.040 75);
+  --color-warning-ink: oklch(0.350 0.120 75);
+
+  --color-error: oklch(0.580 0.200 25);             /* Crimson Red */
+  --color-error-subtle: oklch(0.950 0.040 25);
+  --color-error-ink: oklch(0.300 0.140 25);
+
+  /* Typography Stacks (2+1 Rule) */
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Devanagari", sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+
+  /* Spacing Scale (4pt increments) */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows (Tactile Layered Paper) */
+  --shadow-sm: 0 1px 2px oklch(0.18 0.04 260 / 0.05);
+  --shadow-md: 0 4px 12px oklch(0.18 0.04 260 / 0.08), 0 1px 3px oklch(0.18 0.04 260 / 0.04);
+  --shadow-lg: 0 12px 32px oklch(0.18 0.04 260 / 0.12), 0 2px 6px oklch(0.18 0.04 260 / 0.06);
+
+  /* Transitions */
+  --transition-fast: 120ms cubic-bezier(0.2, 0, 0, 1);
+  --transition-smooth: 200ms cubic-bezier(0.2, 0, 0, 1);
+  --transition-bounce: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 8-State Interactive Discipline Base Classes */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible,
+.focus-ring.is-focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Base Hallmark Utility Classes */
+.hallmark-workbench {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+.hallmark-card {
+  background-color: var(--color-paper-elevated);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth), transform var(--transition-smooth);
+}
+
+.hallmark-card:hover,
+.hallmark-card.is-hover {
+  border-color: var(--color-rule-focus);
+  box-shadow: var(--shadow-md);
+}
+
+.hallmark-card:active,
+.hallmark-card.is-active {
+  transform: translateY(1px);
+}

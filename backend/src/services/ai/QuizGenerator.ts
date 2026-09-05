@@ -61,7 +61,7 @@ export class QuizGeneratorService {
    */
   async generateFromPdf(
     filePath?: string,
-    numQuestions: number = 3,
+    numQuestions: number = 5,
     difficulty: string = 'intermediate',
     mode: string = 'CLOUD_RAG',
     courseId: string = 'Survey Design and Stratification'
@@ -156,32 +156,64 @@ Output MUST be a valid JSON object matching this exact schema:
   ]
 }`;
 
-      console.log(`[Cloud RAG] Routing document snippet (${extractedSnippet.length} chars) to Groq API...`);
-      
-      const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: "qwen/qwen3.8-27b",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Training Document Text:\n${extractedSnippet}` }
-          ],
-          response_format: { type: "json_object" },
-          temperature: 0.2
-        })
-      });
+      let generatedContent: any = null;
 
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error.message);
+      if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+        const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+        console.log(`[Cloud RAG] Routing document snippet (${extractedSnippet.length} chars) to Google Gemini API...`);
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    { text: `${systemPrompt}\n\nTraining Document Text:\n${extractedSnippet}` }
+                  ]
+                }
+              ],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                temperature: 0.2
+              }
+            })
+          }
+        );
+        const geminiData = await geminiRes.json();
+        if (geminiData.error) {
+          throw new Error(geminiData.error.message || 'Google Gemini API Error');
+        }
+        const textRaw = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        generatedContent = JSON.parse(textRaw || '{}');
+      } else {
+        console.log(`[Cloud RAG] Routing document snippet (${extractedSnippet.length} chars) to Groq API...`);
+        const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "qwen/qwen3.8-27b",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Training Document Text:\n${extractedSnippet}` }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.2
+          })
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error.message);
+        }
+        generatedContent = JSON.parse(data.choices[0].message.content);
       }
 
-      const generatedContent = JSON.parse(data.choices[0].message.content);
       const generatedQuestions: QuestionItem[] = generatedContent.questions || [];
 
       // Tag new questions with courseId

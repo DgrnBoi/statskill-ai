@@ -188,6 +188,64 @@ const createMockFetch = () => {
       } as Response);
     }
 
+    if (url.includes('/api/recommend/pathway')) {
+      return Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            success: true,
+            pathway: {
+              cadre: 'Junior Statistical Officer (JSO)',
+              division: 'Field Operations Division (FOD), NSSO',
+              overallReadiness: 78,
+              totalEstimatedHours: 16,
+              identifiedGaps: [],
+              tiers: [
+                {
+                  tierNumber: 1,
+                  tierName: 'Tier 1: Foundation',
+                  targetLevel: 'Level 1-2',
+                  description: 'Core statistical foundations',
+                  courses: [
+                    { id: 'c1', title: 'Foundations of Sampling', provider: 'MoSPI', duration: '4 Hours', link: 'https://igotkarmayogi.gov.in', tier: 1, tierName: 'Tier 1', rationale: 'Prerequisite' },
+                  ],
+                },
+                {
+                  tierNumber: 2,
+                  tierName: 'Tier 2: Operational Reinforcement',
+                  targetLevel: 'Level 3',
+                  description: 'Field operations',
+                  courses: [
+                    { id: 'c2', title: 'CAPI Enumeration', provider: 'NSSTA', duration: '3 Hours', link: 'https://igotkarmayogi.gov.in', tier: 2, tierName: 'Tier 2', rationale: 'Operational' },
+                  ],
+                },
+                {
+                  tierNumber: 3,
+                  tierName: 'Tier 3: Core Cadre Benchmark',
+                  targetLevel: 'Level 4',
+                  description: 'Cadre benchmark',
+                  courses: [
+                    { id: 'c3', title: 'National Accounts Compilation', provider: 'ISTM', duration: '5 Hours', link: 'https://igotkarmayogi.gov.in', tier: 3, tierName: 'Tier 3', rationale: 'Cadre compliance' },
+                  ],
+                },
+                {
+                  tierNumber: 4,
+                  tierName: 'Tier 4: Strategic Leadership',
+                  targetLevel: 'Level 5',
+                  description: 'Apex policy leadership',
+                  courses: [
+                    { id: 'c4', title: 'AI/ML in Official Statistics', provider: 'DIID', duration: '4 Hours', link: 'https://igotkarmayogi.gov.in', tier: 4, tierName: 'Tier 4', rationale: 'Strategic leadership' },
+                  ],
+                },
+              ],
+              milestones: [
+                { id: 'm1', title: 'Milestone 1', timeline: 'Weeks 1-3', description: 'Remediation', targetCompetency: 'Foundations' },
+              ],
+            },
+          }),
+      } as Response);
+    }
+
     return Promise.reject(new Error(`Unhandled fetch endpoint: ${url}`));
   });
 };

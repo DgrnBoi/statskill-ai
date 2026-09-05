@@ -1,0 +1,138 @@
+{
+  "ministry": "Ministry of Statistics and Programme Implementation (MoSPI)",
+  "headquarters": "Khurshid Lal Bhawan, Janpath, New Delhi",
+  "cadreControllingAuthority": "Data Informatics and Innovation Division (DIID) & Training Division (NSSTA)",
+  "totalCadreStrength": 3220,
+  "systemReadinessScore": 78.4,
+  "acbpComplianceScore": 84.2,
+  "lastAuditDate": "2026-08-30",
+  "divisions": [
+    {
+      "id": "fod",
+      "code": "FOD-NSSO",
+      "name": "Field Operations Division (FOD), NSSO",
+      "mandate": "Primary household and enterprise survey enumeration, Computer-Assisted Personal Interviewing (CAPI), and Agricultural Statistics crop estimation.",
+      "headquarters": "Sankhyiki Bhawan, CBD Belapur, Navi Mumbai / New Delhi",
+      "totalOfficers": 1840,
+      "readinessScore": 76.2,
+      "domainScores": {
+        "Statistical Competencies": 82.5,
+        "Technical Competencies": 71.0,
+        "Digital Governance": 68.4,
+        "Behavioural & Managerial": 83.0
+      },
+      "criticalBottlenecks": [
+        "First Stage Unit (FSU) Hamlet-Group Selection Rules in complex peri-urban strata",
+        "Offline CAPI Tablet Cloud Sync reconciliation during low-bandwidth field tours",
+        "DPDPA 2023 Digital Informant Consent compliance protocols"
+      ],
+      "priorityCourses": [
+        {
+          "courseId": "igot-surv-01",
+          "title": "CAPI Field Protocols and Digital Household Enumeration",
+          "provider": "iGOT Karmayogi",
+          "targetOfficers": 420,
+          "duration": "6 Hours"
+        },
+        {
+          "courseId": "nssta-stat-02",
+          "title": "NSSO Multistage Stratified Sampling & Listing Masterclass",
+          "provider": "NSSTA TPAC",
+          "targetOfficers": 310,
+          "duration": "12 Hours"
+        }
+      ]
+    },
+    {
+      "id": "dpd",
+      "code": "DPD-NSSO",
+      "name": "Data Processing Division (DPD), NSSO",
+      "mandate": "Microdata validation, editing rules, imputation pipelines, sampling weight estimation, and statistical tabulation.",
+      "headquarters": "Mahalanobis Bhavan, 164 Gopal Lal Tagore Road, Kolkata",
+      "totalOfficers": 620,
+      "readinessScore": 81.5,
+      "domainScores": {
+        "Statistical Competencies": 88.0,
+        "Technical Competencies": 84.5,
+        "Digital Governance": 74.0,
+        "Behavioural & Managerial": 79.5
+      },
+      "criticalBottlenecks": [
+        "Automated Multiplier Calculation for 2-stage circular systematic samples",
+        "Python and R pipelines for microdata anonymization before public release"
+      ],
+      "priorityCourses": [
+        {
+          "courseId": "igot-tech-04",
+          "title": "Automated Microdata Cleaning & Anonymization Pipelines",
+          "provider": "iGOT Karmayogi",
+          "targetOfficers": 180,
+          "duration": "8 Hours"
+        }
+      ]
+    },
+    {
+      "id": "nad",
+      "code": "NAD-CSO",
+      "name": "National Accounts Division (NAD), CSO",
+      "mandate": "Compilation of Gross Domestic Product (GDP), Gross Value Added (GVA), Consumer Price Index (CPI), and National Balance Sheets.",
+      "headquarters": "Sardar Patel Bhawan, Sansad Marg, New Delhi",
+      "totalOfficers": 310,
+      "readinessScore": 84.0,
+      "domainScores": {
+        "Statistical Competencies": 92.0,
+        "Technical Competencies": 80.5,
+        "Digital Governance": 79.0,
+        "Behavioural & Managerial": 84.5
+      },
+      "criticalBottlenecks": [
+        "Supply and Use Tables (SUT) rebasing under 2026 National Accounts framework",
+        "High-frequency econometric time-series deflators for service sector GVA"
+      ],
+      "priorityCourses": [
+        {
+          "courseId": "nssta-nad-01",
+          "title": "National Accounts Aggregation & SUT Balancing Framework",
+          "provider": "NSSTA TPAC",
+          "targetOfficers": 95,
+          "duration": "15 Hours"
+        }
+      ]
+    },
+    {
+      "id": "diid",
+      "code": "DIID",
+      "name": "Data Informatics & Innovation Division (DIID)",
+      "mandate": "National data governance, cloud statistical lakes, AI integration, cyber security, and DPDPA 2023 compliance.",
+      "headquarters": "Khurshid Lal Bhawan, New Delhi",
+      "totalOfficers": 450,
+      "readinessScore": 72.8,
+      "domainScores": {
+        "Statistical Competencies": 74.0,
+        "Technical Competencies": 78.5,
+        "Digital Governance": 65.0,
+        "Behavioural & Managerial": 73.5
+      },
+      "criticalBottlenecks": [
+        "Data Fiduciary Obligations under DPDPA 2023 for Official Statistical Repositories",
+        "xAPI / CMI-5 Telemetry infrastructure for inter-ministerial capacity audits"
+      ],
+      "priorityCourses": [
+        {
+          "courseId": "igot-gov-01",
+          "title": "Digital Personal Data Protection Act (DPDPA) 2023 for Civil Servants",
+          "provider": "iGOT Karmayogi",
+          "targetOfficers": 260,
+          "duration": "4 Hours"
+        }
+      ]
+    }
+  ],
+  "regionalCircles": [
+    { "circle": "Northern Circle (Delhi, UP, Punjab, Haryana)", "headcount": 890, "readiness": 79.5 },
+    { "circle": "Western Circle (Maharashtra, Gujarat, Goa)", "headcount": 760, "readiness": 81.2 },
+    { "circle": "Southern Circle (Karnataka, TN, Kerala, AP, TS)", "headcount": 820, "readiness": 82.0 },
+    { "circle": "Eastern Circle (WB, Bihar, Odisha, Jharkhand)", "headcount": 520, "readiness": 73.4 },
+    { "circle": "North-Eastern Circle (Assam, Meghalaya, etc.)", "headcount": 230, "readiness": 69.8 }
+  ]
+}

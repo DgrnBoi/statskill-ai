@@ -24,11 +24,11 @@ router.post('/generate-async', upload.single('document'), (req, res) => {
   const mode = req.query.mode as string || 'MODERN_DEVICE';
   const isOffline = mode === 'POTATO_DEVICE' || mode === 'OFFLINE';
 
-  if (!req.file && !isOffline) {
-    return res.status(400).json({ error: 'No PDF document uploaded and not in offline mode.' });
-  }
+  const { difficulty, numQuestions, courseId } = req.body || {};
 
-  const { difficulty, numQuestions, courseId } = req.body;
+  if (!req.file && !isOffline && !courseId) {
+    return res.status(400).json({ error: 'No PDF document uploaded or course selected.' });
+  }
   const filePath = req.file ? req.file.path : undefined;
   const originalName = req.file ? req.file.originalname : (courseId || 'Survey Design and Stratification');
   const jobId = Math.random().toString(36).substring(7); // Simple Job ID
@@ -47,7 +47,7 @@ router.post('/generate-async', upload.single('document'), (req, res) => {
       console.log(`[Job ${jobId}] Starting background generation in mode: ${mode}...`);
       const quiz = await quizService.generateFromPdf(
         filePath, 
-        parseInt(numQuestions) || 3, 
+        parseInt(numQuestions) || 5, 
         difficulty || 'intermediate',
         mode,
         originalName
@@ -58,6 +58,17 @@ router.post('/generate-async', upload.single('document'), (req, res) => {
     } catch (error: any) {
       console.error(`[Job ${jobId}] Generation Error:`, error);
       jobQueue.set(jobId, { status: 'error', error: error.message || 'Failed to generate quiz.' });
+    } finally {
+      // Clean up temporary uploaded file from disk
+      if (filePath) {
+        import('fs').then(fsModule => {
+          fsModule.unlink(filePath, () => {});
+        }).catch(() => {});
+      }
+      // Auto-expire job from memory after 10 minutes
+      setTimeout(() => {
+        jobQueue.delete(jobId);
+      }, 10 * 60 * 1000);
     }
   }, 0);
 });

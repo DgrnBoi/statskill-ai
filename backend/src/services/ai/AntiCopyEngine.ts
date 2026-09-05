@@ -5,6 +5,13 @@
  * to prevent screen copying, shoulder surfing, and answer-key collusion in field offices.
  */
 
+export interface DistractorDiagnostic {
+  misconception: string;
+  remedialSkill: string;
+  recommendedCourseId: string;
+  recommendedCourseTitle: string;
+}
+
 export interface QuestionItem {
   id?: string;
   courseId?: string;
@@ -15,6 +22,7 @@ export interface QuestionItem {
   correctAnswer: string;
   explanation: string;
   sourceCitation: string;
+  distractorAnalysis?: Record<string, DistractorDiagnostic>;
 }
 
 export interface ShuffledExamPaper {

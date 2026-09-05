@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { assessDeviceCapability, DeviceCapability } from '../utils/detectPerformance';
-import { Navbar } from '../components/layout/Navbar';
+import { Navbar, PortalTab } from '../components/layout/Navbar';
+import { AdminCommandCenter } from '../components/admin/AdminCommandCenter';
+import { PersonalisedPathway } from '../components/recommendation/PersonalisedPathway';
+import { AssessmentAnalysisReport, QuestionAnswerRecord } from '../components/assessment/AssessmentAnalysisReport';
+import { OfficerDashboard, RecentExamRecord, CapacityCohort } from '../components/dashboard/OfficerDashboard';
+import { AcbpDossierModal } from '../components/admin/AcbpDossierModal';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { XApiTelemetryDrawer, XApiStatementPayload } from '../components/ui/XApiTelemetryDrawer';
+import { useAntiSpam, useDebounce } from '../hooks/useAntiSpam';
+import { IndianFlag } from '../components/ui/IndianFlag';
+import { KarmayogiSahayakModal } from '../components/ui/KarmayogiSahayakModal';
+import { AccessibilityModal, AccessibilitySettings, DEFAULT_ACCESSIBILITY_SETTINGS } from '../components/ui/AccessibilityModal';
+import { SecretAdminGatewayModal } from '../components/admin/SecretAdminGatewayModal';
 import {
   FileText,
   UploadCloud,
@@ -24,6 +34,11 @@ import {
   ChevronRight,
   TrendingUp,
   Terminal,
+  ShieldAlert,
+  Bot,
+  Eye,
+  Lock,
+  ArrowLeft,
 } from 'lucide-react';
 
 export interface Competency {
@@ -44,6 +59,12 @@ export interface QuizQuestionItem {
   correctAnswer: string;
   explanation?: string;
   sourceCitation?: string;
+  distractorAnalysis?: Record<string, {
+    misconception: string;
+    remedialSkill: string;
+    recommendedCourseTitle: string;
+    recommendedCourseId: string;
+  }>;
 }
 
 export interface CourseItem {
@@ -65,6 +86,9 @@ export interface RecommendationItem {
   provider: string;
   duration: string;
   link: string;
+  level?: number;
+  domain?: string;
+  rationale?: string;
   keywords?: string[];
 }
 
@@ -126,9 +150,17 @@ function shuffleArray<T>(arr: T[]): T[] {
 
 interface DashboardProps {
   onOpenLogin?: () => void;
+  activeTab?: PortalTab;
+  onTabChange?: (tab: PortalTab) => void;
+  initialCourseTopic?: string | null;
 }
 
-export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
+export default function Dashboard({
+  onOpenLogin,
+  activeTab: propActiveTab,
+  onTabChange,
+  initialCourseTopic,
+}: DashboardProps = {}) {
   // Check if an officer is authenticated via Jan Parichay SSO
   const savedOfficerInfo = useMemo(() => {
     try {
@@ -139,6 +171,79 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
     } catch {}
     return null;
   }, []);
+
+  const [internalTab, setInternalTab] = useState<PortalTab>('dashboard');
+  const activeTab = propActiveTab || internalTab;
+
+  // Modals & Navigation History State
+  const [isSahayakOpen, setIsSahayakOpen] = useState(false);
+  const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
+  const [isSecretAdminOpen, setIsSecretAdminOpen] = useState(false);
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
+  const [navigationHistory, setNavigationHistory] = useState<PortalTab[]>([]);
+
+  const [accessibilitySettings, setAccessibilitySettings] = useState<AccessibilitySettings>(() => {
+    try {
+      const saved = window.localStorage.getItem('statskill_accessibility');
+      if (saved) return { ...DEFAULT_ACCESSIBILITY_SETTINGS, ...JSON.parse(saved) };
+    } catch {}
+    return DEFAULT_ACCESSIBILITY_SETTINGS;
+  });
+
+  const updateAccessibilitySettings = useCallback((newPartial: Partial<AccessibilitySettings>) => {
+    setAccessibilitySettings((prev) => {
+      const updated = { ...prev, ...newPartial };
+      try {
+        window.localStorage.setItem('statskill_accessibility', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, []);
+
+  const resetAccessibilitySettings = useCallback(() => {
+    setAccessibilitySettings(DEFAULT_ACCESSIBILITY_SETTINGS);
+    try {
+      window.localStorage.setItem('statskill_accessibility', JSON.stringify(DEFAULT_ACCESSIBILITY_SETTINGS));
+    } catch {}
+  }, []);
+
+  const handleTabChange = useCallback((tab: PortalTab) => {
+    if (tab !== activeTab) {
+      setNavigationHistory((prev) => [...prev, activeTab]);
+    }
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+    setInternalTab(tab);
+  }, [activeTab, onTabChange]);
+
+  const handleGoBack = useCallback(() => {
+    setNavigationHistory((prev) => {
+      if (prev.length === 0) return prev;
+      const nextHistory = [...prev];
+      const previousTab = nextHistory.pop()!;
+      if (onTabChange) {
+        onTabChange(previousTab);
+      }
+      setInternalTab(previousTab);
+      return nextHistory;
+    });
+  }, [onTabChange]);
+
+  const previousTabTitle = useMemo(() => {
+    if (navigationHistory.length === 0) return '';
+    const lastTab = navigationHistory[navigationHistory.length - 1];
+    const map: Record<PortalTab, string> = {
+      home: 'Public Gateway',
+      overview: 'Officer Dashboard',
+      dashboard: 'Assessment Engine',
+      discover: 'Course Discovery',
+      competency: 'FRAC Competencies',
+      analytics: 'MoSPI Analytics',
+      admin: 'HQ Command Center',
+    };
+    return map[lastTab] || 'Previous Menu';
+  }, [navigationHistory]);
 
   const [designation, setDesignation] = useState(() => {
     try {
@@ -160,8 +265,15 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
   const [deviceMode, setDeviceMode] = useState<DeviceCapability | 'LOADING'>('POTATO_DEVICE');
   const [selectedCourseContext, setSelectedCourseContext] = useState<string | null>(null);
 
+  // Assessment Timer & Anti-Cheat State (2 min 30 sec = 150s)
+  const [timeLeft, setTimeLeft] = useState<number>(150);
+  const [isTimedOut, setIsTimedOut] = useState<boolean>(false);
+  const [userExamAnswers, setUserExamAnswers] = useState<Record<number, QuestionAnswerRecord>>({});
+  const [isExamCompleted, setIsExamCompleted] = useState<boolean>(false);
+  const [examTimeTaken, setExamTimeTaken] = useState<number>(0);
+  const examTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
   // Navigation and Discovery States
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'discover' | 'competency' | 'analytics'>('dashboard');
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     try {
       return !!window.localStorage.getItem('statskill_demo_login');
@@ -174,7 +286,38 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
   const [selectedDomain, setSelectedDomain] = useState('All');
   const [assessmentsTaken, setAssessmentsTaken] = useState(0);
   const [isTelemetryDrawerOpen, setIsTelemetryDrawerOpen] = useState(false);
+  const [isAcbpModalOpen, setIsAcbpModalOpen] = useState(false);
   const [latestTelemetryStatement, setLatestTelemetryStatement] = useState<XApiStatementPayload | null>(null);
+
+  const [assessmentHistory, setAssessmentHistory] = useState<RecentExamRecord[]>(() => {
+    try {
+      const saved = window.localStorage.getItem('statskill_assessment_history');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {}
+    return [];
+  });
+  const [capacityCohorts, setCapacityCohorts] = useState<CapacityCohort[]>(() => {
+    try {
+      const saved = window.localStorage.getItem('statskill_capacity_cohorts');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {}
+    return [];
+  });
+
+  // Anti-Spam Click Shield and Search Debouncing
+  const {
+    isLocked: isAntiSpamLocked,
+    lockoutRemaining: antiSpamRemaining,
+    spamMessage: antiSpamMessage,
+    guardAction: antiSpamGuardAction,
+    triggerLockout: triggerAntiSpamLockout,
+  } = useAntiSpam({ threshold: 5, windowMs: 2000, cooldownSeconds: 5 });
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Resilient error states
   const [assessmentError, setAssessmentError] = useState<string | null>(null);
@@ -198,15 +341,108 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
     setProficiency(initialProf);
   }, [skills]);
 
-  // Clean up any running polling interval on unmount
+  // Clean up any running polling and exam timer intervals on unmount
   useEffect(() => {
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
+      if (examTimerRef.current) {
+        clearInterval(examTimerRef.current);
+        examTimerRef.current = null;
+      }
     };
   }, []);
+
+  // Global Keyboard Shortcuts (Alt+1..5, Alt+A, Alt+H, Ctrl+Shift+A, Esc)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for secret admin combo (Ctrl+Shift+A or Cmd+Shift+A)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        setIsSecretAdminOpen((prev) => !prev);
+        return;
+      }
+
+      // Check for Alt shortcuts
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (e.key === '1') {
+          e.preventDefault();
+          handleTabChange('overview');
+        } else if (e.key === '2') {
+          e.preventDefault();
+          handleTabChange('dashboard');
+        } else if (e.key === '3') {
+          e.preventDefault();
+          handleTabChange('discover');
+        } else if (e.key === '4') {
+          e.preventDefault();
+          handleTabChange('competency');
+        } else if (e.key === '5') {
+          e.preventDefault();
+          handleTabChange('analytics');
+        } else if (e.key === 'a' || e.key === 'A') {
+          e.preventDefault();
+          setIsAccessibilityOpen((prev) => !prev);
+        } else if (e.key === 'h' || e.key === 'H') {
+          e.preventDefault();
+          setIsSahayakOpen((prev) => !prev);
+        }
+      }
+
+      if (e.key === 'Escape') {
+        setIsSahayakOpen(false);
+        setIsAccessibilityOpen(false);
+        setIsSecretAdminOpen(false);
+        setIsTelemetryDrawerOpen(false);
+        setIsAcbpModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleTabChange]);
+
+  // Manage assessment countdown timer (150s = 2m 30s)
+  useEffect(() => {
+    if (generatedQuiz.length > 0) {
+      setTimeLeft(150);
+      setIsTimedOut(false);
+
+      if (examTimerRef.current) {
+        clearInterval(examTimerRef.current);
+      }
+
+      examTimerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (examTimerRef.current) {
+              clearInterval(examTimerRef.current);
+              examTimerRef.current = null;
+            }
+            setIsTimedOut(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (examTimerRef.current) {
+        clearInterval(examTimerRef.current);
+        examTimerRef.current = null;
+      }
+      setTimeLeft(150);
+      setIsTimedOut(false);
+    }
+
+    return () => {
+      if (examTimerRef.current) {
+        clearInterval(examTimerRef.current);
+        examTimerRef.current = null;
+      }
+    };
+  }, [generatedQuiz.length, paperSet]);
 
   // Hardware capability auto-detection
   useEffect(() => {
@@ -219,7 +455,7 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
     const domainQuery = selectedDomain !== 'All' ? `&domain=${encodeURIComponent(selectedDomain)}` : '';
     setCourseError(null);
 
-    fetch(`http://localhost:5000/api/courses/search?q=${encodeURIComponent(searchQuery)}${domainQuery}`, {
+    fetch(`http://localhost:5000/api/courses/search?q=${encodeURIComponent(debouncedSearchQuery)}${domainQuery}`, {
       signal: controller.signal,
     })
       .then((res) => {
@@ -241,25 +477,127 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
       });
 
     return () => controller.abort();
-  }, [searchQuery, selectedDomain]);
+  }, [debouncedSearchQuery, selectedDomain]);
 
   const selectCourseForQuiz = useCallback((courseTitle: string) => {
     setSelectedCourseContext(courseTitle);
     setGeneratedQuiz([]);
-    setActiveTab('dashboard');
+    handleTabChange('dashboard');
     setTimeout(() => {
       const el = document.getElementById('quiz-section');
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }, 100);
-  }, []);
+  }, [handleTabChange]);
 
   const handleProficiencyChange = useCallback((skillName: string, level: number) => {
     setProficiency((prev) => ({ ...prev, [skillName]: level }));
     setAssessmentsTaken((prev) => prev + 1);
   }, []);
 
+  const handleQuestionAnswered = useCallback(
+    (qIndex: number, record: QuestionAnswerRecord) => {
+      setUserExamAnswers((prev) => {
+        const updated = { ...prev, [qIndex]: record };
+        const answeredCount = Object.keys(updated).length;
+
+        if (generatedQuiz.length > 0 && answeredCount >= generatedQuiz.length) {
+          // Stop countdown timer immediately upon answering all questions
+          if (examTimerRef.current) {
+            clearInterval(examTimerRef.current);
+            examTimerRef.current = null;
+          }
+          const timeSpent = Math.max(1, 150 - timeLeft);
+          setExamTimeTaken(timeSpent);
+          setIsExamCompleted(true);
+
+          // Dispatch diagnostic assessment results to recommendation engine
+          const answersList = Object.values(updated);
+          fetch('http://localhost:5000/api/recommend/analyze-assessment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              officerId: savedOfficerInfo?.officer?.parichayId || 'JSO_1042',
+              cadre: designation,
+              answers: answersList,
+              proficiencies: proficiency,
+            }),
+          })
+            .then((res) => {
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              return res.json();
+            })
+            .then((data) => {
+              if (data.success && data.analysis) {
+                const analysis = data.analysis;
+                if (analysis.updatedProficiency) {
+                  setProficiency((currentProf) => ({
+                    ...currentProf,
+                    ...analysis.updatedProficiency,
+                  }));
+                }
+
+                const newExamRecord: RecentExamRecord = {
+                  id: `exam-${Date.now()}`,
+                  title:
+                    selectedCourseContext ||
+                    (generatedQuiz[0]?.topic ? `${generatedQuiz[0].topic} Assessment` : 'MoSPI FRAC Diagnostic Assessment'),
+                  category:
+                    skills.find((s) => s.skillName === generatedQuiz[0]?.topic)?.category ||
+                    'Statistical Competencies',
+                  date: new Date().toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  }),
+                  durationMinutes: Math.max(1, Math.ceil(timeSpent / 60)),
+                  score: analysis.scorePercentage,
+                  totalScore: 100,
+                  status: analysis.status,
+                  misconceptions: (analysis.misconceptionsFound || []).map((m: any) => ({
+                    question: m.question,
+                    chosenAnswer: m.chosenAnswer,
+                    correctAnswer: m.correctAnswer,
+                    misconception: m.misconception,
+                    remedialCourse: m.remedialCourse,
+                    remedialCourseId: m.remedialCourseId,
+                  })),
+                };
+
+                setAssessmentHistory((prevHistory) => {
+                  const updatedHistory = [newExamRecord, ...prevHistory];
+                  try {
+                    window.localStorage.setItem(
+                      'statskill_assessment_history',
+                      JSON.stringify(updatedHistory)
+                    );
+                  } catch {}
+                  return updatedHistory;
+                });
+
+                if (Array.isArray(analysis.recommendedCohorts) && analysis.recommendedCohorts.length > 0) {
+                  setCapacityCohorts(analysis.recommendedCohorts);
+                  try {
+                    window.localStorage.setItem(
+                      'statskill_capacity_cohorts',
+                      JSON.stringify(analysis.recommendedCohorts)
+                    );
+                  } catch {}
+                }
+              }
+            })
+            .catch((err) => {
+              console.warn('Assessment analysis background computation notice:', err);
+            });
+        }
+
+        return updated;
+      });
+    },
+    [generatedQuiz, timeLeft, savedOfficerInfo, designation, proficiency, selectedCourseContext, skills]
+  );
+
   const handleReshuffle = useCallback(() => {
-    if (reshufflesLeft <= 0 || generatedQuiz.length === 0) return;
+    if (reshufflesLeft <= 0 || generatedQuiz.length === 0 || isExamCompleted) return;
 
     const setCycle: Record<string, string> = {
       'Set A': 'Set B',
@@ -281,7 +619,10 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
     setGeneratedQuiz(reorderedQuestions);
     setPaperSet(nextSet);
     setReshufflesLeft((prev) => prev - 1);
-  }, [reshufflesLeft, generatedQuiz, paperSet]);
+    setUserExamAnswers({});
+    setIsExamCompleted(false);
+    setExamTimeTaken(0);
+  }, [reshufflesLeft, generatedQuiz, paperSet, isExamCompleted]);
 
   const handleGenerateQuiz = async (file?: File) => {
     // Clear any active poll before starting new generation
@@ -293,6 +634,9 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
     setIsUploading(true);
     setAssessmentError(null);
     setGeneratedQuiz([]);
+    setUserExamAnswers({});
+    setIsExamCompleted(false);
+    setExamTimeTaken(0);
 
     const formData = new FormData();
     if (file) {
@@ -301,7 +645,7 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
     if (selectedCourseContext) {
       formData.append('courseId', selectedCourseContext);
     }
-    formData.append('numQuestions', '3');
+    formData.append('numQuestions', '5');
     formData.append('difficulty', 'intermediate');
 
     try {
@@ -312,6 +656,9 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
+        if (response.status === 429) {
+          triggerAntiSpamLockout(errData.retryAfter || 10);
+        }
         throw new Error(errData.error || `HTTP ${response.status}: Failed to start assessment job`);
       }
 
@@ -385,6 +732,13 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
     }
   };
 
+  useEffect(() => {
+    if (initialCourseTopic) {
+      setSelectedCourseContext(initialCourseTopic);
+      handleGenerateQuiz();
+    }
+  }, [initialCourseTopic]);
+
   const analyticsData = useMemo(() => {
     const numSkills = skills.length || 1;
     const avgLevel = (Object.values(proficiency).reduce((a, b) => a + b, 0) / numSkills).toFixed(1);
@@ -404,11 +758,29 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
   }, [skills, proficiency]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-primary-900 selection:text-white">
+    <div
+      className={`min-h-screen bg-[#F5F6F8] font-body text-slate-900 antialiased selection:bg-[#0B2E63] selection:text-white transition-colors duration-200 ${
+        accessibilitySettings.highContrast ? 'contrast-125 saturate-150' : ''
+      } ${
+        accessibilitySettings.textScale === 'large'
+          ? 'text-[105%]'
+          : accessibilitySettings.textScale === 'xlarge'
+          ? 'text-[115%]'
+          : ''
+      } ${
+        accessibilitySettings.reducedMotion
+          ? '[&_*]:transition-none [&_*]:animate-none'
+          : ''
+      } ${
+        accessibilitySettings.dyslexicSpacing
+          ? 'tracking-wide leading-relaxed'
+          : ''
+      }`}
+    >
       {/* Official Government Top Navigation Bar */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         isLoggedIn={isLoggedIn}
         setIsLoggedIn={(logged) => {
           if (!logged) {
@@ -421,9 +793,63 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
         onOpenLogin={onOpenLogin}
         officerName={savedOfficerInfo?.officer?.name}
         officerCadreId={savedOfficerInfo?.officer?.parichayId}
+        isAdminUnlocked={isAdminUnlocked}
+        onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
+        onOpenAccessibility={() => setIsAccessibilityOpen(true)}
+        onOpenSahayak={() => setIsSahayakOpen(true)}
+        canGoBack={navigationHistory.length > 0}
+        previousTabTitle={previousTabTitle}
+        onGoBack={handleGoBack}
       />
 
       <main className="max-w-7xl mx-auto py-8 px-4 md:px-10 space-y-8">
+        {/* Anti-Spam Click Shield Active Banner */}
+        {isAntiSpamLocked && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="p-4 bg-amber-50 border-2 border-amber-500/80 rounded-xl text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in shadow-xs"
+          >
+            <div className="flex items-start sm:items-center gap-3">
+              <span className="p-2 bg-amber-500 text-slate-950 font-black rounded-lg text-xs flex items-center gap-1">
+                <ShieldAlert className="w-4 h-4 text-slate-950" />
+                SHIELD ACTIVE
+              </span>
+              <div>
+                <p className="font-bold text-sm text-amber-950">Spam Click Protection Active</p>
+                <p className="text-xs text-amber-900 leading-relaxed">
+                  Rapid clicks were detected. Module actions are temporarily locked for {antiSpamRemaining} seconds to protect server stability.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 font-mono text-sm font-black bg-white px-3.5 py-1.5 rounded-lg border border-amber-300 text-amber-950 shadow-xs self-end sm:self-center">
+              <Clock className="w-4 h-4 text-amber-600 animate-spin" />
+              <span>00:{antiSpamRemaining.toString().padStart(2, '0')}</span>
+            </div>
+          </div>
+        )}
+        {/* ========================================================================= */}
+        {/* TAB 0: OFFICER OVERVIEW (LEARNER DASHBOARD & SPIDER RADAR)                */}
+        {/* ========================================================================= */}
+        {activeTab === 'overview' && (
+          <OfficerDashboard
+            currentCadre={designation}
+            onCadreChange={setDesignation}
+            cadresList={Object.keys(MOSPI_CADRES_DATA)}
+            divisionName={MOSPI_CADRES_DATA[designation]?.division || 'Field Operations Division (FOD), NSSO'}
+            divisionDescription={MOSPI_CADRES_DATA[designation]?.description || ''}
+            skills={skills}
+            proficiency={proficiency}
+            onNavigateTab={handleTabChange}
+            onOpenTelemetry={() => setIsTelemetryDrawerOpen(true)}
+            onOpenAcbpModal={() => setIsAcbpModalOpen(true)}
+            officerName={savedOfficerInfo?.officer?.name}
+            officerCadreId={savedOfficerInfo?.officer?.parichayId}
+            assessmentHistory={assessmentHistory}
+            capacityCohorts={capacityCohorts}
+          />
+        )}
+
         {/* ========================================================================= */}
         {/* TAB 1: ASSESSMENT ENGINE (SOVEREIGN EDGE-AI & QUESTION GENERATION)       */}
         {/* ========================================================================= */}
@@ -433,7 +859,7 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
               <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="p-1.5 bg-primary-100 text-primary-900 rounded-md">
+                    <span className="p-1.5 bg-[#0B2E63]/10 text-[#0B2E63] rounded-md">
                       <Cpu className="w-4 h-4" />
                     </span>
                     <Badge variant="default">Official Examination Module</Badge>
@@ -443,7 +869,7 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                   </div>
                   <CardTitle>Sovereign Edge-AI Assessment Generator</CardTitle>
                   <CardDescription>
-                    Generate active-recall examination papers mapped to MoSPI FRAC competency benchmarks.
+                    Generate structured active-recall assessments mapped to MoSPI FRAC competency benchmarks.
                   </CardDescription>
                 </div>
 
@@ -452,11 +878,11 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                   <button
                     type="button"
                     onClick={() => setIsTelemetryDrawerOpen(true)}
-                    className="px-3 py-1.5 text-xs font-bold rounded-md transition-all shadow-xs border flex items-center gap-1.5 bg-slate-900 text-emerald-300 border-emerald-500/40 hover:bg-slate-800 cursor-pointer active:scale-95"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all shadow-xs border flex items-center gap-1.5 bg-slate-900 text-emerald-300 border-emerald-500/40 hover:bg-slate-800 cursor-pointer active:translate-y-[1px]"
                     title="Inspect live ADL xAPI learning record sent to iGOT LRS"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>iGOT LRS Telemetry</span>
+                    <span className="font-mono text-[11px]">iGOT LRS Telemetry</span>
                     <Terminal className="w-3.5 h-3.5 text-amber-400" />
                   </button>
                   <button
@@ -466,7 +892,7 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                         prev === 'MODERN_DEVICE' ? 'POTATO_DEVICE' : 'MODERN_DEVICE'
                       )
                     }
-                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all shadow-xs border flex items-center gap-2 cursor-pointer ${
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all shadow-xs border flex items-center gap-2 cursor-pointer active:translate-y-[1px] ${
                       deviceMode === 'MODERN_DEVICE'
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
                         : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
@@ -480,28 +906,28 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                 </div>
               </CardHeader>
 
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 {/* Upload & Direct Practice Container */}
                 <div
                   className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                     isUploading
-                      ? 'border-primary-500 bg-primary-50/40'
-                      : 'border-slate-300 hover:border-primary-400 bg-slate-50/50 hover:bg-slate-50'
+                      ? 'border-[#0B2E63] bg-blue-50/40'
+                      : 'border-slate-300 hover:border-[#0B2E63]/60 bg-slate-50/50 hover:bg-slate-50'
                   }`}
                 >
-                  <div className="w-14 h-14 mx-auto rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-primary-900">
+                  <div className="w-14 h-14 mx-auto rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-[#0B2E63]">
                     {isUploading ? (
-                      <RotateCw className="w-6 h-6 animate-spin text-primary-900" />
+                      <RotateCw className="w-6 h-6 animate-spin text-[#0B2E63]" />
                     ) : (
-                      <UploadCloud className="w-6 h-6 text-primary-900" />
+                      <UploadCloud className="w-6 h-6 text-[#0B2E63]" />
                     )}
                   </div>
-                  <h3 className="text-base font-bold text-slate-900 mb-1">
+                  <h3 className="text-base font-bold text-slate-900 mb-1 font-display">
                     {isUploading
                       ? 'Synthesizing Examination Paper...'
-                      : 'Upload MoSPI Manual / Training PDF'}
+                      : 'Upload MoSPI Manual or Training PDF'}
                   </h3>
-                  <p className="text-xs text-slate-500 max-w-lg mx-auto mb-6 leading-relaxed">
+                  <p className="text-xs text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed font-body">
                     Upload official training circulars or test immediately against the verified MoSPI
                     examination bank. Anti-collusion algorithms ensure unique sequence and option sets.
                   </p>
@@ -513,25 +939,27 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                       className="sr-only"
                       id="pdf-upload"
                       aria-label="Upload official training circular or manual in PDF format"
-                      disabled={isUploading}
+                      disabled={isUploading || isAntiSpamLocked}
                       onChange={(e) => {
                         if (!e.target.files || e.target.files.length === 0) return;
-                        handleGenerateQuiz(e.target.files[0]);
+                        antiSpamGuardAction(() => handleGenerateQuiz(e.target.files![0]))();
                       }}
                     />
                     <label
                       htmlFor="pdf-upload"
-                      tabIndex={isUploading ? -1 : 0}
+                      tabIndex={isUploading || isAntiSpamLocked ? -1 : 0}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          document.getElementById('pdf-upload')?.click();
+                          if (!isAntiSpamLocked) {
+                            document.getElementById('pdf-upload')?.click();
+                          }
                         }
                       }}
-                      className={`px-5 py-2.5 rounded-lg text-xs font-bold transition shadow-xs inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-2 ${
-                        isUploading
+                      className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-xs inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63] focus-visible:ring-offset-2 active:translate-y-[1px] ${
+                        isUploading || isAntiSpamLocked
                           ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                          : 'bg-primary-900 text-white hover:bg-primary-800 cursor-pointer'
+                          : 'bg-[#0B2E63] text-white hover:bg-[#123E82] cursor-pointer'
                       }`}
                     >
                       <FileText className="w-4 h-4" aria-hidden="true" />
@@ -542,9 +970,9 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={isUploading}
-                      onClick={() => handleGenerateQuiz()}
-                      className="text-xs font-bold border-slate-300 text-slate-800 hover:bg-white"
+                      disabled={isUploading || isAntiSpamLocked}
+                      onClick={antiSpamGuardAction(() => handleGenerateQuiz())}
+                      className="text-xs font-semibold border-slate-300 text-slate-800 hover:bg-white"
                     >
                       <BookOpen className="w-4 h-4 text-amber-700" aria-hidden="true" />
                       Practice from Verified Question Bank
@@ -572,21 +1000,58 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
 
                 {/* Generated Assessment Paper Output */}
                 {generatedQuiz.length > 0 && (
-                  <div className="mt-10 animate-fade-in border-t border-slate-200 pt-8">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <div className="mt-10 animate-fade-in border-t border-slate-200 pt-8 space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                        <div className="w-8 h-8 rounded-lg bg-[#155C33] text-white flex items-center justify-center font-bold text-sm shadow-xs">
                           <CheckCircle2 className="w-5 h-5" aria-hidden="true" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-slate-900">Official Assessment Paper</h3>
-                          <p className="text-xs text-slate-600">
-                            Candidate Evaluation • MoSPI FRAC Standards
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-slate-900 font-display">Official Assessment Paper</h3>
+                            <Badge variant="neutral">5 MCQs</Badge>
+                          </div>
+                          <p className="text-xs text-slate-600 font-body">
+                            Candidate Evaluation • MoSPI FRAC Standards • 2m 30s Time Limit
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* Live Examination Countdown Timer Badge */}
+                        {isExamCompleted ? (
+                          <div
+                            className="px-3.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-2 shadow-xs bg-emerald-50 border-emerald-300 text-emerald-950 font-black animate-fade-in"
+                            aria-label={`Assessment completed in ${Math.floor(examTimeTaken / 60)} minutes and ${examTimeTaken % 60} seconds`}
+                          >
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            <span>
+                              Completed in {Math.floor(examTimeTaken / 60)}m {examTimeTaken % 60}s
+                            </span>
+                          </div>
+                        ) : (
+                          <div
+                            className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-2 shadow-xs transition-colors ${
+                              timeLeft <= 30
+                                ? 'bg-red-100 border-red-300 text-red-950 animate-pulse font-black'
+                                : timeLeft <= 60
+                                ? 'bg-amber-100 border-amber-300 text-amber-950 font-bold'
+                                : 'bg-slate-100 border-slate-300 text-slate-800'
+                            }`}
+                            aria-label={`Time remaining: ${Math.floor(timeLeft / 60)} minutes and ${timeLeft % 60} seconds`}
+                          >
+                            <Clock className={`w-4 h-4 ${timeLeft <= 30 ? 'text-red-600' : timeLeft <= 60 ? 'text-amber-600' : 'text-slate-600'}`} />
+                            <span className="font-mono text-sm">
+                              {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
+                            </span>
+                            {timeLeft <= 30 && (
+                              <span className="text-[10px] uppercase font-bold text-red-700 bg-red-200 px-1 rounded">
+                                Final Seconds
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         {/* Plain Words Badge */}
                         <span className="px-3 py-1.5 bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold rounded-md shadow-xs uppercase tracking-wider">
                           Paper: {paperSet}
@@ -595,16 +1060,20 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                         {/* Reshuffle Button: max 3 attempts */}
                         <button
                           type="button"
-                          onClick={handleReshuffle}
-                          disabled={reshufflesLeft <= 0}
+                          onClick={antiSpamGuardAction(handleReshuffle)}
+                          disabled={reshufflesLeft <= 0 || isTimedOut || isExamCompleted || isAntiSpamLocked}
                           aria-label={`Reshuffle question and option sequence (${reshufflesLeft} attempts remaining)`}
                           className={`px-3 py-1.5 text-xs font-semibold rounded-md border transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 ${
-                            reshufflesLeft > 0
+                            reshufflesLeft > 0 && !isTimedOut && !isExamCompleted && !isAntiSpamLocked
                               ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 hover:border-slate-400 cursor-pointer shadow-xs active:scale-95'
                               : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                           }`}
                           title={
-                            reshufflesLeft > 0
+                            isAntiSpamLocked
+                              ? `Locked for ${antiSpamRemaining}s (Anti-Spam Shield)`
+                              : isExamCompleted
+                              ? 'Assessment finalized'
+                              : reshufflesLeft > 0
                               ? 'Shuffle sequence & options'
                               : 'Maximum 3 reshuffles allowed per session'
                           }
@@ -615,6 +1084,57 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                       </div>
                     </div>
 
+                    {/* Countdown Progress Line */}
+                    <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className={`h-1.5 transition-all duration-1000 ${
+                          isExamCompleted
+                            ? 'bg-emerald-600'
+                            : timeLeft <= 30
+                            ? 'bg-red-600'
+                            : timeLeft <= 60
+                            ? 'bg-amber-500'
+                            : 'bg-primary-900'
+                        }`}
+                        style={{ width: `${isExamCompleted ? 100 : (timeLeft / 150) * 100}%` }}
+                      />
+                    </div>
+
+                    {/* Timed Out Notice */}
+                    {isTimedOut && !isExamCompleted && (
+                      <div role="alert" className="p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-900 flex items-start gap-3 animate-fade-in">
+                        <AlertCircle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold text-sm">Assessment Time Limit Expired (2m 30s)</p>
+                          <p className="text-red-700 mt-0.5">
+                            The allocated 2 minutes and 30 seconds for this assessment session have elapsed. Answered questions have been registered in your competency profile.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Post-Assessment Performance Analysis & Scorecard */}
+                    {isExamCompleted && (
+                      <AssessmentAnalysisReport
+                        answers={Object.values(userExamAnswers)}
+                        totalQuestions={generatedQuiz.length}
+                        timeTakenSeconds={examTimeTaken}
+                        paperSet={paperSet}
+                        cadre={designation}
+                        division={MOSPI_CADRES_DATA[designation]?.division || 'Field Operations Division (FOD), NSSO'}
+                        onNavigateToPathway={() => {
+                          handleTabChange('competency');
+                          setTimeout(() => {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }, 100);
+                        }}
+                        onRetakeQuiz={() => {
+                          handleGenerateQuiz();
+                        }}
+                        onOpenTelemetry={() => setIsTelemetryDrawerOpen(true)}
+                      />
+                    )}
+
                     <div className="space-y-6">
                       {generatedQuiz.map((q, index) => (
                         <QuizQuestion
@@ -624,6 +1144,8 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                           handleProficiencyChange={handleProficiencyChange}
                           skillToUpdate={skills.length > 0 ? skills[0].skillName : 'Survey Design & Sampling'}
                           onTelemetryStatement={setLatestTelemetryStatement}
+                          onQuestionAnswered={(record) => handleQuestionAnswered(index, record)}
+                          isTimedOut={isTimedOut}
                         />
                       ))}
                     </div>
@@ -738,7 +1260,8 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
                           type="button"
                           variant="primary"
                           size="sm"
-                          onClick={() => selectCourseForQuiz(course.title)}
+                          disabled={isAntiSpamLocked}
+                          onClick={antiSpamGuardAction(() => selectCourseForQuiz(course.title))}
                         >
                           Generate Quiz
                           <ChevronRight className="w-3.5 h-3.5" />
@@ -868,65 +1391,12 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
               </CardContent>
             </Card>
 
-            {/* Personalised Learning Pathway */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Personalised Learning Pathway</CardTitle>
-                <CardDescription>
-                  Targeted iGOT Karmayogi course interventions dynamically recommended based on your competency gaps.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {skills.map((s) => {
-                    const currentLevel = proficiency[s.skillName] || 1;
-                    if (currentLevel < s.targetLevel) {
-                      return (
-                        <div
-                          key={s.id}
-                          className="border border-amber-200 bg-amber-50/40 rounded-xl p-5 flex flex-col justify-between shadow-xs"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between gap-2 mb-2">
-                              <Badge variant="destructive">Gap Identified</Badge>
-                              <span className="text-xs font-semibold text-slate-600">
-                                Level {currentLevel} &rarr; Target {s.targetLevel}
-                              </span>
-                            </div>
-                            <h4 className="font-bold text-sm text-slate-900 leading-snug">
-                              Advanced Competency: {s.skillName}
-                            </h4>
-                            <p className="text-xs text-slate-600 mt-1">
-                              NSSTA / iGOT Karmayogi Official Curriculum
-                            </p>
-                          </div>
-                          <a
-                            href="https://igotkarmayogi.gov.in/"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-4 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-4 py-2 rounded-lg text-center transition-all shadow-xs flex items-center justify-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
-                          >
-                            Enroll in Karmayogi Course
-                            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-                          </a>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
-
-                  {skills.every((s) => (proficiency[s.skillName] || 1) >= s.targetLevel) && (
-                    <div className="col-span-full p-8 text-center border border-emerald-200 bg-emerald-50/60 rounded-xl">
-                      <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
-                      <h4 className="font-bold text-base text-emerald-900">All Benchmarks Satisfied</h4>
-                      <p className="text-xs text-emerald-700 mt-1">
-                        All competencies meet or exceed the departmental cadre target level.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Pillar 2: 4-Tier Zone of Proximal Development (ZPD) Personalised Learning Pathway */}
+            <PersonalisedPathway
+              designation={designation}
+              proficiencies={proficiency}
+              onSelectCourseForQuiz={selectCourseForQuiz}
+            />
           </div>
         )}
 
@@ -1034,13 +1504,120 @@ export default function Dashboard({ onOpenLogin }: DashboardProps = {}) {
             </CardContent>
           </Card>
         )}
+
+        {/* ========================================================================= */}
+        {/* TAB 5: MOSPI CADRE COMMAND CENTER & ACBP DOSSIER (PILLAR 5)               */}
+        {/* ========================================================================= */}
+        {activeTab === 'admin' && (
+          <AdminCommandCenter onBackToLearner={() => handleTabChange('dashboard')} />
+        )}
       </main>
+
+      {/* Floating AI Sahayak Quick Launch Button */}
+      <aside aria-label="Karmayogi Sahayak Quick Launch" className="fixed bottom-6 right-6 z-40">
+        <button
+          type="button"
+          onClick={() => setIsSahayakOpen(true)}
+          aria-label="Open Karmayogi Sahayak AI Navigation Guide (Alt+H)"
+          className="px-4 py-2.5 rounded-full bg-[#0B2E63] hover:bg-[#123E82] text-amber-300 font-bold text-xs shadow-lg border border-amber-400/40 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          title="Karmayogi Sahayak AI Guide (Alt+H)"
+        >
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+          <Bot className="w-4 h-4 text-amber-400" />
+          <span>Ask AI Sahayak</span>
+        </button>
+      </aside>
+
+      {/* Official Government Footer */}
+      <footer className="bg-slate-900 text-slate-400 text-xs py-8 px-4 md:px-10 border-t border-slate-800 mt-16 font-body">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-center md:text-left">
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+              <IndianFlag variant="circular" width={32} height={32} />
+            </div>
+            <div>
+              <p className="font-bold text-slate-200">
+                Ministry of Statistics and Programme Implementation (MoSPI)
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Mission Karmayogi • National Statistical Systems Training Academy (NSSTA) • DIID Sovereign Node
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px]">
+            <button
+              type="button"
+              onClick={() => setIsAccessibilityOpen(true)}
+              className="hover:text-amber-300 transition-colors cursor-pointer"
+            >
+              Accessibility Options (Alt+A)
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => setIsSahayakOpen(true)}
+              className="hover:text-amber-300 transition-colors cursor-pointer"
+            >
+              AI Navigation Guide (Alt+H)
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => setIsSecretAdminOpen(true)}
+              className="hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1 font-mono text-slate-400 hover:text-amber-400"
+              title="Restricted HQ Administrative Gateway"
+            >
+              <Lock className="w-3.5 h-3.5 text-slate-400" />
+              <span>HQ Gateway (Ctrl+Shift+A)</span>
+            </button>
+          </div>
+        </div>
+      </footer>
 
       {/* Pillar 3: iGOT Karmayogi LRS Telemetry Inspector Drawer */}
       <XApiTelemetryDrawer
         isOpen={isTelemetryDrawerOpen}
         onClose={() => setIsTelemetryDrawerOpen(false)}
         statement={latestTelemetryStatement}
+      />
+
+      {/* MoSPI Annual Capacity Building Plan (ACBP) Dossier Modal */}
+      <AcbpDossierModal
+        isOpen={isAcbpModalOpen}
+        onClose={() => setIsAcbpModalOpen(false)}
+      />
+
+      {/* Karmayogi Sahayak Interactive AI Guide Modal */}
+      <KarmayogiSahayakModal
+        isOpen={isSahayakOpen}
+        onClose={() => setIsSahayakOpen(false)}
+        onNavigateTab={handleTabChange}
+        onOpenLogin={() => {
+          if (onOpenLogin) onOpenLogin();
+          else setIsLoggedIn(true);
+        }}
+        onOpenAccessibility={() => setIsAccessibilityOpen(true)}
+        onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
+      />
+
+      {/* WCAG 2.2 Accessibility Control Center Modal */}
+      <AccessibilityModal
+        isOpen={isAccessibilityOpen}
+        onClose={() => setIsAccessibilityOpen(false)}
+        settings={accessibilitySettings}
+        onUpdateSettings={updateAccessibilitySettings}
+        onResetSettings={resetAccessibilitySettings}
+      />
+
+      {/* Secret Admin HQ Passcode Gateway Modal */}
+      <SecretAdminGatewayModal
+        isOpen={isSecretAdminOpen}
+        onClose={() => setIsSecretAdminOpen(false)}
+        onUnlockAdmin={() => {
+          setIsAdminUnlocked(true);
+          handleTabChange('admin');
+        }}
       />
     </div>
   );
@@ -1052,12 +1629,16 @@ const QuizQuestion = React.memo(function QuizQuestion({
   handleProficiencyChange,
   skillToUpdate,
   onTelemetryStatement,
+  onQuestionAnswered,
+  isTimedOut,
 }: {
   q: QuizQuestionItem;
   index: number;
   handleProficiencyChange: (skillName: string, level: number) => void;
   skillToUpdate: string;
   onTelemetryStatement?: (statement: XApiStatementPayload) => void;
+  onQuestionAnswered?: (record: QuestionAnswerRecord) => void;
+  isTimedOut?: boolean;
 }) {
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [recommendation, setRecommendation] = React.useState<RecommendationItem | null>(null);
@@ -1066,7 +1647,23 @@ const QuizQuestion = React.memo(function QuizQuestion({
   const isCorrect = selectedOption === q.correctAnswer;
 
   const handleSelect = async (opt: string) => {
+    if (isTimedOut) return;
     setSelectedOption(opt);
+
+    // Notify parent dashboard of answer to track full paper completion and stop timer
+    if (onQuestionAnswered) {
+      onQuestionAnswered({
+        questionNumber: index + 1,
+        questionText: q.question,
+        topic: q.topic || skillToUpdate,
+        selectedOption: opt,
+        correctAnswer: q.correctAnswer,
+        isCorrect: opt === q.correctAnswer,
+        explanation: q.explanation,
+        sourceCitation: q.sourceCitation,
+        distractorAnalysis: q.distractorAnalysis,
+      });
+    }
 
     // Dispatch live xAPI statement to iGOT Karmayogi LRS with network error handling
     fetch('http://localhost:5000/api/telemetry/quiz', {
@@ -1099,7 +1696,11 @@ const QuizQuestion = React.memo(function QuizQuestion({
         const res = await fetch('http://localhost:5000/api/recommend/course', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gapTopic: 'General', gapDescription: q.question }),
+          body: JSON.stringify({
+            gapTopic: q.topic || skillToUpdate,
+            gapDescription: q.question,
+            assessedLevel: 2,
+          }),
         });
         if (res.ok) {
           const data = await res.json();
@@ -1120,12 +1721,25 @@ const QuizQuestion = React.memo(function QuizQuestion({
   const safeOptions = Array.isArray(q.options) ? q.options : [];
 
   return (
-    <Card className="overflow-hidden border-slate-200">
-      <div className="bg-slate-50/80 px-6 py-4 border-b border-slate-200 flex items-start gap-3">
-        <span className="flex-shrink-0 w-6 h-6 rounded-md bg-primary-900 text-white flex items-center justify-center text-xs font-bold mt-0.5">
-          {index + 1}
-        </span>
-        <p className="text-sm font-semibold text-slate-900 leading-relaxed">{q.question}</p>
+    <Card
+      className="overflow-hidden border-slate-200/90 select-none shadow-xs"
+      onContextMenu={(e) => e.preventDefault()}
+      onCopy={(e) => e.preventDefault()}
+      onCut={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+    >
+      <div className="bg-slate-50/90 px-6 py-4 border-b border-slate-200/80 flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="flex-shrink-0 w-6 h-6 rounded-md bg-[#0B2E63] text-white flex items-center justify-center text-xs font-bold mt-0.5 font-mono">
+            {index + 1}
+          </span>
+          <p className="text-sm font-semibold text-slate-900 leading-relaxed select-none font-body">{q.question}</p>
+        </div>
+        {isTimedOut && !selectedOption && (
+          <span className="text-[10px] uppercase font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded border border-red-200 shrink-0 font-mono">
+            Window Expired
+          </span>
+        )}
       </div>
 
       <div className="p-6 space-y-5">
@@ -1135,10 +1749,14 @@ const QuizQuestion = React.memo(function QuizQuestion({
         >
           {safeOptions.map((opt: string, i: number) => {
             let btnStyle =
-              'text-left px-4 py-3.5 border rounded-lg text-xs font-medium transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-1 ';
+              'text-left px-4 py-3.5 border rounded-lg text-xs font-medium transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63] focus-visible:ring-offset-1 select-none active:translate-y-[1px] ';
 
             if (!selectedOption) {
-              btnStyle += 'border-slate-200 hover:border-primary-400 hover:bg-slate-50 text-slate-800';
+              if (isTimedOut) {
+                btnStyle += 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400 border-slate-200';
+              } else {
+                btnStyle += 'border-slate-200/90 hover:border-[#0B2E63]/60 hover:bg-slate-50 text-slate-800';
+              }
             } else {
               if (opt === q.correctAnswer) {
                 btnStyle += 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold shadow-xs';
@@ -1154,12 +1772,12 @@ const QuizQuestion = React.memo(function QuizQuestion({
                 key={i}
                 type="button"
                 aria-pressed={selectedOption === opt}
-                disabled={!!selectedOption}
+                disabled={!!selectedOption || isTimedOut}
                 onClick={() => handleSelect(opt)}
                 className={btnStyle}
               >
                 <span
-                  className={`inline-block w-5 font-bold mr-1.5 ${
+                  className={`inline-block w-5 font-bold mr-1.5 font-mono ${
                     selectedOption && opt === q.correctAnswer ? 'text-emerald-800' : 'text-slate-700'
                   }`}
                 >
@@ -1174,13 +1792,13 @@ const QuizQuestion = React.memo(function QuizQuestion({
         {/* Source Citation and Feedback */}
         {selectedOption && (
           <div className="animate-fade-in space-y-3 pt-2">
-            <div className="bg-primary-50/60 border border-primary-100 rounded-lg p-3.5 flex items-start gap-2.5 text-xs text-primary-950">
-              <BookOpen className="w-4 h-4 text-primary-900 flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <div className="bg-[#0B2E63]/5 border border-[#0B2E63]/15 rounded-lg p-3.5 flex items-start gap-2.5 text-xs text-slate-900">
+              <BookOpen className="w-4 h-4 text-[#0B2E63] flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
-                <span className="font-bold text-primary-900 block mb-0.5">Source Context:</span>
-                <p className="italic text-slate-700">{q.sourceCitation || 'Official MoSPI Reference'}</p>
+                <span className="font-bold text-[#0B2E63] block mb-0.5 font-display">Source Context:</span>
+                <p className="text-slate-700 font-body">{q.sourceCitation || 'Official MoSPI Reference'}</p>
                 {q.explanation && (
-                  <p className="mt-1 text-slate-800">
+                  <p className="mt-1 text-slate-800 font-body">
                     <strong>Explanation:</strong> {q.explanation}
                   </p>
                 )}
@@ -1192,32 +1810,47 @@ const QuizQuestion = React.memo(function QuizQuestion({
                 <div className="flex items-start gap-2.5">
                   <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" aria-hidden="true" />
                   <div className="w-full">
-                    <h5 className="text-xs font-bold text-amber-900">Competency Gap Identified</h5>
-                    <p className="text-xs text-amber-900 mt-0.5">
+                    <h5 className="text-xs font-bold text-amber-900 font-display">Competency Gap Identified</h5>
+                    <p className="text-xs text-amber-900 mt-0.5 font-body">
                       Response indicates a need for reinforcement in this competency.
                     </p>
 
                     {loadingRec ? (
-                      <p className="text-xs text-amber-800 animate-pulse mt-2">
+                      <p className="text-xs text-amber-800 animate-pulse mt-2 font-mono">
                         Querying 880+ Government Catalog for optimal course...
                       </p>
                     ) : recommendation ? (
-                      <div className="mt-3 bg-white border border-amber-200 rounded-lg p-3 flex items-center justify-between gap-3 shadow-xs">
-                        <div>
-                          <h6 className="text-xs font-bold text-slate-900">{recommendation.title}</h6>
-                          <p className="text-[11px] text-slate-600">
-                            {recommendation.provider} • {recommendation.duration}
-                          </p>
+                      <div className="mt-3 bg-white border border-amber-200 rounded-lg p-3.5 space-y-2 shadow-xs">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <Badge variant="saffron" className="text-[10px]">
+                                {recommendation.domain || 'MoSPI / iGOT'}
+                              </Badge>
+                              <span className="text-[10px] font-bold text-slate-500 font-mono">
+                                Level {recommendation.level || 2}
+                              </span>
+                            </div>
+                            <h6 className="text-xs font-bold text-slate-900 font-display">{recommendation.title}</h6>
+                            <p className="text-[11px] text-slate-600 font-body">
+                              {recommendation.provider} • {recommendation.duration || '3 Hours'}
+                            </p>
+                          </div>
+                          <a
+                            href={recommendation.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-[#D96B07] hover:bg-[#B85704] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1.5 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 shrink-0 active:translate-y-[1px]"
+                          >
+                            Enroll in iGOT
+                            <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                          </a>
                         </div>
-                        <a
-                          href={recommendation.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-3 py-1.5 rounded-md transition shadow-xs flex items-center gap-1.5 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
-                        >
-                          Enroll in iGOT
-                          <ExternalLink className="w-3 h-3" aria-hidden="true" />
-                        </a>
+                        {recommendation.rationale && (
+                          <p className="text-[11px] text-slate-600 bg-amber-50/70 rounded p-2 border border-amber-100 leading-relaxed font-body">
+                            {recommendation.rationale}
+                          </p>
+                        )}
                       </div>
                     ) : null}
                   </div>
@@ -1228,7 +1861,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
             {isCorrect && (
               <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 flex items-center gap-2.5 text-xs text-emerald-950" role="status">
                 <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" aria-hidden="true" />
-                <p className="font-semibold">
+                <p className="font-semibold font-body">
                   Correct! Your FRAC competency level in this domain has been updated.
                 </p>
               </div>

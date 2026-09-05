@@ -1,9 +1,162 @@
+@import "./tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-neutral-100 text-neutral-900 antialiased;
+  html, body {
+    overflow-x: clip;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-style: normal;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-subtle);
+    color: var(--color-ink);
   }
 }
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* ========================================================================= */
+/* iGOT Karmayogi Universal Accessibility Stylesheet (WCAG 2.2 AAA Engine)    */
+/* ========================================================================= */
+
+/* 1. Contrast Modes */
+.a11y-contrast-dark {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+.a11y-contrast-dark * {
+  background-color: transparent !important;
+  color: #FFFFFF !important;
+  border-color: #38BDF8 !important;
+}
+.a11y-contrast-dark .bg-white,
+.a11y-contrast-dark .bg-slate-50,
+.a11y-contrast-dark .bg-slate-100 {
+  background-color: #0F172A !important;
+}
+.a11y-contrast-invert {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+.a11y-contrast-invert img,
+.a11y-contrast-invert video {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+/* 2. Saturation Controls */
+.a11y-sat-low {
+  filter: saturate(0.35) !important;
+}
+.a11y-sat-high {
+  filter: saturate(1.85) !important;
+}
+.a11y-sat-mono {
+  filter: grayscale(1) !important;
+}
+
+/* 3. Highlight Links */
+.a11y-highlight-links a,
+.a11y-highlight-links button:not([role="dialog"] button) {
+  outline: 2px dashed #D97706 !important;
+  outline-offset: 3px !important;
+  text-decoration: underline 2px solid #D97706 !important;
+}
+
+/* 4. Text Spacing */
+.a11y-spacing-light * {
+  letter-spacing: 0.08em !important;
+  word-spacing: 0.16em !important;
+}
+.a11y-spacing-moderate * {
+  letter-spacing: 0.14em !important;
+  word-spacing: 0.24em !important;
+}
+.a11y-spacing-heavy * {
+  letter-spacing: 0.20em !important;
+  word-spacing: 0.32em !important;
+}
+
+/* 5. Pause Animations */
+.a11y-pause-animations,
+.a11y-pause-animations * {
+  animation: none !important;
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+/* 6. Hide Images */
+.a11y-hide-images img,
+.a11y-hide-images svg[role="img"],
+.a11y-hide-images picture {
+  opacity: 0.05 !important;
+  filter: grayscale(1) blur(2px) !important;
+}
+
+/* 7. Dyslexia Friendly Typography */
+.a11y-dyslexic,
+.a11y-dyslexic * {
+  font-family: 'OpenDyslexic', 'Trebuchet MS', 'Comic Sans MS', sans-serif !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.1em !important;
+}
+
+/* 8. Oversized Cursors */
+.a11y-cursor-black,
+.a11y-cursor-black * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='%23000000' stroke='%23ffffff' stroke-width='1.5'%3E%3Cpath d='M3 3l7 18 3-7 7-3L3 3z'/%3E%3C/svg%3E"), auto !important;
+}
+.a11y-cursor-white,
+.a11y-cursor-white * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='%23ffffff' stroke='%23000000' stroke-width='1.5'%3E%3Cpath d='M3 3l7 18 3-7 7-3L3 3z'/%3E%3C/svg%3E"), auto !important;
+}
+
+/* 9. Line Heights */
+.a11y-lh-18 * {
+  line-height: 1.8 !important;
+}
+.a11y-lh-22 * {
+  line-height: 2.2 !important;
+}
+
+/* 10. Text Alignments */
+.a11y-align-left p,
+.a11y-align-left h1,
+.a11y-align-left h2,
+.a11y-align-left h3,
+.a11y-align-left span {
+  text-align: left !important;
+}
+.a11y-align-center p,
+.a11y-align-center h1,
+.a11y-align-center h2,
+.a11y-align-center h3,
+.a11y-align-center span {
+  text-align: center !important;
+}
+.a11y-align-justify p,
+.a11y-align-justify span {
+  text-align: justify !important;
+}
+

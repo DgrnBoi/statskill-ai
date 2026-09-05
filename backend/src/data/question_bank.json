@@ -13,7 +13,27 @@
     ],
     "correctAnswer": "First Stage Unit",
     "explanation": "First Stage Units (FSUs) are the primary sampling units (villages in rural areas, urban frame survey blocks in urban areas) selected in the first stage of sampling.",
-    "sourceCitation": "NSSO Survey Design Manual, Section 2.1"
+    "sourceCitation": "NSSO Survey Design Manual, Section 2.1",
+    "distractorAnalysis": {
+      "Final Sampling Unit": {
+        "misconception": "Confusing the initial First Stage Unit (FSU) with the Ultimate Stage Sampling Unit (USU/household).",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "Fundamental Survey Unit": {
+        "misconception": "Inventing non-standard administrative terminology rather than statutory NSSO sampling terms.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "Field Supervisor Unit": {
+        "misconception": "Confusing field supervisory administrative hierarchy with statistical sampling units.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
   },
   {
     "id": "qb-stat-002",
@@ -29,7 +49,27 @@
     ],
     "correctAnswer": "To minimize intra-stratum variance and reduce standard error",
     "explanation": "Stratification groups similar population units together, minimizing variance within each stratum, which maximizes the precision (reduces standard error) of aggregate estimators.",
-    "sourceCitation": "Concepts and Definitions in NSS Surveys, Chapter 4"
+    "sourceCitation": "Concepts and Definitions in NSS Surveys, Chapter 4",
+    "distractorAnalysis": {
+      "To increase total sample size arbitrarily": {
+        "misconception": "Believing stratification is meant to inflate sample size rather than improve estimation precision.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "To completely eliminate non-sampling errors": {
+        "misconception": "Conflating sampling variance reduction with non-sampling errors (e.g. measurement/reporting bias).",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "To avoid calculating survey multipliers": {
+        "misconception": "Incorrectly assuming stratified designs eliminate the need for survey inflation multipliers.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      }
+    }
   },
   {
     "id": "qb-stat-003",
@@ -45,7 +85,27 @@
     ],
     "correctAnswer": "The reciprocal of its probability of selection",
     "explanation": "In design-based estimation, the sampling weight or multiplier is the inverse of the inclusion probability of the selected sample unit.",
-    "sourceCitation": "NSSO Estimation Procedure Guidelines, Section 3.2"
+    "sourceCitation": "NSSO Estimation Procedure Guidelines, Section 3.2",
+    "distractorAnalysis": {
+      "The square root of the stratum sample variance": {
+        "misconception": "Confusing multiplier expansion factors with standard error and variance metrics.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "The ratio of response to non-response households": {
+        "misconception": "Confusing non-response compensation factors with primary design-based selection multipliers.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "A correction coefficient for price inflation": {
+        "misconception": "Conflating survey sample multipliers with macroeconomic CPI/GDP price deflators.",
+        "remedialSkill": "National Accounts & Macro Indices",
+        "recommendedCourseId": "nad-macro-indices-301",
+        "recommendedCourseTitle": "National Accounts Statistics & Macro Indices"
+      }
+    }
   },
   {
     "id": "qb-stat-004",
@@ -61,7 +121,27 @@
     ],
     "correctAnswer": "Circular Systematic Sampling",
     "explanation": "Circular systematic sampling is standardly utilized in secondary stage unit (SSU) selection to ensure an even geographic spread across the selected hamlet/block.",
-    "sourceCitation": "NSS Field Operations Handbook, Part II"
+    "sourceCitation": "NSS Field Operations Handbook, Part II",
+    "distractorAnalysis": {
+      "Cluster Sampling with Replacement": {
+        "misconception": "Assuming replacement sampling is standard in NSSO household listings (NSSO uses without replacement).",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "Convenience Quota Sampling": {
+        "misconception": "Assuming non-probabilistic quota methods are permitted in official national statistics.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      },
+      "Snowball Network Sampling": {
+        "misconception": "Confusing hidden population network sampling with standardized geographic household enumeration.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
+      }
+    }
   },
   {
     "id": "qb-tech-001",
@@ -77,7 +157,27 @@
     ],
     "correctAnswer": "Real-time validation checks and instant logic error flagging at the point of data capture",
     "explanation": "CAPI software enforces range checks, skip patterns, and consistency conditions immediately during interview, preventing dirty data from entering the central database.",
-    "sourceCitation": "MoSPI CAPI Implementation Guidelines, Chapter 1"
+    "sourceCitation": "MoSPI CAPI Implementation Guidelines, Chapter 1",
+    "distractorAnalysis": {
+      "Elimination of the need for trained field investigators": {
+        "misconception": "Assuming digital automation replaces enumerator skill rather than assisting field execution.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      },
+      "Complete immunity from hardware battery drainage": {
+        "misconception": "Overestimating physical hardware constraints in rural enumeration environments.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      },
+      "Automatic replacement of non-responding households without supervisor approval": {
+        "misconception": "Bypassing statutory substitution rules and casualty casualty protocols in NSSO surveys.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
   },
   {
     "id": "qb-tech-002",
@@ -93,7 +193,27 @@
     ],
     "correctAnswer": "Store records in encrypted local SQLite cache and sync to cloud once network is re-established",
     "explanation": "CAPI platforms use store-and-forward architecture: schedules are cryptographically signed and stored locally, then synchronized via HTTPS once cellular connectivity is acquired.",
-    "sourceCitation": "NSSO Digital Survey SOP, Module 4"
+    "sourceCitation": "NSSO Digital Survey SOP, Module 4",
+    "distractorAnalysis": {
+      "Immediately discard incomplete survey schedules": {
+        "misconception": "Violating NSS data retention protocols by destroying partial field records.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      },
+      "Disable tablet GPS geotagging to conserve battery": {
+        "misconception": "Disabling mandatory verification telemetry (GPS/timestamping) during field enumeration.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      },
+      "Manually re-enter survey data into a paper schedule": {
+        "misconception": "Unnecessarily reverting to manual paper schedules instead of trusting local cryptographic storage.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
   },
   {
     "id": "qb-tech-003",
@@ -109,7 +229,27 @@
     ],
     "correctAnswer": "A hard check blocks the enumerator from continuing until an impossible contradiction is resolved",
     "explanation": "A hard check enforces strict mathematical/logical consistency (e.g., child older than parent) and refuses form progression until corrected by the enumerator.",
-    "sourceCitation": "BLAISE / CAPI Logic Design Standard, Section 5"
+    "sourceCitation": "BLAISE / CAPI Logic Design Standard, Section 5",
+    "distractorAnalysis": {
+      "A hard check only generates an advisory warning message": {
+        "misconception": "Confusing blocking Hard Checks with non-blocking advisory Soft Checks.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      },
+      "A hard check is executed only after the survey is uploaded to the server": {
+        "misconception": "Assuming validation logic runs only on server rather than client-side on device.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      },
+      "A hard check requires internet connection to validate": {
+        "misconception": "Assuming local rule engines in BLAISE/CAPI require real-time cloud connectivity.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
   },
   {
     "id": "qb-econ-001",
@@ -125,7 +265,27 @@
     ],
     "correctAnswer": "GDP = GVA (at basic prices) + Product Taxes - Product Subsidies",
     "explanation": "Under SNA 2008 / National Accounts base year 2011-12 series, GDP at market prices is derived by adding net product taxes (Taxes less Subsidies) to GVA at basic prices.",
-    "sourceCitation": "Sources and Methods: National Accounts Statistics 2011-12, CSO"
+    "sourceCitation": "Sources and Methods: National Accounts Statistics 2011-12, CSO",
+    "distractorAnalysis": {
+      "GDP = GVA (at basic prices) - Product Taxes + Product Subsidies": {
+        "misconception": "Misunderstanding of statutory principles in GDP Compilation.",
+        "remedialSkill": "GDP Compilation",
+        "recommendedCourseId": "National Accounts Statistics",
+        "recommendedCourseTitle": "Foundations of GDP Compilation"
+      },
+      "GDP = GVA (at factor cost) + Operating Surplus": {
+        "misconception": "Misunderstanding of statutory principles in GDP Compilation.",
+        "remedialSkill": "GDP Compilation",
+        "recommendedCourseId": "National Accounts Statistics",
+        "recommendedCourseTitle": "Foundations of GDP Compilation"
+      },
+      "GDP = GVA (at basic prices) * Wholesale Price Index": {
+        "misconception": "Misunderstanding of statutory principles in GDP Compilation.",
+        "remedialSkill": "GDP Compilation",
+        "recommendedCourseId": "National Accounts Statistics",
+        "recommendedCourseTitle": "Foundations of GDP Compilation"
+      }
+    }
   },
   {
     "id": "qb-econ-002",
@@ -141,7 +301,27 @@
     ],
     "correctAnswer": "Modified Laspeyres price index formula with base year consumption weights",
     "explanation": "All-India CPI (Rural, Urban, Combined) compiled by MoSPI utilizes the Laspeyres index methodology with fixed base-year expenditure weights obtained from the Consumer Expenditure Survey.",
-    "sourceCitation": "Manual on Consumer Price Index Numbers, CSO Price Statistics Division"
+    "sourceCitation": "Manual on Consumer Price Index Numbers, CSO Price Statistics Division",
+    "distractorAnalysis": {
+      "Unweighted Paasche price index with current year weights": {
+        "misconception": "Misunderstanding of statutory principles in Price Index Formulas.",
+        "remedialSkill": "Price Index Formulas",
+        "recommendedCourseId": "Consumer Price Index (CPI) Methodology",
+        "recommendedCourseTitle": "Foundations of Price Index Formulas"
+      },
+      "Fisher Ideal Index with geometric chaining": {
+        "misconception": "Misunderstanding of statutory principles in Price Index Formulas.",
+        "remedialSkill": "Price Index Formulas",
+        "recommendedCourseId": "Consumer Price Index (CPI) Methodology",
+        "recommendedCourseTitle": "Foundations of Price Index Formulas"
+      },
+      "Simple Marshall-Edgeworth arithmetic mean": {
+        "misconception": "Misunderstanding of statutory principles in Price Index Formulas.",
+        "remedialSkill": "Price Index Formulas",
+        "recommendedCourseId": "Consumer Price Index (CPI) Methodology",
+        "recommendedCourseTitle": "Foundations of Price Index Formulas"
+      }
+    }
   },
   {
     "id": "qb-gov-001",
@@ -157,7 +337,27 @@
     ],
     "correctAnswer": "Data Fiduciary",
     "explanation": "Under DPDPA 2023, any government entity or ministry determining the purpose and means of processing citizen personal data acts as a Data Fiduciary.",
-    "sourceCitation": "DPDPA 2023, Section 2(i) & Central Government Guidelines"
+    "sourceCitation": "DPDPA 2023, Section 2(i) & Central Government Guidelines",
+    "distractorAnalysis": {
+      "Data Principal": {
+        "misconception": "Confusing the Data Fiduciary (the ministry processing data) with the Data Principal (the citizen whose data is collected).",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "dpdpa-2023-compliance",
+        "recommendedCourseTitle": "Data Privacy, Cybersecurity & DPDPA 2023 Compliance"
+      },
+      "Data Protection Board of India": {
+        "misconception": "Confusing the statutory regulatory tribunal with individual government ministries.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "dpdpa-2023-compliance",
+        "recommendedCourseTitle": "Data Privacy, Cybersecurity & DPDPA 2023 Compliance"
+      },
+      "Consent Manager": {
+        "misconception": "Confusing technical consent management intermediaries with statutory Data Fiduciaries.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "dpdpa-2023-compliance",
+        "recommendedCourseTitle": "Data Privacy, Cybersecurity & DPDPA 2023 Compliance"
+      }
+    }
   },
   {
     "id": "qb-gov-002",
@@ -173,7 +373,27 @@
     ],
     "correctAnswer": "Masking or perturbing direct identifiers like respondent names, phone numbers, and precise village codes",
     "explanation": "To prevent re-identification attacks while preserving research utility, statistical agencies perform k-anonymity, top-coding, and suppression of direct geographic and personal identifiers.",
-    "sourceCitation": "MoSPI National Microdata Policy & Data Anonymization Guidelines"
+    "sourceCitation": "MoSPI National Microdata Policy & Data Anonymization Guidelines",
+    "distractorAnalysis": {
+      "Removing all demographic variables completely": {
+        "misconception": "Misunderstanding of statutory principles in Micro-Data Anonymization.",
+        "remedialSkill": "Micro-Data Anonymization",
+        "recommendedCourseId": "Data Privacy and DPDPA Compliance",
+        "recommendedCourseTitle": "Foundations of Micro-Data Anonymization"
+      },
+      "Encrypting micro-data so researchers cannot open it in R or Stata": {
+        "misconception": "Misunderstanding of statutory principles in Micro-Data Anonymization.",
+        "remedialSkill": "Micro-Data Anonymization",
+        "recommendedCourseId": "Data Privacy and DPDPA Compliance",
+        "recommendedCourseTitle": "Foundations of Micro-Data Anonymization"
+      },
+      "Releasing data only to central government ministries": {
+        "misconception": "Misunderstanding of statutory principles in Micro-Data Anonymization.",
+        "remedialSkill": "Micro-Data Anonymization",
+        "recommendedCourseId": "Data Privacy and DPDPA Compliance",
+        "recommendedCourseTitle": "Foundations of Micro-Data Anonymization"
+      }
+    }
   },
   {
     "question": "According to the system architecture and recommendation flow, what is the primary mechanism that ensures a training pathway is valid and trustworthy before it is presented to the user?",
@@ -188,7 +408,27 @@
     "sourceCitation": "Section 12: Recommendation flow",
     "id": "qb-ai-1788540825262-1",
     "courseId": "SRS.pdf",
-    "bloomLevel": "Application"
+    "bloomLevel": "Application",
+    "distractorAnalysis": {
+      "The Large Language Model (LLM) generates the pathway based on the user's natural language input and verifies its existence in real-time.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      },
+      "The beneficiary confirms the pathway's validity through a secondary verification step after the initial AI suggestion.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      },
+      "The facilitator manually creates the pathway entry in the database if it does not already exist in the system.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      }
+    }
   },
   {
     "question": "In the context of the 'Complete system flow' and 'Beneficiary journey', what is the specific purpose of the step where the system displays a readable summary of the extracted information before identifying skill gaps?",
@@ -203,7 +443,27 @@
     "sourceCitation": "Section 6.4: Confirming the profile; Section 5: Complete system flow",
     "id": "qb-ai-1788540825262-2",
     "courseId": "SRS.pdf",
-    "bloomLevel": "Application"
+    "bloomLevel": "Application",
+    "distractorAnalysis": {
+      "To allow the administrator to audit the data quality before the profile is saved to the central database.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      },
+      "To generate a final PDF report that the beneficiary can download for future reference.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      },
+      "To trigger the voice-to-text conversion process for the next set of questions.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      }
+    }
   },
   {
     "question": "Based on the 'External service connections' table, what is the designated fallback strategy if the Sarvam speech-to-text (STT) service is unavailable or access is not granted?",
@@ -218,6 +478,26 @@
     "sourceCitation": "Section 10: External service connections",
     "id": "qb-ai-1788540825262-3",
     "courseId": "SRS.pdf",
-    "bloomLevel": "Application"
+    "bloomLevel": "Application",
+    "distractorAnalysis": {
+      "The system automatically switches to the AI4Bharat Indic Parler-TTS provider to handle input processing.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      },
+      "The system relies solely on the LLM to interpret the raw audio file without text conversion.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      },
+      "The system disables the voice interface and requires the facilitator to manually enter all data.": {
+        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
+        "remedialSkill": "Statistical Competencies",
+        "recommendedCourseId": "SRS.pdf",
+        "recommendedCourseTitle": "Foundations of Official Statistics"
+      }
+    }
   }
 ]

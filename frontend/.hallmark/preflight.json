@@ -1,0 +1,18 @@
+{
+  "scanDate": "2026-09-05",
+  "framework": "React 18 (Vite)",
+  "typography": {
+    "display": "Space Grotesk (Google Fonts)",
+    "body": "Geist + Inter",
+    "mono": "Geist Mono",
+    "indic": "Noto Sans Devanagari"
+  },
+  "palette": {
+    "system": "OKLCH Tokens",
+    "paper": "oklch(0.985 0.005 240)",
+    "ink": "oklch(0.180 0.040 260)",
+    "accent": "oklch(0.680 0.180 45)"
+  },
+  "macrostructure": "Workbench",
+  "genre": "modern-minimal/editorial"
+}
