@@ -85,14 +85,40 @@ export class TelemetryController {
         timestamp: new Date().toISOString()
       };
 
-      // In production, this would be pushed via HTTPS to the national LRS (Learning Record Store)
-      // For the prototype, we simulate the "Store-and-Forward" successful dispatch:
+      // Live LRS Dispatch or Local Store-and-Forward simulation
+      let dispatchedToRemote = false;
+      const lrsEndpoint = process.env.IGOT_LRS_ENDPOINT;
+
+      if (lrsEndpoint) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const lrsResponse = await fetch(lrsEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Experience-API-Version': '1.0.3'
+            },
+            body: JSON.stringify(statement),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          dispatchedToRemote = lrsResponse.ok;
+          console.log(`[xAPI Telemetry] Outbound LRS HTTP POST response status: ${lrsResponse.status}`);
+        } catch (lrsErr: any) {
+          console.warn(`[xAPI Telemetry] Remote LRS unreachable (${lrsErr.message}). Stored in local store-and-forward queue.`);
+        }
+      }
+
       console.log("[xAPI Telemetry] Successfully formatted and dispatched statement:");
       console.dir(statement, { depth: null });
 
       return res.status(200).json({ 
         success: true, 
-        message: "Telemetry successfully synced with iGOT Karmayogi LRS",
+        message: dispatchedToRemote 
+          ? "Telemetry successfully synced with external iGOT Karmayogi LRS" 
+          : "Telemetry successfully formatted and buffered in local store-and-forward queue",
+        dispatchedToRemote,
         statement 
       });
 

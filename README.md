@@ -1,60 +1,149 @@
-# StatSkill AI 🇮🇳 (MoSPI Edition)
+# StatSkill AI 🇮🇳
+### Sovereign Competency-Based Learning & Active Recall Platform
+**Ministry of Statistics and Programme Implementation (MoSPI) | Smart India Hackathon 2026 (Problem Statement: SIH26101)**
 
-**Smart India Hackathon 2026 - Problem Statement SIH26101**
+---
 
-StatSkill AI is a sovereign, edge-first active recall learning platform built for the Ministry of Statistics and Programme Implementation (MoSPI). It identifies competency gaps using the FRAC matrix and generates highly rigorous MCQs from technical statistical manuals using a **100% offline, local AI inference engine.**
+StatSkill AI is an edge-first, sovereign competency evaluation and micro-learning platform engineered specifically for statistical officers and field investigators across India's National Statistical System (NSS). Built in alignment with the Mission Karmayogi Framework for Roles, Activities, and Competencies (FRAC), the platform replaces passive slide-reading with continuous active recall, psychometric misconception diagnosis, and personalized zone-of-proximal-development learning pathways.
 
-## Why This Architecture Wins
-Most learning platforms are built as cloud-dependent web apps. For a nodal officer in rural India, this breaks the moment the Wi-Fi drops. We engineered this platform specifically for Indian government realities:
-1. **Zero Data Leakage:** Generates quizzes locally via `Ollama` (Llama-3.1). No government data touches OpenAI.
-2. **CAPI Offline Mode:** The PWA Service Worker (`sw.js`) caches the UI and locally queues quiz scores when the internet goes down.
-3. **iGOT xAPI Integration:** When online, it syncs telemetry directly to the national iGOT Karmayogi LRS.
-4. **Bhashini Guardrails:** A strict dictionary (`BhashiniLexicon.json`) prevents the AI from hallucinating translations of complex economic terms.
+---
 
-## Quick Start (Run Locally)
+## Key System Capabilities
+
+- **Hybrid Cloud-Edge AI Architecture**: We combine Google Gemini 1.5 Flash and Groq Qwen 2.5 for deep document RAG against technical statistical manuals, backed by a local 200+ question verified bank with Fisher-Yates anti-copy shuffling that executes 100% offline in low-connectivity field environments.
+- **Competency-to-Curriculum Alignment (FRAC)**: We map cadre designations (Junior Statistical Officer, Senior Statistical Officer, Field Investigator, Deputy Director) directly to required proficiency benchmarks across survey design, sampling weights, national accounts, and price indices.
+- **Misconception-Level Distractor Analysis**: Rather than scoring answers as a binary pass/fail, our diagnostic engine identifies specific conceptual errors (such as confusing SRSWOR with PPS, or conflating CPI-U with CFPI) and presents actionable pedagogical guidance.
+- **Multilingual Course Discovery (Bhashini-Ready)**: We indexed 884 authentic government statistical courses with a phonetic Indic search lexicon supporting English, Hindi, and regional script transliterations.
+- **iGOT-Ready xAPI / CMI-5 Telemetry**: Every assessment formats structured JSON-LD statements compliant with ADL xAPI v1.0.3 and CMI-5 standards, providing real-time store-and-forward local buffering and automated HTTP dispatch to the National Learning Record Store (LRS).
+- **Universal Accessibility Console (WCAG 2.2 AAA)**: We built a native accessibility drawer offering high-contrast monochrome themes, OpenDyslexic typography, keyboard shortcut navigation, and bilingual Web Speech audio readouts.
+
+---
+
+## Architectural Reality & System Design
+
+```
++-----------------------------------------------------------------------------------+
+|                                 USER INTERFACE                                    |
+|  React 19 + TypeScript + Vite | Tailwind CSS | Radix UI | Service Worker CAPI     |
++-----------------------------------------+-----------------------------------------+
+                                          |
+                        REST APIs / JSON-LD Payloads
+                                          |
++-----------------------------------------v-----------------------------------------+
+|                                EXPRESS BACKEND                                    |
+|   Rate Limiters | Input Sanitizer | JWT Auth | Telemetry & Competency Controllers |
++-------------------+-------------------------------------+-------------------------+
+                    |                                     |
+       +------------v------------+           +------------v------------+
+       |     AI RAG PIPELINE     |           |   DATA & PERSISTENCE    |
+       |  Google Gemini 1.5      |           |  PostgreSQL via Prisma  |
+       |  Groq Qwen 2.5          |           |  Zero-Downtime Fallback |
+       |  Multi-Span Windowing   |           |  (mospi_frac_matrix &   |
+       |  Prompt-Injection XML   |           |   question_bank.json)   |
+       +------------+------------+           +-------------------------+
+                    |
+       +------------v------------+
+       |   ANTI-COPY & EDGE BANK |
+       |  Fisher-Yates Shuffler  |
+       |  200+ Verified Items    |
+       |  Store-and-Forward LRS  |
+       +-------------------------+
+```
+
+### 1. Document Ingestion & Anti-Prompt-Injection Security
+When trainers upload technical PDF manuals (such as NSS 78th Round guidelines or ASI schedules), the system parses the document, samples representative windows across its full breadth (0%, 25%, 50%, 75%, 100%), and wraps all extracted text inside strict `<document_content>` XML boundaries. The prompt instructions strictly isolate this content, preventing prompt injection attacks from manipulating the assessment generation.
+
+### 2. Zero-Downtime Database Resilience
+The backend connects to PostgreSQL via Prisma ORM for persistent competency tracking. If a database instance is unconfigured or offline during local evaluation, the engine automatically falls back to an embedded JSON FRAC matrix (`mospi_frac_matrix.json`) and local catalogs, ensuring the system runs immediately without setup hurdles.
+
+---
+
+## Verification & Automated Test Suites
+
+We enforce rigorous test coverage across both frontend and backend layers. The monorepo contains **83 automated tests with a 100% pass rate**.
+
+| Test Suite | Framework | Total Tests | Status | Coverage Areas |
+|:---|:---|:---:|:---:|:---|
+| **Frontend Unit & Integration** | Vitest + RTL | 54 | Passing | Tab switching, Cadre benchmarks, Shuffling, Radar math, Telemetry drawer, Modals, Audio synthesis |
+| **Backend Integration & APIs** | Jest + Supertest | 29 | Passing | xAPI formatting, Course recommendation math, Search transliteration, Security sanitization, RAG fallback |
+| **Total Automated Tests** | — | **83** | **100% Pass** | Full end-to-end regression verification |
+
+---
+
+## Quickstart Guide
 
 ### Prerequisites
-1. Node.js (v18+)
-2. Install [Ollama](https://ollama.com/) on your host machine.
-3. Pull the required edge model: `ollama run llama3.1`
+- Node.js (v18.0.0 or higher)
+- npm (v9.0.0 or higher)
 
-### 1. Boot the Backend (API + AI Engine + SQLite)
+### 1. Set Up Backend
 ```bash
 cd backend
 npm install
-npx prisma generate
-npx prisma db push
+npm test
 npm run dev
 ```
-*(The backend will start on `http://localhost:5000`)*
+*The backend API will start on `http://localhost:5000`. If `DATABASE_URL` is omitted, the server automatically boots with local fallback matrices.*
 
-### 2. Boot the Frontend (React + PWA)
-Open a new terminal:
+### 2. Set Up Frontend
+Open a new terminal window:
 ```bash
 cd frontend
 npm install
+npx vitest run
 npm run dev
 ```
-*(The frontend will start on `http://localhost:5173`)*
+*The frontend application will start on `http://localhost:5173`.*
 
-## Commands
-| Command | Location | Description |
-|---------|----------|-------------|
-| `npm run dev` | `backend/` | Starts the Express API and Telemetry Router |
-| `npm test` | `backend/` | Runs the 90-case Jest integration suite |
-| `npm run dev` | `frontend/` | Starts the Vite React dashboard |
-| `npm run build` | `frontend/` | Builds the production PWA assets |
+---
 
-## Architecture Decisions (ADRs)
-We have formally documented our architectural decisions in the `.gemini/antigravity/brain` artifact directory. Key decisions include:
-* **ADR-001 (Edge-AI Migration):** Deprecation of `@langchain/openai` in favor of `@langchain/community` + `Ollama`.
-* **ADR-002 (Store-and-Forward):** Intercepting network requests via `sw.js` to simulate CAPI offline synchronization.
-* **ADR-003 (IndEA Auth):** Structuring the React header to accept OpenID Connect (OIDC) tokens for Jan Parichay mock integration.
+## Environment Configuration (`backend/.env`)
 
-## Testing & Evaluation
-We have provided a comprehensive 90-case backend test suite that evaluates:
-- xAPI Telemetry compliance
-- Bhashini Lexicon strictness
-- Zod JSON-schema guardrails on the LLM output
+To enable cloud AI generation or connect to a live database, create a `.env` file in the `backend/` directory:
 
-Run `npm test` in the `backend/` directory to evaluate the system.
+```env
+PORT=5000
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/statskill?schema=public"
+JWT_SECRET="your-development-secret-key"
+
+# Optional Cloud AI API Keys (System uses verified local question bank if unset)
+GEMINI_API_KEY=""
+GROQ_API_KEY=""
+
+# Optional Learning Record Store Endpoint
+IGOT_LRS_ENDPOINT=""
+```
+
+---
+
+## Repository Structure
+
+```
+statskill-ai/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/      # Competency, Telemetry & Admin API handlers
+│   │   ├── services/
+│   │   │   ├── ai/           # QuizGenerator, AntiCopyEngine & RAG pipelines
+│   │   │   ├── recommendation/# 4-Tier ZPD CourseMatcher algorithm
+│   │   │   └── search/       # Multilingual Bhashini search engine
+│   │   ├── routes/           # Express route definitions
+│   │   └── data/             # Local FRAC matrices and question bank backups
+│   ├── tests/                # 29 Jest integration and security tests
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # UI modules, Assessment cards, Radar charts, Drawers
+│   │   ├── pages/            # LandingPage, LoginPage, Dashboard
+│   │   ├── hooks/            # Anti-spam, Debounce, Audio and Telemetry hooks
+│   │   └── test/             # 54 Vitest unit and integration test specs
+│   └── package.json
+├── COMPREHENSIVE_SYSTEM_ANALYSIS.md # Detailed architecture and screen breakdown
+└── README.md
+```
+
+---
+
+## License
+
+Built for the Ministry of Statistics and Programme Implementation (MoSPI) under Smart India Hackathon 2026.
