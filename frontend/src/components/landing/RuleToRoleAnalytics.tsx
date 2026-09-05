@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   ArrowRight,
 } from 'lucide-react';
+import { CountUpNumber } from '../ui/CountUpNumber';
 
 const COMPETENCIES = [
   { label: 'Domain (NSS, SUT, CPI, Sampling)', value: 1290, color: '#1A56A0' },
@@ -57,7 +58,7 @@ function CompetencyDonut() {
         </svg>
         <div className="absolute inset-0 flex rotate-0 flex-col items-center justify-center">
           <span className="font-mono text-xl font-bold tabular-nums text-[#0B2E63]">
-            {total.toLocaleString('en-IN')}
+            <CountUpNumber end={total} duration={1500} />
           </span>
           <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
             Competencies

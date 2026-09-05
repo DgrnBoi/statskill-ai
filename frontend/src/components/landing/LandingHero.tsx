@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BookOpen, Sparkles, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
+import { CountUpNumber } from '../ui/CountUpNumber';
 
 interface LandingHeroProps {
   onLaunchAssessment: () => void;
@@ -7,8 +8,6 @@ interface LandingHeroProps {
 }
 
 export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHeroProps) {
-  const [activeDot, setActiveDot] = useState(0);
-
   return (
     <section id="hero" className="relative overflow-hidden bg-[#FAF8F5]">
       <div
@@ -84,8 +83,7 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
                 <Sparkles className="h-3.5 w-3.5" /> MoSPI &amp; National Cadre Milestone
               </span>
               <p className="mt-6 font-mono text-5xl md:text-6xl font-bold leading-none tracking-tight text-white tabular-nums">
-                1.7 Crore
-                <span className="text-amber-400">+</span>
+                <CountUpNumber end={1.72} decimals={2} suffix=" Crore+" duration={1800} />
               </p>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-200">
                 Civil Servants Onboarded Nationally • <strong>5,200+ Statistical Officers &amp; Enumerators</strong> Active Across 36 States/UTs.
@@ -93,27 +91,17 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
 
               <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
                 <div className="rounded-xl bg-white/10 p-3 backdrop-blur-xs border border-white/10">
-                  <p className="font-mono text-lg font-bold text-amber-300">94.2%</p>
+                  <p className="font-mono text-lg font-bold text-amber-300">
+                    <CountUpNumber end={94.2} decimals={1} suffix="%" duration={1600} />
+                  </p>
                   <p className="text-slate-300 text-[11px] mt-0.5">NSS CAPI Proficiency</p>
                 </div>
                 <div className="rounded-xl bg-white/10 p-3 backdrop-blur-xs border border-white/10">
-                  <p className="font-mono text-lg font-bold text-emerald-300">36 States/UTs</p>
+                  <p className="font-mono text-lg font-bold text-emerald-300">
+                    <CountUpNumber end={36} suffix=" States/UTs" duration={1400} />
+                  </p>
                   <p className="text-slate-300 text-[11px] mt-0.5">State DES Integration</p>
                 </div>
-              </div>
-
-              <div className="mt-6 flex items-center gap-2">
-                {[0, 1, 2].map((dot) => (
-                  <button
-                    key={dot}
-                    type="button"
-                    aria-label={`Slide ${dot + 1}`}
-                    onClick={() => setActiveDot(dot)}
-                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                      activeDot === dot ? 'w-6 bg-amber-400' : 'w-1.5 bg-white/40'
-                    }`}
-                  />
-                ))}
               </div>
             </div>
           </div>
