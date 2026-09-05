@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
+import { IndianFlag } from '../components/ui/IndianFlag';
 
 export interface DemoOfficer {
   id: string;
@@ -32,8 +33,8 @@ export default function LoginPage({ onAuthenticate }: LoginPageProps) {
     <main className="min-h-screen bg-slate-100 text-slate-900">
       <header className="border-b-4 border-amber-500 bg-primary-900 text-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-full border-2 border-white/80 text-lg font-bold">भारत</span>
+          <div className="flex items-center gap-3.5">
+            <IndianFlag variant="circular" width={42} height={42} className="shadow-sm" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-200">Government of India</p>
               <h1 className="text-base font-bold">MeriPehchan · Jan Parichay</h1>

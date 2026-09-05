@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { ShieldCheck, UserCheck, BookOpen, BarChart3, LayoutDashboard, Award } from 'lucide-react';
+import { UserCheck, BookOpen, BarChart3, LayoutDashboard, Award } from 'lucide-react';
+import { IndianFlag } from '../ui/IndianFlag';
 
 interface NavbarProps {
   activeTab: 'dashboard' | 'discover' | 'competency' | 'analytics';
@@ -34,8 +35,8 @@ export function Navbar({
       <div className="bg-primary-900 text-white px-4 md:px-10 py-3 shadow-inner">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
           <div className="flex items-center gap-3.5 text-center md:text-left">
-            <div className="w-9 h-9 rounded-full bg-white/10 border border-amber-400/80 flex items-center justify-center font-bold text-amber-400 text-sm shadow-xs">
-              <ShieldCheck className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-full bg-white/10 border border-amber-400/80 flex items-center justify-center shadow-xs overflow-hidden flex-shrink-0">
+              <IndianFlag variant="circular" width={40} height={40} />
             </div>
             <div>
               <div className="flex items-center gap-2">
