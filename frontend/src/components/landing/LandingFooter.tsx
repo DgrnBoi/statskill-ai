@@ -75,14 +75,16 @@ export function LandingFooter({
                     {'modalKey' in item && item.modalKey && onOpenInfo ? (
                       <button
                         type="button"
-                        onClick={() => onOpenInfo(item.modalKey)}
+                        onClick={() => {
+                          if (item.modalKey) onOpenInfo(item.modalKey);
+                        }}
                         className="text-left text-sm text-slate-300 transition hover:text-amber-400 cursor-pointer"
                       >
                         {item.label}
                       </button>
                     ) : (
                       <a
-                        href={item.href}
+                        href={item.href || '#'}
                         target={item.href?.startsWith('http') ? '_blank' : undefined}
                         rel={item.href?.startsWith('http') ? 'noreferrer' : undefined}
                         className="text-sm text-slate-300 transition hover:text-amber-400"

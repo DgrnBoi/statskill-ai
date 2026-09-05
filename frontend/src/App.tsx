@@ -7,6 +7,7 @@ import { PortalTab } from './components/layout/Navbar';
 import { AccessibilityModal, AccessibilitySettings, DEFAULT_ACCESSIBILITY_SETTINGS } from './components/ui/AccessibilityModal';
 import { KarmayogiSahayakModal } from './components/ui/KarmayogiSahayakModal';
 import { SecretAdminGatewayModal } from './components/admin/SecretAdminGatewayModal';
+import { OfflineStatusBar } from './components/ui/OfflineStatusBar';
 
 interface AppRouteState {
   isLogin: boolean;
@@ -157,6 +158,7 @@ function App() {
   return (
     <ErrorBoundary>
       <div className="App min-h-screen bg-slate-50">
+        <OfflineStatusBar />
         {route.isLogin ? (
           <LoginPage
             onAuthenticate={handleDemoLogin}
