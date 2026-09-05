@@ -17,7 +17,7 @@ export function SiteFooter({
         { label: 'MoSPI Newsroom', modalKey: 'newsroom' as const },
         { label: 'Help Centre & Helpline', modalKey: 'help' as const },
         { label: 'Active Tenders (CPPP)', modalKey: 'tenders' as const },
-        { label: 'Right to Information (RTI)', href: '#' },
+        { label: 'Right to Information (RTI)', href: 'https://rti.gov.in' },
       ],
     },
     {
@@ -25,9 +25,9 @@ export function SiteFooter({
       items: [
         { label: 'ISS & SSS Career Pathways', modalKey: 'career' as const },
         { label: 'Gazette Notifications', modalKey: 'notifications' as const },
-        { label: 'NSSTA Training Calendar', href: '#' },
-        { label: 'CAPI Field Protocols', href: '#' },
-        { label: 'Nodal Officers Directory', href: '#' },
+        { label: 'NSSTA Training Calendar', href: 'https://mospi.gov.in/training' },
+        { label: 'CAPI Field Protocols', href: 'https://mospi.gov.in/surveys' },
+        { label: 'Nodal Officers Directory', href: 'https://mospi.gov.in/whos-who' },
       ],
     },
     {
@@ -37,7 +37,7 @@ export function SiteFooter({
         { label: 'Ministry of Statistics (MoSPI)', href: 'https://mospi.gov.in' },
         { label: 'Capacity Building Commission', href: 'https://cbc.gov.in' },
         { label: 'Department of Personnel & Training', href: 'https://dopt.gov.in' },
-        { label: 'Privacy & Data Governance Policy', href: '#' },
+        { label: 'Privacy & Data Governance Policy', href: 'https://www.meity.gov.in/national-data-governance-framework-policy' },
       ],
     },
   ]

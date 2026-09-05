@@ -116,7 +116,7 @@ function heatColor(v: number) {
 
 export function RuleToRoleAnalytics({ onOpenDashboard }: { onOpenDashboard?: () => void }) {
   return (
-    <section id="analytics" className="bg-[#F8FAFC]">
+    <section id="analytics" className="bg-[#F8FAFC] cv-auto">
       <div className="mx-auto max-w-7xl px-4 py-16">
         <div className="mb-10 max-w-2xl">
           <span className="text-xs font-bold uppercase tracking-widest text-amber-600">

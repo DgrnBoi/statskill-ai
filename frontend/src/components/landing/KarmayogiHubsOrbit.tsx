@@ -45,7 +45,7 @@ const HUBS = [
 
 export function KarmayogiHubsOrbit({ onLaunchAssessment }: { onLaunchAssessment?: () => void }) {
   return (
-    <section id="hubs" className="bg-[#0B2E63] text-white">
+    <section id="hubs" className="bg-[#0B2E63] text-white cv-auto">
       <div className="mx-auto max-w-7xl px-4 py-16">
         <div className="mb-10 max-w-2xl">
           <span className="text-xs font-bold uppercase tracking-widest text-amber-400">

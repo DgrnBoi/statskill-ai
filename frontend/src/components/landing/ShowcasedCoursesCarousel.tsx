@@ -85,7 +85,7 @@ export function ShowcasedCoursesCarousel({
   };
 
   return (
-    <section id="courses" className="bg-[#FAF8F5]">
+    <section id="courses" className="bg-[#FAF8F5] cv-auto">
       <div className="mx-auto max-w-7xl px-4 py-16">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
