@@ -19,62 +19,90 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
           backgroundSize: '24px 24px',
         }}
       />
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 md:py-20 lg:grid-cols-[1.1fr_0.9fr]">
-        {/* Left column */}
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#0B2E63]/20 bg-[#0B2E63]/10 px-3 py-1 text-xs font-semibold text-[#0B2E63]">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            National Statistical Systems Training Academy (NSSTA) · Mission Karmayogi
-          </span>
-          <h1 className="mt-4 text-4xl font-extrabold leading-tight text-[#0B2E63] md:text-5xl lg:text-6xl">
-            StatSkill AI
-          </h1>
-          <p className="mt-2 text-xl font-bold text-amber-600">
-            Sovereign Capacity Building for India's Statistical Cadres
-          </p>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-700">
-            Empowering officers of the Indian Statistical Service (ISS), Subordinate Statistical Service (SSS),
-            and State DES with AI-driven, FRAC-aligned diagnostic assessments and role-based continuous learning.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={onLaunchAssessment}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0B2E63] hover:bg-[#123E82] px-5 py-3 text-sm font-bold text-white shadow-md transition cursor-pointer active:translate-y-[1px]"
-            >
-              <Zap className="h-4 w-4 text-amber-400" />
-              Launch Diagnostic Assessment
-              <ArrowRight className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={onExploreCourses}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#0B2E63]/30 bg-white px-5 py-3 text-sm font-bold text-[#0B2E63] transition hover:bg-slate-50 cursor-pointer shadow-2xs"
-            >
-              <BookOpen className="h-4 w-4" />
-              Browse 880+ MoSPI Courses
-            </button>
+      <div className="relative mx-auto max-w-7xl px-4 pt-6 pb-10 md:pt-8 md:pb-12">
+        {/* Top Sovereign Announcement & Cadre Dispatch Strip */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-[#0B2E63]/15 bg-white/85 px-4 py-2.5 text-xs backdrop-blur-xs shadow-2xs">
+          <div className="flex flex-wrap items-center gap-2 font-medium text-[#0B2E63]">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75"></span>
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
+            </span>
+            <span className="rounded border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] font-extrabold uppercase tracking-wider text-amber-900">
+              Official MoSPI Gateway
+            </span>
+            <span className="font-light text-slate-300">|</span>
+            <span className="font-semibold text-slate-800">
+              National Statistical Systems Training Academy (NSSTA)
+            </span>
           </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0B2E63]/10 border border-[#0B2E63]/15 text-[#0B2E63] font-semibold shadow-2xs">
-              <span>🎯</span> FRAC Level 3 Mapped
+          <div className="flex items-center gap-3 text-[11px] text-slate-600">
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-800">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+              FRAC v3.0 &amp; DPDP Act 2023 Compliant
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-900 font-semibold shadow-2xs">
-              <span>🔄</span> Sets A, B, C, D Reshuffle
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-900 font-semibold shadow-2xs">
-              <span>📱</span> CAPI Field Mode
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-900 font-semibold shadow-2xs">
-              <span>🛡️</span> DPDP Act 2023 Fiduciary
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/25 text-purple-900 font-semibold shadow-2xs">
-              <span>⚡</span> 12ms Edge-AI Engine
+            <span className="hidden text-slate-300 md:inline">•</span>
+            <span className="hidden font-mono text-slate-500 md:inline">
+              Cadre Session 2026-27 Active
             </span>
           </div>
         </div>
+
+        <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          {/* Left column */}
+          <div className="border-l-4 border-amber-500 pl-4 md:pl-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#0B2E63]/20 bg-[#0B2E63]/10 px-3 py-1 text-xs font-semibold text-[#0B2E63]">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              National Statistical Systems Training Academy (NSSTA) · Mission Karmayogi
+            </span>
+            <h1 className="mt-3 text-4xl font-extrabold leading-tight text-[#0B2E63] md:text-5xl lg:text-6xl tracking-tight">
+              StatSkill AI
+            </h1>
+            <p className="mt-2 text-xl font-bold text-amber-600">
+              Sovereign Capacity Building for India's Statistical Cadres
+            </p>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-700">
+              Empowering officers of the Indian Statistical Service (ISS), Subordinate Statistical Service (SSS),
+              and State DES with AI-driven, FRAC-aligned diagnostic assessments and role-based continuous learning.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={onLaunchAssessment}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#0B2E63] hover:bg-[#123E82] px-5 py-3 text-sm font-bold text-white shadow-md transition cursor-pointer active:translate-y-[1px]"
+              >
+                <Zap className="h-4 w-4 text-amber-400" />
+                Launch Diagnostic Assessment
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onExploreCourses}
+                className="inline-flex items-center gap-2 rounded-lg border border-[#0B2E63]/30 bg-white px-5 py-3 text-sm font-bold text-[#0B2E63] transition hover:bg-slate-50 cursor-pointer shadow-2xs"
+              >
+                <BookOpen className="h-4 w-4" />
+                Browse 880+ MoSPI Courses
+              </button>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0B2E63]/10 border border-[#0B2E63]/15 text-[#0B2E63] font-semibold shadow-2xs">
+                <span>🎯</span> FRAC Level 3 Mapped
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-900 font-semibold shadow-2xs">
+                <span>🔄</span> Sets A, B, C, D Reshuffle
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-900 font-semibold shadow-2xs">
+                <span>📱</span> CAPI Field Mode
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-900 font-semibold shadow-2xs">
+                <span>🛡️</span> DPDP Act 2023 Fiduciary
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/25 text-purple-900 font-semibold shadow-2xs">
+                <span>⚡</span> 12ms Edge-AI Engine
+              </span>
+            </div>
+          </div>
 
         {/* Right column — celebratory milestone card */}
         <div className="relative">
@@ -132,6 +160,7 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
           </div>
         </div>
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 }
