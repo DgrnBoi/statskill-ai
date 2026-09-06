@@ -1,6 +1,7 @@
 import React from 'react';
-import { BookOpen, Sparkles, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
-import { CountUpNumber } from '../ui/CountUpNumber';
+import { ArrowRight } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { useUiPreferences } from '../../contexts/UiPreferencesContext';
 
 interface LandingHeroProps {
   onLaunchAssessment: () => void;
@@ -8,159 +9,31 @@ interface LandingHeroProps {
 }
 
 export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHeroProps) {
+  const { t } = useUiPreferences();
   return (
-    <section id="hero" className="relative overflow-hidden bg-[#FAF8F5]">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.4]"
-        aria-hidden="true"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 1px 1px, rgba(11,46,99,0.08) 1px, transparent 0)',
-          backgroundSize: '24px 24px',
-        }}
-      />
-      <div className="relative mx-auto max-w-7xl px-4 pt-6 pb-10 md:pt-8 md:pb-12">
-        {/* Top Sovereign Announcement & Cadre Dispatch Strip */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-[#0B2E63]/15 bg-white/85 px-4 py-2.5 text-xs backdrop-blur-xs shadow-2xs">
-          <div className="flex flex-wrap items-center gap-2 font-medium text-[#0B2E63]">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75"></span>
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
-            </span>
-            <span className="rounded border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] font-extrabold uppercase tracking-wider text-amber-900">
-              Official MoSPI Gateway
-            </span>
-            <span className="font-light text-slate-300">|</span>
-            <span className="font-semibold text-slate-800">
-              National Statistical Systems Training Academy (NSSTA)
-            </span>
+    <section id="hero" className="landing-hero">
+      <div className="landing-container landing-hero-layout">
+        <div className="landing-hero-copy">
+          <p className="landing-eyebrow">{t('heroEyebrow')}</p>
+          <h1>{t('heroTitle')}</h1>
+          <p className="landing-hero-description">{t('heroDescription')}</p>
+          <p className="landing-hero-context">{t('heroContext')}</p>
+          <div className="landing-hero-actions">
+            <Button onClick={onLaunchAssessment}>{t('startAssessment')} <ArrowRight size={16} aria-hidden="true" /></Button>
+            <Button variant="outline" onClick={onExploreCourses}>{t('exploreCourses')}</Button>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-slate-600">
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-800">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-              FRAC v3.0 &amp; DPDP Act 2023 Compliant
-            </span>
-            <span className="hidden text-slate-300 md:inline">•</span>
-            <span className="hidden font-mono text-slate-500 md:inline">
-              Cadre Session 2026-27 Active
-            </span>
-          </div>
+          <p className="landing-hero-note">JSO · SSO · Assistant Director · Director</p>
         </div>
-
-        <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          {/* Left column */}
-          <div className="border-l-4 border-amber-500 pl-4 md:pl-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#0B2E63]/20 bg-[#0B2E63]/10 px-3 py-1 text-xs font-semibold text-[#0B2E63]">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              National Statistical Systems Training Academy (NSSTA) · Mission Karmayogi
-            </span>
-            <h1 className="mt-3 text-4xl font-extrabold leading-tight text-[#0B2E63] md:text-5xl lg:text-6xl tracking-tight">
-              StatSkill AI
-            </h1>
-            <p className="mt-2 text-xl font-bold text-amber-600">
-              Sovereign Capacity Building for India's Statistical Cadres
-            </p>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-700">
-              Empowering officers of the Indian Statistical Service (ISS), Subordinate Statistical Service (SSS),
-              and State DES with AI-driven, FRAC-aligned diagnostic assessments and role-based continuous learning.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={onLaunchAssessment}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#0B2E63] hover:bg-[#123E82] px-5 py-3 text-sm font-bold text-white shadow-md transition cursor-pointer active:translate-y-[1px]"
-              >
-                <Zap className="h-4 w-4 text-amber-400" />
-                Launch Diagnostic Assessment
-                <ArrowRight className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={onExploreCourses}
-                className="inline-flex items-center gap-2 rounded-lg border border-[#0B2E63]/30 bg-white px-5 py-3 text-sm font-bold text-[#0B2E63] transition hover:bg-slate-50 cursor-pointer shadow-2xs"
-              >
-                <BookOpen className="h-4 w-4" />
-                Browse 880+ MoSPI Courses
-              </button>
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0B2E63]/10 border border-[#0B2E63]/15 text-[#0B2E63] font-semibold shadow-2xs">
-                <span>🎯</span> FRAC Level 3 Mapped
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-900 font-semibold shadow-2xs">
-                <span>🔄</span> Sets A, B, C, D Reshuffle
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-900 font-semibold shadow-2xs">
-                <span>📱</span> CAPI Field Mode
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-900 font-semibold shadow-2xs">
-                <span>🛡️</span> DPDP Act 2023 Fiduciary
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/25 text-purple-900 font-semibold shadow-2xs">
-                <span>⚡</span> 12ms Edge-AI Engine
-              </span>
-            </div>
-          </div>
-
-        {/* Right column — celebratory milestone card */}
-        <div className="relative">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#123E82] to-[#0B2E63] p-8 text-white shadow-2xl border border-white/10">
-            {/* Background Glow */}
-            <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-[#1A56A0]/60 blur-2xl" />
-
-            <div className="relative">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/40">
-                  <span>✨</span> MoSPI &amp; National Cadre Milestone
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-[11px] font-mono text-emerald-300">
-                  <span>📡</span> xAPI LRS Synced
-                </span>
-              </div>
-
-              <p className="mt-6 font-mono text-5xl md:text-6xl font-bold leading-none tracking-tight text-white tabular-nums">
-                <CountUpNumber end={1.72} decimals={2} suffix=" Crore+" duration={1800} />
-              </p>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-200">
-                Civil Servants Onboarded Nationally • <strong>5,200+ Statistical Officers &amp; Enumerators</strong> Active Across 36 States/UTs.
-              </p>
-
-              <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl bg-white/10 p-3 backdrop-blur-xs border border-white/10">
-                  <div className="flex items-center justify-between">
-                    <p className="font-mono text-lg font-bold text-amber-300">
-                      <CountUpNumber end={94.2} decimals={1} suffix="%" duration={1600} />
-                    </p>
-                    <span className="text-sm">📊</span>
-                  </div>
-                  <p className="text-slate-300 text-[11px] mt-0.5">NSS CAPI Proficiency</p>
-                </div>
-                <div className="rounded-xl bg-white/10 p-3 backdrop-blur-xs border border-white/10">
-                  <div className="flex items-center justify-between">
-                    <p className="font-mono text-lg font-bold text-emerald-300">
-                      <CountUpNumber end={36} suffix=" States/UTs" duration={1400} />
-                    </p>
-                    <span className="text-sm">🇮🇳</span>
-                  </div>
-                  <p className="text-slate-300 text-[11px] mt-0.5">State DES Integration</p>
-                </div>
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px]">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-slate-200">
-                  <span>📶</span> 100% Offline CAPI Ready
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-slate-200">
-                  <span>🏛️</span> Jan Parichay Verified
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <aside className="landing-learning-path" aria-labelledby="learning-path-title">
+          <div className="landing-path-heading"><p className="landing-eyebrow">{t('learningPath')}</p><h2 id="learning-path-title">{t('learningPathTitle')}</h2></div>
+          <ol>
+            <li><span className="landing-step-number">01</span><div><h3>{t('assessCompetencies')}</h3><p>{t('assessCompetenciesDescription')}</p></div></li>
+            <li><span className="landing-step-number">02</span><div><h3>{t('findLearning')}</h3><p>{t('findLearningDescription')}</p></div></li>
+            <li><span className="landing-step-number">03</span><div><h3>{t('seeProgress')}</h3><p>{t('seeProgressDescription')}</p></div></li>
+          </ol>
+          <div className="landing-path-footer">FRAC-aligned competencies <span aria-hidden="true">·</span> Mission Karmayogi</div>
+        </aside>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
 }

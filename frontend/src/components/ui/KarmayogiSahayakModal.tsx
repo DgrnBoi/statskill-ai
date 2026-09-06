@@ -3,6 +3,7 @@
 /* contrast: pass (WCAG AA 4.5:1+) */
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 import { PortalTab } from '../layout/Navbar';
 import {
   MessageSquare,
@@ -52,12 +53,13 @@ export function KarmayogiSahayakModal({
   onOpenAccessibility,
   onOpenSecretAdmin,
 }: KarmayogiSahayakModalProps) {
+  const dialogRef = useDialogAccessibility(isOpen, onClose);
   const [inputQuery, setInputQuery] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: 'welcome-1',
       sender: 'bot',
-      text: 'Namaste! I am your Karmayogi Sahayak, the official AI learning and navigation guide for MoSPI officials. Where would you like to go today?',
+      text: 'Namaste! I am the StatSkill prototype guide. I can help you find assessments, courses, competency views, and accessibility controls. Where would you like to go?',
       timestamp: 'Just now',
       actions: [
         {
@@ -143,7 +145,7 @@ export function KarmayogiSahayakModal({
 
     // Structured keyword intent resolution
     if (lower.includes('home') || lower.includes('landing') || lower.includes('gateway') || lower.includes('front page') || lower.includes('main page')) {
-      botReplyText = 'The Public Gateway provides the official national landing page with real-time capacity metrics, showcased MoSPI courses, Mission Karmayogi hubs, and ministry info drawers.';
+      botReplyText = 'The Public Gateway introduces this SIH prototype, highlights sample capacity indicators, showcases the course catalog, and links to project information.';
       botActions = [
         {
           label: 'Go to Public Gateway (Landing Page)',
@@ -155,7 +157,7 @@ export function KarmayogiSahayakModal({
         },
       ];
     } else if (lower.includes('test') || lower.includes('quiz') || lower.includes('exam') || lower.includes('assessment') || lower.includes('potato')) {
-      botReplyText = 'The Assessment Engine generates 5-question MoSPI FRAC exams with anti-collusion shuffling and cognitive distractor analysis. It supports both Cloud Live RAG and Edge Offline (Potato) Mode.';
+      botReplyText = 'The Assessment Engine builds five-question competency checks, shuffles questions and options, and records diagnostic results locally. Generated assessments need the backend; the bundled question bank remains available offline.';
       botActions = [
         {
           label: 'Go to Assessment Engine',
@@ -167,7 +169,7 @@ export function KarmayogiSahayakModal({
         },
       ];
     } else if (lower.includes('course') || lower.includes('search') || lower.includes('find') || lower.includes('igot') || lower.includes('catalog') || lower.includes('training')) {
-      botReplyText = 'Our Course Discovery module indexes 880+ authentic government training programs from iGOT Karmayogi and NSSTA across Statistical, Technical, and Digital Governance domains.';
+      botReplyText = 'Course Discovery indexes the project catalog of government training resources across statistical, technical, and digital-governance domains, with source links provided on each course.';
       botActions = [
         {
           label: 'Open 880+ Course Discovery',
@@ -179,7 +181,7 @@ export function KarmayogiSahayakModal({
         },
       ];
     } else if (lower.includes('login') || lower.includes('sign in') || lower.includes('sso') || lower.includes('parichay') || lower.includes('auth')) {
-      botReplyText = 'You can sign in securely via the official Jan Parichay National Single Sign-On (SSO) using your Parichay ID, MeriPehchan credentials, or OTP verification.';
+      botReplyText = 'The login screen demonstrates a Jan Parichay-style handoff with four demo officer profiles. It does not connect to the production Jan Parichay service or collect government credentials.';
       botActions = [
         {
           label: 'Open Jan Parichay Login',
@@ -191,7 +193,7 @@ export function KarmayogiSahayakModal({
         },
       ];
     } else if (lower.includes('radar') || lower.includes('spider') || lower.includes('overview') || lower.includes('cohort') || lower.includes('mistake') || lower.includes('profile')) {
-      botReplyText = 'The Officer Dashboard features an interactive SVG Spider Radar chart mapping your mastery across 6 statistical dimensions, recent diagnostic mistake logs, and peer capacity cohorts.';
+      botReplyText = 'The Officer Dashboard maps your saved competency scores in a radar chart and shows locally recorded assessment history. Empty sections stay empty until you complete an assessment.';
       botActions = [
         {
           label: 'Open Officer Dashboard',
@@ -203,7 +205,7 @@ export function KarmayogiSahayakModal({
         },
       ];
     } else if (lower.includes('frac') || lower.includes('competency') || lower.includes('matrix') || lower.includes('skill') || lower.includes('zpd') || lower.includes('pathway')) {
-      botReplyText = 'The FRAC Competency Profile maps official benchmarks (Levels 1 to 5) for Junior Statistical Officers (JSO), Senior Statistical Officers (SSO), Assistant Directors, and DIID Directors with 4-tier ZPD pathways.';
+      botReplyText = 'The prototype competency profile demonstrates role-based levels for JSO, SSO, Assistant Director, and Director demo personas, together with suggested learning pathways.';
       botActions = [
         {
           label: 'View FRAC Competency Profile',
@@ -215,7 +217,7 @@ export function KarmayogiSahayakModal({
         },
       ];
     } else if (lower.includes('analytics') || lower.includes('macro') || lower.includes('division') || lower.includes('chart')) {
-      botReplyText = 'MoSPI Analytics monitors real-time statistical readiness, xAPI telemetry statement logs, and division-level competency fulfillment heatmaps.';
+      botReplyText = 'Analytics visualizes competency results saved by this prototype. The telemetry drawer previews xAPI-formatted statements, but it does not verify delivery to an external learning record store.';
       botActions = [
         {
           label: 'View MoSPI Analytics',
@@ -294,9 +296,10 @@ export function KarmayogiSahayakModal({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Karmayogi Sahayak MoSPI AI Guide"
+      aria-label="Karmayogi Sahayak prototype guide"
       className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] max-h-[85vh] bg-white rounded-2xl shadow-2xl border border-slate-300 flex flex-col overflow-hidden animate-fade-in font-body text-slate-900"
     >
       {/* Header Bar */}
@@ -309,10 +312,10 @@ export function KarmayogiSahayakModal({
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-sm tracking-tight font-display text-white">Karmayogi Sahayak</h3>
               <span className="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-bold font-mono">
-                AI GUIDE
+                PROTOTYPE GUIDE
               </span>
             </div>
-            <p className="text-[11px] text-slate-300">MoSPI Interactive Navigation & Learning Assistant</p>
+            <p className="text-[11px] text-slate-300">Keyword-based navigation and learning help</p>
           </div>
         </div>
 
@@ -408,12 +411,12 @@ export function KarmayogiSahayakModal({
           value={inputQuery}
           onChange={(e) => setInputQuery(e.target.value)}
           placeholder="Ask where to go or how to use StatSkill..."
-          aria-label="Message Karmayogi Sahayak AI Guide"
+          aria-label="Message Karmayogi Sahayak guide"
           className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-900 bg-white placeholder:text-slate-400 focus:outline-none focus:border-[#0B2E63] focus:ring-2 focus:ring-[#0B2E63]/20"
         />
         <button
           type="submit"
-          aria-label="Send message to AI guide"
+          aria-label="Send message to guide"
           disabled={!inputQuery.trim()}
           className="p-2.5 bg-[#0B2E63] hover:bg-[#123E82] disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63]"
         >

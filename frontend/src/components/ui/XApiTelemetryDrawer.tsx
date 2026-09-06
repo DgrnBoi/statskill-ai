@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Copy, Check, Server, ShieldCheck, Terminal, Radio } from 'lucide-react';
 import { Button } from './Button';
 import { Badge } from './Badge';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 
 export interface XApiStatementPayload {
   actor: {
@@ -50,6 +51,7 @@ interface XApiTelemetryDrawerProps {
 }
 
 export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetryDrawerProps) {
+  const dialogRef = useDialogAccessibility(isOpen, onClose);
   const [copied, setCopied] = useState(false);
 
   // Keyboard listener for Escape key to close modal
@@ -66,14 +68,14 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
 
   if (!isOpen) return null;
 
-  // Fallback representative statement if not yet triggered by user quiz action
+  // Transparent example shown until the first quiz action prepares a statement.
 
   const currentStatement: XApiStatementPayload = statement || {
     actor: {
-      name: 'Eshaan Sunthankar (JSO)',
+      name: 'Demo officer',
       account: {
         homePage: 'https://igotkarmayogi.gov.in',
-        name: 'PARICHAY_1042_NSSO',
+        name: 'NO_CAPTURED_OFFICER_ID',
       },
     },
     verb: {
@@ -83,10 +85,10 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
       },
     },
     object: {
-      id: 'https://statskill.mospi.gov.in/assessments/sampling-theory-01',
+      id: 'https://example.invalid/statskill/assessment-preview',
       definition: {
         name: {
-          'en-US': 'Official Survey Design & Multi-Stage Sampling Evaluation',
+          'en-US': 'Example assessment statement',
         },
         type: 'http://adlnet.gov/expapi/activities/assessment',
       },
@@ -101,12 +103,12 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
       success: true,
     },
     context: {
-      platform: 'StatSkill AI • Sovereign MoSPI Node',
-      revision: 'FRAC-v2.4-GOV-IN',
+      platform: 'StatSkill AI prototype',
+      revision: 'demo-preview',
       extensions: {
-        'https://igotkarmayogi.gov.in/ext/cadre': 'Subordinate Statistical Service (SSS)',
-        'https://igotkarmayogi.gov.in/ext/division': 'Field Operations Division (FOD), NSSO',
-        'https://igotkarmayogi.gov.in/ext/competency': 'Survey Design & Sampling',
+        'https://igotkarmayogi.gov.in/ext/cadre': 'Demo cadre',
+        'https://igotkarmayogi.gov.in/ext/division': 'Demo division',
+        'https://igotkarmayogi.gov.in/ext/competency': 'Demo competency',
       },
     },
     timestamp: new Date().toISOString(),
@@ -129,7 +131,7 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
       />
 
       {/* Slide-out Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10" role="dialog" aria-modal="true" aria-labelledby="xapi-drawer-title">
+      <div ref={dialogRef} className="fixed inset-y-0 right-0 max-w-full flex pl-10" role="dialog" aria-modal="true" aria-labelledby="xapi-drawer-title">
         <div className="w-screen max-w-xl bg-slate-900 text-slate-100 shadow-2xl flex flex-col border-l border-slate-800 animate-slide-in">
           {/* Header */}
           <div className="px-6 py-5 border-b border-slate-800 bg-slate-950 flex items-start justify-between">
@@ -137,7 +139,7 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
                 <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
-                  iGOT LRS Telemetry Stream
+                  {statement ? 'Latest xAPI payload' : 'Example xAPI payload'}
                 </span>
               </div>
               <h3 id="xapi-drawer-title" className="text-base font-bold text-white flex items-center gap-2">
@@ -145,7 +147,7 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
                 xAPI / CMI-5 Statement Inspector
               </h3>
               <p className="text-xs text-slate-400">
-                Live JSON-LD learning record dispatched to Karmayogi Bharat LRS
+                {statement ? 'Prepared from the latest assessment interaction; delivery is not verified here' : 'Illustrative payload only; no statement has been captured or dispatched'}
               </p>
             </div>
             <button
@@ -162,7 +164,7 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
           <div className="px-6 py-3 bg-slate-900/80 border-b border-slate-800 grid grid-cols-2 gap-3 text-xs">
             <div className="space-y-0.5">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Target LRS Endpoint
+                Configured LRS target
               </span>
               <span className="font-mono text-xs text-amber-300 truncate block">
                 igotkarmayogi.gov.in/lrs/v1/statements
@@ -184,7 +186,7 @@ export function XApiTelemetryDrawer({ isOpen, onClose, statement }: XApiTelemetr
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span className="text-slate-300 font-semibold text-[11px]">
-                  Cryptographically Signed & Verified
+                  Client-side payload preview · delivery status unavailable
                 </span>
               </div>
               <button

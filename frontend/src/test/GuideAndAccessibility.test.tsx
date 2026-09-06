@@ -33,8 +33,8 @@ describe('iGOT Karmayogi Universal Accessibility Console, AI Sahayak Guide & Nav
       />
     );
 
-    expect(screen.getByRole('dialog', { name: /Karmayogi Sahayak MoSPI AI Guide/i })).toBeDefined();
-    expect(screen.getByText(/I am your Karmayogi Sahayak/i)).toBeDefined();
+    expect(screen.getByRole('dialog', { name: /Karmayogi Sahayak prototype guide/i })).toBeDefined();
+    expect(screen.getByText(/I am the StatSkill prototype guide/i)).toBeDefined();
 
     // Click "Take Diagnostic Assessment" action chip
     const quizJumpBtn = screen.getByRole('button', { name: /Take Diagnostic Assessment/i });
@@ -59,14 +59,14 @@ describe('iGOT Karmayogi Universal Accessibility Console, AI Sahayak Guide & Nav
       />
     );
 
-    const input = screen.getByLabelText(/Message Karmayogi Sahayak AI Guide/i);
-    const sendBtn = screen.getByLabelText(/Send message to AI guide/i);
+    const input = screen.getByLabelText(/Message Karmayogi Sahayak guide/i);
+    const sendBtn = screen.getByLabelText(/Send message to guide/i);
 
     // Ask about searching courses
     fireEvent.change(input, { target: { value: 'Where can I find iGOT courses for sampling?' } });
     fireEvent.click(sendBtn);
 
-    expect(screen.getByText(/indexes 880\+ authentic government training programs/i)).toBeDefined();
+    expect(screen.getByText(/indexes the project catalog of government training resources/i)).toBeDefined();
     const jumpBtn = screen.getByRole('button', { name: /Open 880\+ Course Discovery/i });
     fireEvent.click(jumpBtn);
 
@@ -186,23 +186,23 @@ describe('iGOT Karmayogi Universal Accessibility Console, AI Sahayak Guide & Nav
       />
     );
 
-    expect(screen.getByRole('dialog', { name: /MoSPI Sovereign Gateway/i })).toBeDefined();
+    expect(screen.getByRole('dialog', { name: /Demo Admin Gateway/i })).toBeDefined();
 
     // Enter wrong PIN
-    const pinInput = screen.getByLabelText(/Ministerial Clearance Passcode/i);
-    const authBtn = screen.getByRole('button', { name: /Authenticate Clearance/i });
+    const pinInput = screen.getByLabelText(/Demo admin access key/i);
+    const authBtn = screen.getByRole('button', { name: /Open admin preview/i });
 
     fireEvent.change(pinInput, { target: { value: 'WRONGPIN' } });
     fireEvent.click(authBtn);
 
     expect(screen.getByRole('alert')).toBeDefined();
-    expect(screen.getByText(/Invalid ministerial PIN/i)).toBeDefined();
+    expect(screen.getByText(/Invalid demo key/i)).toBeDefined();
 
     // Enter valid PIN
     fireEvent.change(pinInput, { target: { value: 'MOSPI2026' } });
     fireEvent.click(authBtn);
 
-    expect(screen.getByText(/Ministerial Clearance Verified/i)).toBeDefined();
+    expect(screen.getByText(/Demo key accepted/i)).toBeDefined();
 
     act(() => {
       vi.runAllTimers();
@@ -261,6 +261,6 @@ describe('iGOT Karmayogi Universal Accessibility Console, AI Sahayak Guide & Nav
     fireEvent.click(backBtn);
 
     // We are back at Assessment Engine
-    expect(screen.getByText(/Sovereign Edge-AI Assessment Generator/i)).toBeDefined();
+    expect(screen.getByText(/Competency assessment generator/i)).toBeDefined();
   });
 });

@@ -80,7 +80,7 @@ describe('Assessment Analysis Report & Timer Stoppage', () => {
     expect(screen.getByText('1m 14s / 2m 30s')).toBeDefined();
 
     // Verify Rating Title
-    expect(screen.getAllByText('Proficient Cadre Competence').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Strong assessment result').length).toBeGreaterThanOrEqual(1);
 
     // Verify Action buttons
     const pathwayBtn = screen.getByRole('button', { name: /View 4-Tier Learning Pathway/i });
@@ -93,7 +93,7 @@ describe('Assessment Analysis Report & Timer Stoppage', () => {
     fireEvent.click(retakeBtn);
     expect(onRetakeQuiz).toHaveBeenCalledTimes(1);
 
-    const telemetryBtn = screen.getByRole('button', { name: /Inspect iGOT xAPI Statement/i });
+    const telemetryBtn = screen.getByRole('button', { name: /Inspect xAPI payload/i });
     expect(telemetryBtn).toBeDefined();
     fireEvent.click(telemetryBtn);
     expect(onOpenTelemetry).toHaveBeenCalledTimes(1);

@@ -7,6 +7,7 @@ import { AccessibilityModal, AccessibilitySettings, DEFAULT_ACCESSIBILITY_SETTIN
 import { KarmayogiSahayakModal } from './components/ui/KarmayogiSahayakModal';
 import { SecretAdminGatewayModal } from './components/admin/SecretAdminGatewayModal';
 import { OfflineStatusBar } from './components/ui/OfflineStatusBar';
+import { UiPreferencesProvider } from './contexts/UiPreferencesContext';
 
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
@@ -54,6 +55,9 @@ function App() {
   const [isSahayakOpen, setIsSahayakOpen] = useState(false);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isSecretAdminOpen, setIsSecretAdminOpen] = useState(false);
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => {
+    try { return window.sessionStorage.getItem('statskill_admin_unlocked') === 'true'; } catch { return false; }
+  });
 
   const [accessibilitySettings, setAccessibilitySettings] = useState<AccessibilitySettings>(() => {
     try {
@@ -89,6 +93,12 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  useEffect(() => {
+    if (route.tab !== 'admin' || isAdminUnlocked) return;
+    window.history.replaceState({}, '', '/');
+    setRoute({ isLogin: false, tab: 'home' });
+  }, [isAdminUnlocked, route.tab]);
+
   const handleTabChange = useCallback((newTab: PortalTab) => {
     const path = newTab === 'home' ? '/' : `/${newTab}`;
     if (window.location.pathname !== path) {
@@ -110,20 +120,16 @@ function App() {
   }, []);
 
   const handleDemoLogin = useCallback(async (officer: DemoOfficer, method: 'parichay-id' | 'mobile-otp') => {
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/demo-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ officerId: officer.id, method }),
-      });
-      const data = await response.json();
-      if (response.ok && data?.token) {
-        window.localStorage.setItem('auth_token', data.token);
-      }
-    } catch {
-      // Fallback offline mock JWT token
-      window.localStorage.setItem('auth_token', `demo-jwt-${officer.id}`);
+    const response = await fetch('http://localhost:5000/api/auth/demo-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ officerId: officer.id, method }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data?.token) {
+      throw new Error(data?.error || 'The demo authentication service is unavailable. Start the backend and try again.');
     }
+    window.localStorage.setItem('auth_token', data.token);
 
     try {
       window.localStorage.setItem('statskill_demo_login', JSON.stringify({ officer, method }));
@@ -158,8 +164,10 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <div className="App min-h-screen bg-slate-50">
+    <UiPreferencesProvider>
+      <ErrorBoundary>
+        <div className="App min-h-screen bg-slate-50">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <OfflineStatusBar />
         <Suspense
           fallback={
@@ -225,13 +233,16 @@ function App() {
               isOpen={isSecretAdminOpen}
               onClose={() => setIsSecretAdminOpen(false)}
               onUnlockAdmin={() => {
+                setIsAdminUnlocked(true);
+                try { window.sessionStorage.setItem('statskill_admin_unlocked', 'true'); } catch {}
                 handleTabChange('admin');
               }}
             />
           </>
         )}
-      </div>
-    </ErrorBoundary>
+        </div>
+      </ErrorBoundary>
+    </UiPreferencesProvider>
   );
 }
 

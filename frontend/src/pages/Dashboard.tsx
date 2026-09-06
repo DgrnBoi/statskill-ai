@@ -15,6 +15,9 @@ import { IndianFlag } from '../components/ui/IndianFlag';
 import { KarmayogiSahayakModal } from '../components/ui/KarmayogiSahayakModal';
 import { AccessibilityModal, AccessibilitySettings, DEFAULT_ACCESSIBILITY_SETTINGS } from '../components/ui/AccessibilityModal';
 import { SecretAdminGatewayModal } from '../components/admin/SecretAdminGatewayModal';
+import { CourseCatalog } from '../components/catalog/CourseCatalog';
+import { CompetencyAnalytics } from '../components/analytics/CompetencyAnalytics';
+import { SahayakLauncher } from '../components/ui/SahayakLauncher';
 import {
   FileText,
   UploadCloud,
@@ -35,7 +38,6 @@ import {
   TrendingUp,
   Terminal,
   ShieldAlert,
-  Bot,
   Eye,
   Lock,
   ArrowLeft,
@@ -244,6 +246,58 @@ export const FALLBACK_COURSES: CourseItem[] = [
   },
 ];
 
+const OFFICER_PROGRESS_STORAGE_KEY = 'statskill_officer_progress_v1';
+
+interface StoredOfficerProgress {
+  proficiency: Record<string, number>;
+  assessmentsTaken: number;
+}
+
+function clampProficiencyLevel(value: unknown): number {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? Math.min(5, Math.max(0, numericValue)) : 0;
+}
+
+function normalizedProficiencyFor(designation: string, proficiency: Record<string, unknown> | undefined): Record<string, number> {
+  const defaults = defaultProficiencyFor(designation);
+  return Object.fromEntries(Object.keys(defaults).map((skillName) => [skillName, clampProficiencyLevel(proficiency?.[skillName])]));
+}
+
+function defaultProficiencyFor(designation: string) {
+  const cadre = MOSPI_CADRES_DATA[designation] || MOSPI_CADRES_DATA['Junior Statistical Officer (JSO)'];
+  return Object.fromEntries(cadre.competencies.map((skill) => [skill.skillName, 0]));
+}
+
+function readOfficerProgress(designation: string): StoredOfficerProgress | null {
+  try {
+    const raw = window.localStorage.getItem(OFFICER_PROGRESS_STORAGE_KEY);
+    if (!raw) return null;
+    const allProgress = JSON.parse(raw) as Record<string, StoredOfficerProgress>;
+    const progress = allProgress[designation];
+    if (!progress || typeof progress.assessmentsTaken !== 'number' || !progress.proficiency) return null;
+    return {
+      assessmentsTaken: Math.max(0, Math.floor(progress.assessmentsTaken)),
+      proficiency: normalizedProficiencyFor(designation, progress.proficiency),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeOfficerProgress(designation: string, progress: StoredOfficerProgress) {
+  try {
+    const raw = window.localStorage.getItem(OFFICER_PROGRESS_STORAGE_KEY);
+    const allProgress = raw ? JSON.parse(raw) : {};
+    const normalizedProgress: StoredOfficerProgress = {
+      assessmentsTaken: Math.max(0, Math.floor(progress.assessmentsTaken)),
+      proficiency: normalizedProficiencyFor(designation, progress.proficiency),
+    };
+    window.localStorage.setItem(OFFICER_PROGRESS_STORAGE_KEY, JSON.stringify({ ...allProgress, [designation]: normalizedProgress }));
+  } catch {
+    // The application remains usable if storage is unavailable.
+  }
+}
+
 interface DashboardProps {
   onOpenLogin?: () => void;
   activeTab?: PortalTab;
@@ -353,7 +407,9 @@ export default function Dashboard({
     } catch {}
     return 'Junior Statistical Officer (JSO)';
   });
-  const [proficiency, setProficiency] = useState<Record<string, number>>({});
+  const [proficiency, setProficiency] = useState<Record<string, number>>(
+    () => readOfficerProgress(designation)?.proficiency ?? defaultProficiencyFor(designation)
+  );
   const [isUploading, setIsUploading] = useState(false);
   const [generatedQuiz, setGeneratedQuiz] = useState<QuizQuestionItem[]>([]);
   const [paperSet, setPaperSet] = useState<string>('Set A');
@@ -368,6 +424,7 @@ export default function Dashboard({
   const [isExamCompleted, setIsExamCompleted] = useState<boolean>(false);
   const [examTimeTaken, setExamTimeTaken] = useState<number>(0);
   const examTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasFinalizedExamRef = React.useRef(false);
 
   // Navigation and Discovery States
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -380,7 +437,9 @@ export default function Dashboard({
   const [courses, setCourses] = useState<CourseItem[]>(FALLBACK_COURSES);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
-  const [assessmentsTaken, setAssessmentsTaken] = useState(0);
+  const [assessmentsTaken, setAssessmentsTaken] = useState(
+    () => readOfficerProgress(designation)?.assessmentsTaken ?? 0
+  );
   const [isTelemetryDrawerOpen, setIsTelemetryDrawerOpen] = useState(false);
   const [isAcbpModalOpen, setIsAcbpModalOpen] = useState(false);
   const [latestTelemetryStatement, setLatestTelemetryStatement] = useState<XApiStatementPayload | null>(null);
@@ -428,14 +487,16 @@ export default function Dashboard({
     return cadreData.competencies;
   }, [designation]);
 
-  // Synchronize initial proficiency levels when skills change
+  // Load the selected officer track without leaking another cadre's progress.
   useEffect(() => {
-    const initialProf: Record<string, number> = {};
-    skills.forEach((s) => {
-      initialProf[s.skillName] = Math.max(1, s.targetLevel - 1);
-    });
-    setProficiency(initialProf);
-  }, [skills]);
+    const saved = readOfficerProgress(designation);
+    setProficiency(saved?.proficiency ?? defaultProficiencyFor(designation));
+    setAssessmentsTaken(saved?.assessmentsTaken ?? 0);
+  }, [designation]);
+
+  useEffect(() => {
+    writeOfficerProgress(designation, { proficiency, assessmentsTaken });
+  }, [designation, proficiency, assessmentsTaken]);
 
   // Clean up any running polling and exam timer intervals on unmount
   useEffect(() => {
@@ -518,6 +579,8 @@ export default function Dashboard({
               examTimerRef.current = null;
             }
             setIsTimedOut(true);
+            setExamTimeTaken(150);
+            setIsExamCompleted(true);
             return 0;
           }
           return prev - 1;
@@ -561,7 +624,7 @@ export default function Dashboard({
           (c.provider && c.provider.toLowerCase().includes(q))
       );
     }
-    return filtered.slice(0, 9);
+    return filtered;
   }, []);
 
   // Fetch real government courses catalog with AbortController for network resilience
@@ -579,7 +642,7 @@ export default function Dashboard({
       })
       .then((data) => {
         if (data.success && Array.isArray(data.courses)) {
-          setCourses(data.courses.slice(0, 9)); // Show top 9 results
+          setCourses(data.courses);
         } else {
           setCourses(filterLocalCourses(debouncedSearchQuery, selectedDomain));
         }
@@ -606,111 +669,111 @@ export default function Dashboard({
   }, [handleTabChange]);
 
   const handleProficiencyChange = useCallback((skillName: string, level: number) => {
-    setProficiency((prev) => ({ ...prev, [skillName]: level }));
-    setAssessmentsTaken((prev) => prev + 1);
+    setProficiency((prev) => ({ ...prev, [skillName]: clampProficiencyLevel(level) }));
   }, []);
 
-  const handleQuestionAnswered = useCallback(
-    (qIndex: number, record: QuestionAnswerRecord) => {
-      setUserExamAnswers((prev) => {
-        const updated = { ...prev, [qIndex]: record };
-        const answeredCount = Object.keys(updated).length;
+  const handleQuestionAnswered = useCallback((qIndex: number, record: QuestionAnswerRecord) => {
+    setUserExamAnswers((previous) => ({ ...previous, [qIndex]: record }));
+  }, []);
 
-        if (generatedQuiz.length > 0 && answeredCount >= generatedQuiz.length) {
-          // Stop countdown timer immediately upon answering all questions
-          if (examTimerRef.current) {
-            clearInterval(examTimerRef.current);
-            examTimerRef.current = null;
-          }
-          const timeSpent = Math.max(1, 150 - timeLeft);
-          setExamTimeTaken(timeSpent);
-          setIsExamCompleted(true);
+  useEffect(() => {
+    const answeredCount = Object.keys(userExamAnswers).length;
+    if (generatedQuiz.length === 0 || answeredCount < generatedQuiz.length || hasFinalizedExamRef.current) return;
 
-          // Dispatch diagnostic assessment results to recommendation engine
-          const answersList = Object.values(updated);
-          fetch('http://localhost:5000/api/recommend/analyze-assessment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              officerId: savedOfficerInfo?.officer?.parichayId || 'JSO_1042',
-              cadre: designation,
-              answers: answersList,
-              proficiencies: proficiency,
-            }),
-          })
-            .then((res) => {
-              if (!res.ok) throw new Error(`HTTP ${res.status}`);
-              return res.json();
-            })
-            .then((data) => {
-              if (data.success && data.analysis) {
-                const analysis = data.analysis;
-                if (analysis.updatedProficiency) {
-                  setProficiency((currentProf) => ({
-                    ...currentProf,
-                    ...analysis.updatedProficiency,
-                  }));
-                }
+    hasFinalizedExamRef.current = true;
+    if (examTimerRef.current) {
+      clearInterval(examTimerRef.current);
+      examTimerRef.current = null;
+    }
 
-                const newExamRecord: RecentExamRecord = {
-                  id: `exam-${Date.now()}`,
-                  title:
-                    selectedCourseContext ||
-                    (generatedQuiz[0]?.topic ? `${generatedQuiz[0].topic} Assessment` : 'MoSPI FRAC Diagnostic Assessment'),
-                  category:
-                    skills.find((s) => s.skillName === generatedQuiz[0]?.topic)?.category ||
-                    'Statistical Competencies',
-                  date: new Date().toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                  }),
-                  durationMinutes: Math.max(1, Math.ceil(timeSpent / 60)),
-                  score: analysis.scorePercentage,
-                  totalScore: 100,
-                  status: analysis.status,
-                  misconceptions: (analysis.misconceptionsFound || []).map((m: any) => ({
-                    question: m.question,
-                    chosenAnswer: m.chosenAnswer,
-                    correctAnswer: m.correctAnswer,
-                    misconception: m.misconception,
-                    remedialCourse: m.remedialCourse,
-                    remedialCourseId: m.remedialCourseId,
-                  })),
-                };
+    const timeSpent = Math.max(1, 150 - timeLeft);
+    const answersList = Object.values(userExamAnswers);
+    const correctCount = answersList.filter((answer) => answer.isCorrect).length;
+    const scorePercentage = Math.round((correctCount / generatedQuiz.length) * 100);
+    const recordId = `exam-${Date.now()}`;
+    const localRecord: RecentExamRecord = {
+      id: recordId,
+      title: selectedCourseContext || (generatedQuiz[0]?.topic ? `${generatedQuiz[0].topic} Assessment` : 'MoSPI FRAC Diagnostic Assessment'),
+      category: skills.find((skill) => skill.skillName === generatedQuiz[0]?.topic)?.category || 'Statistical Competencies',
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      durationMinutes: Math.max(1, Math.ceil(timeSpent / 60)),
+      score: scorePercentage,
+      totalScore: 100,
+      status: scorePercentage >= 60 ? 'passed' : 'remedial',
+      misconceptions: answersList.filter((answer) => !answer.isCorrect).map((answer) => {
+        const detail = answer.distractorAnalysis?.[answer.selectedOption];
+        return {
+          question: answer.questionText,
+          chosenAnswer: answer.selectedOption,
+          correctAnswer: answer.correctAnswer,
+          misconception: detail?.misconception || 'Review the explanation and source material for this item.',
+          remedialCourse: detail?.recommendedCourseTitle || `Review ${answer.topic || 'this competency'}`,
+          remedialCourseId: detail?.recommendedCourseId || '',
+        };
+      }),
+    };
 
-                setAssessmentHistory((prevHistory) => {
-                  const updatedHistory = [newExamRecord, ...prevHistory];
-                  try {
-                    window.localStorage.setItem(
-                      'statskill_assessment_history',
-                      JSON.stringify(updatedHistory)
-                    );
-                  } catch {}
-                  return updatedHistory;
-                });
+    setExamTimeTaken(timeSpent);
+    setIsExamCompleted(true);
+    setAssessmentsTaken((count) => count + 1);
+    setAssessmentHistory((previous) => {
+      const updated = [localRecord, ...previous];
+      try { window.localStorage.setItem('statskill_assessment_history', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
 
-                if (Array.isArray(analysis.recommendedCohorts) && analysis.recommendedCohorts.length > 0) {
-                  setCapacityCohorts(analysis.recommendedCohorts);
-                  try {
-                    window.localStorage.setItem(
-                      'statskill_capacity_cohorts',
-                      JSON.stringify(analysis.recommendedCohorts)
-                    );
-                  } catch {}
-                }
-              }
-            })
-            .catch((err) => {
-              console.warn('Assessment analysis background computation notice:', err);
-            });
+    const controller = new AbortController();
+    fetch('http://localhost:5000/api/recommend/analyze-assessment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        officerId: savedOfficerInfo?.officer?.parichayId || 'DEMO_OFFICER',
+        cadre: designation,
+        answers: answersList,
+        proficiencies: proficiency,
+      }),
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        if (!data.success || !data.analysis) return;
+        const analysis = data.analysis;
+        if (analysis.updatedProficiency) {
+          setProficiency((current) => ({ ...current, ...Object.fromEntries(Object.entries(analysis.updatedProficiency).map(([skillName, level]) => [skillName, clampProficiencyLevel(level)])) }));
         }
-
-        return updated;
+        setAssessmentHistory((previous) => {
+          const enriched = previous.map((exam) => exam.id === recordId ? {
+            ...exam,
+            score: analysis.scorePercentage ?? exam.score,
+            status: analysis.status ?? exam.status,
+            misconceptions: Array.isArray(analysis.misconceptionsFound)
+              ? analysis.misconceptionsFound.map((item: any) => ({
+                  question: item.question,
+                  chosenAnswer: item.chosenAnswer,
+                  correctAnswer: item.correctAnswer,
+                  misconception: item.misconception,
+                  remedialCourse: item.remedialCourse,
+                  remedialCourseId: item.remedialCourseId,
+                }))
+              : exam.misconceptions,
+          } : exam);
+          try { window.localStorage.setItem('statskill_assessment_history', JSON.stringify(enriched)); } catch {}
+          return enriched;
+        });
+        if (Array.isArray(analysis.recommendedCohorts) && analysis.recommendedCohorts.length > 0) {
+          setCapacityCohorts(analysis.recommendedCohorts);
+          try { window.localStorage.setItem('statskill_capacity_cohorts', JSON.stringify(analysis.recommendedCohorts)); } catch {}
+        }
+      })
+      .catch((error) => {
+        if (error?.name !== 'AbortError') console.warn('Assessment analysis service unavailable; local result retained:', error);
       });
-    },
-    [generatedQuiz, timeLeft, savedOfficerInfo, designation, proficiency, selectedCourseContext, skills]
-  );
+
+    return () => controller.abort();
+  }, [designation, generatedQuiz, proficiency, savedOfficerInfo, selectedCourseContext, skills, timeLeft, userExamAnswers]);
 
   const handleReshuffle = useCallback(() => {
     if (reshufflesLeft <= 0 || generatedQuiz.length === 0 || isExamCompleted) return;
@@ -738,9 +801,10 @@ export default function Dashboard({
     setUserExamAnswers({});
     setIsExamCompleted(false);
     setExamTimeTaken(0);
+    hasFinalizedExamRef.current = false;
   }, [reshufflesLeft, generatedQuiz, paperSet, isExamCompleted]);
 
-  const handleGenerateQuiz = async (file?: File) => {
+  const handleGenerateQuiz = async (file?: File, courseIdOverride?: string) => {
     // Clear any active poll before starting new generation
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
@@ -753,13 +817,15 @@ export default function Dashboard({
     setUserExamAnswers({});
     setIsExamCompleted(false);
     setExamTimeTaken(0);
+    hasFinalizedExamRef.current = false;
 
     const formData = new FormData();
     if (file) {
       formData.append('document', file);
     }
-    if (selectedCourseContext) {
-      formData.append('courseId', selectedCourseContext);
+    const courseContext = courseIdOverride || selectedCourseContext;
+    if (courseContext) {
+      formData.append('courseId', courseContext);
     }
     formData.append('numQuestions', '5');
     formData.append('difficulty', 'intermediate');
@@ -851,18 +917,19 @@ export default function Dashboard({
   useEffect(() => {
     if (initialCourseTopic) {
       setSelectedCourseContext(initialCourseTopic);
-      handleGenerateQuiz();
+      handleGenerateQuiz(undefined, initialCourseTopic);
     }
   }, [initialCourseTopic]);
 
   const analyticsData = useMemo(() => {
     const numSkills = skills.length || 1;
-    const avgLevel = (Object.values(proficiency).reduce((a, b) => a + b, 0) / numSkills).toFixed(1);
+    const assessedLevels = skills.map((skill) => clampProficiencyLevel(proficiency[skill.skillName]));
+    const avgLevel = (assessedLevels.reduce((total, level) => total + level, 0) / numSkills).toFixed(1);
 
     let topGapSkill = 'None';
     let maxGap = -1;
     skills.forEach((s) => {
-      const currentLvl = proficiency[s.skillName] || 1;
+      const currentLvl = clampProficiencyLevel(proficiency[s.skillName]);
       const gap = s.targetLevel - currentLvl;
       if (gap > maxGap) {
         maxGap = gap;
@@ -902,6 +969,7 @@ export default function Dashboard({
           if (!logged) {
             try {
               window.localStorage.removeItem('statskill_demo_login');
+              window.localStorage.removeItem('auth_token');
             } catch {}
           }
           setIsLoggedIn(logged);
@@ -912,13 +980,12 @@ export default function Dashboard({
         isAdminUnlocked={isAdminUnlocked}
         onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
         onOpenAccessibility={() => setIsAccessibilityOpen(true)}
-        onOpenSahayak={() => setIsSahayakOpen(true)}
         canGoBack={navigationHistory.length > 0}
         previousTabTitle={previousTabTitle}
         onGoBack={handleGoBack}
       />
 
-      <main className="max-w-7xl mx-auto py-8 px-4 md:px-10 space-y-8">
+      <main id="main-content" className="mx-auto max-w-[1280px] space-y-6 px-4 py-6 md:px-6 md:py-8">
         {/* Anti-Spam Click Shield Active Banner */}
         {isAntiSpamLocked && (
           <div
@@ -967,7 +1034,7 @@ export default function Dashboard({
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 1: ASSESSMENT ENGINE (SOVEREIGN EDGE-AI & QUESTION GENERATION)       */}
+        {/* TAB 1: ASSESSMENT ENGINE                                                */}
         {/* ========================================================================= */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
@@ -978,12 +1045,12 @@ export default function Dashboard({
                     <span className="p-1.5 bg-[#0B2E63]/10 text-[#0B2E63] rounded-md">
                       <Cpu className="w-4 h-4" />
                     </span>
-                    <Badge variant="default">Official Examination Module</Badge>
+                    <Badge variant="default">Prototype assessment module</Badge>
                     {selectedCourseContext && (
                       <Badge variant="saffron">{selectedCourseContext}</Badge>
                     )}
                   </div>
-                  <CardTitle>Sovereign Edge-AI Assessment Generator</CardTitle>
+                  <CardTitle>Competency assessment generator</CardTitle>
                   <CardDescription>
                     Generate structured active-recall assessments mapped to MoSPI FRAC competency benchmarks.
                   </CardDescription>
@@ -995,10 +1062,10 @@ export default function Dashboard({
                     type="button"
                     onClick={() => setIsTelemetryDrawerOpen(true)}
                     className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all shadow-xs border flex items-center gap-1.5 bg-slate-900 text-emerald-300 border-emerald-500/40 hover:bg-slate-800 cursor-pointer active:translate-y-[1px]"
-                    title="Inspect live ADL xAPI learning record sent to iGOT LRS"
+                    title="Inspect the latest xAPI payload prepared by the prototype"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span className="font-mono text-[11px]">iGOT LRS Telemetry</span>
+                    <span className="font-mono text-[11px]">xAPI Payload Inspector</span>
                     <Terminal className="w-3.5 h-3.5 text-amber-400" />
                   </button>
                   <button
@@ -1016,8 +1083,8 @@ export default function Dashboard({
                   >
                     <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                     {deviceMode === 'MODERN_DEVICE'
-                      ? 'Cloud Live RAG (PDF)'
-                      : 'Edge Offline Bank'}
+                      ? 'Generate from PDF'
+                      : 'Bundled question bank'}
                   </button>
                 </div>
               </CardHeader>
@@ -1044,8 +1111,8 @@ export default function Dashboard({
                       : 'Upload MoSPI Manual or Training PDF'}
                   </h3>
                   <p className="text-xs text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed font-body">
-                    Upload official training circulars or test immediately against the verified MoSPI
-                    examination bank. Anti-collusion algorithms ensure unique sequence and option sets.
+                    Upload training material or practise with the bundled question bank. Questions and
+                    answer choices are shuffled to create a fresh attempt.
                   </p>
 
                   <div className="flex flex-wrap items-center justify-center gap-3">
@@ -1091,7 +1158,7 @@ export default function Dashboard({
                       className="text-xs font-semibold border-slate-300 text-slate-800 hover:bg-white"
                     >
                       <BookOpen className="w-4 h-4 text-amber-700" aria-hidden="true" />
-                      Practice from Verified Question Bank
+                      Practise with Question Bank
                     </Button>
                   </div>
 
@@ -1124,11 +1191,11 @@ export default function Dashboard({
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-bold text-slate-900 font-display">Official Assessment Paper</h3>
+                            <h3 className="text-lg font-bold text-slate-900 font-display">Assessment paper</h3>
                             <Badge variant="neutral">5 MCQs</Badge>
                           </div>
                           <p className="text-xs text-slate-600 font-body">
-                            Candidate Evaluation • MoSPI FRAC Standards • 2m 30s Time Limit
+                            Prototype competency check • 2m 30s time limit
                           </p>
                         </div>
                       </div>
@@ -1258,7 +1325,7 @@ export default function Dashboard({
                           q={q}
                           index={index}
                           handleProficiencyChange={handleProficiencyChange}
-                          skillToUpdate={skills.length > 0 ? skills[0].skillName : 'Survey Design & Sampling'}
+                          skillToUpdate={skills.length > 0 ? skills[index % skills.length].skillName : 'Survey Design & Sampling'}
                           onTelemetryStatement={setLatestTelemetryStatement}
                           onQuestionAnswered={(record) => handleQuestionAnswered(index, record)}
                           isTimedOut={isTimedOut}
@@ -1276,126 +1343,18 @@ export default function Dashboard({
         {/* TAB 2: DISCOVER COURSES (REAL 880+ CATALOG)                               */}
         {/* ========================================================================= */}
         {activeTab === 'discover' && (
-          <Card>
-            <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="p-1.5 bg-primary-100 text-primary-900 rounded-md">
-                    <BookOpen className="w-4 h-4" />
-                  </span>
-                  <Badge variant="default">880+ Authentic Courses</Badge>
-                  <Badge variant="success">iGOT Karmayogi & NSSTA TPAC</Badge>
-                </div>
-                <CardTitle>Government of India Course Discovery</CardTitle>
-                <CardDescription>
-                  Search official training programs across Statistical, Technical, Digital Governance, and Behavioural domains.
-                </CardDescription>
-              </div>
-            </CardHeader>
-
-            <CardContent className="p-8 space-y-6">
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" aria-hidden="true" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label="Search authentic government courses across MoSPI, iGOT, and NSSTA"
-                  placeholder="Search 880+ official courses (e.g., 'Sampling', 'CPI', 'National Accounts', 'Python', 'DPDPA')..."
-                  className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-primary-900 focus:ring-2 focus:ring-primary-100 shadow-xs text-sm text-slate-900 bg-white"
-                />
-              </div>
-
-              {/* Course Fetch Error Banner if offline */}
-              {courseError && (
-                <div role="alert" className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-xs text-amber-900 animate-fade-in">
-                  <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" aria-hidden="true" />
-                  <span>{courseError}</span>
-                </div>
-              )}
-
-              {/* Domain Filter Pills */}
-              <div className="flex flex-wrap gap-2" aria-label="Course Domain Filter">
-                {[
-                  'All',
-                  'Statistical Competencies',
-                  'Technical Competencies',
-                  'Digital Governance',
-                  'Behavioural and Managerial Competencies',
-                ].map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    aria-pressed={selectedDomain === filter}
-                    onClick={() => setSelectedDomain(filter)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 ${
-                      selectedDomain === filter
-                        ? 'bg-primary-900 text-white border-primary-900 shadow-xs'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-
-              {/* Course Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {courses.length > 0 ? (
-                  courses.map((course: CourseItem, idx: number) => (
-                    <Card
-                      key={course.id || idx}
-                      className="flex flex-col justify-between hover:shadow-md transition-all duration-200 border-slate-200 hover:border-primary-300 bg-white"
-                    >
-                      <div className="p-5">
-                        <div className="flex justify-between items-start gap-2 mb-3">
-                          <Badge variant="saffron" className="text-[10px]">
-                            {course.domain || 'MoSPI / NSSTA'}
-                          </Badge>
-                          <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5" />
-                            {course.duration || '4 Hours'}
-                          </span>
-                        </div>
-                        <h4 className="font-bold text-sm text-slate-900 leading-snug line-clamp-2 mb-2">
-                          {course.title}
-                        </h4>
-                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                          {course.description ||
-                            'Official government competency enhancement module aligned with Karmayogi FRAC framework.'}
-                        </p>
-                      </div>
-
-                      <div className="p-5 pt-0 border-t border-slate-100 flex items-center justify-between gap-3 mt-4">
-                        <span className="text-xs font-bold text-primary-900 flex items-center gap-1">
-                          <Award className="w-3.5 h-3.5 text-amber-600" />
-                          Level {course.targetLevel || 3}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="primary"
-                          size="sm"
-                          disabled={isAntiSpamLocked}
-                          onClick={antiSpamGuardAction(() => selectCourseForQuiz(course.title))}
-                        >
-                          Generate Quiz
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </Card>
-                  ))
-                ) : (
-                  <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                    <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                    <h4 className="text-sm font-bold text-slate-700">No courses match your filter</h4>
-                    <p className="text-xs text-slate-500 mt-1">Try resetting the domain filter or search terms.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <CourseCatalog
+            courses={courses}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            selectedDomain={selectedDomain}
+            onDomainChange={setSelectedDomain}
+            courseError={courseError}
+            isActionLocked={isAntiSpamLocked}
+            onSelectCourse={(title) => antiSpamGuardAction(() => selectCourseForQuiz(title))()}
+          />
         )}
+
 
         {/* ========================================================================= */}
         {/* TAB 3: COMPETENCY PROFILE & FRAC MATRIX                                   */}
@@ -1452,7 +1411,7 @@ export default function Dashboard({
                 {/* Competency Matrix Cards */}
                 <div className="space-y-4">
                   {skills.map((skill) => {
-                    const currentLevel = proficiency[skill.skillName] || 1;
+                    const currentLevel = proficiency[skill.skillName] ?? 0;
                     const isGap = currentLevel < skill.targetLevel;
 
                     return (
@@ -1520,106 +1479,15 @@ export default function Dashboard({
         {/* TAB 4: MOSPI ANALYTICS DASHBOARD                                         */}
         {/* ========================================================================= */}
         {activeTab === 'analytics' && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="p-1.5 bg-primary-100 text-primary-900 rounded-md">
-                  <BarChart3 className="w-4 h-4" />
-                </span>
-                <Badge variant="default">Real-time Telemetry</Badge>
-              </div>
-              <CardTitle>MoSPI Division Competency Analytics</CardTitle>
-              <CardDescription>
-                Live monitoring of statistical readiness, assessment logs, and departmental gap heatmaps.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="p-8 space-y-8">
-              {/* Metric Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Assessments Logged
-                    </span>
-                    <span className="p-2 bg-primary-50 text-primary-900 rounded-lg">
-                      <FileText className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <p className="text-3xl font-black text-slate-900 tracking-tight">{assessmentsTaken}</p>
-                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-                    Captured via xAPI / CMI-5 Telemetry
-                  </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Avg. FRAC Proficiency
-                    </span>
-                    <span className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
-                      <Award className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <p className="text-3xl font-black text-slate-900 tracking-tight">
-                    {analyticsData.avgLevel} <span className="text-sm font-semibold text-slate-400">/ 5.0</span>
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">Across 4 MoSPI Competency Domains</p>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Primary Training Need
-                    </span>
-                    <span className="p-2 bg-amber-50 text-amber-700 rounded-lg">
-                      <AlertCircle className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <p className="text-lg font-bold text-amber-900 truncate tracking-tight">
-                    {analyticsData.topGapSkill}
-                  </p>
-                  <p className="text-xs text-amber-700 mt-1">Prioritized for NSSTA Training Calendar</p>
-                </div>
-              </div>
-
-              {/* Dynamic Competency Heatmap */}
-              <div className="space-y-5 border-t border-slate-100 pt-6">
-                <h4 className="font-bold text-sm text-slate-900 uppercase tracking-wider">
-                  Competency Fulfillment Progress
-                </h4>
-
-                <div className="space-y-4">
-                  {skills.map((s) => {
-                    const currentLvl = proficiency[s.skillName] || 1;
-                    const percent = Math.min(100, (currentLvl / s.targetLevel) * 100);
-                    const isCritical = currentLvl < s.targetLevel;
-
-                    return (
-                      <div key={s.id} className="space-y-1.5">
-                        <div className="flex justify-between text-xs font-bold text-slate-700">
-                          <span>{s.skillName}</span>
-                          <span className={isCritical ? 'text-amber-700' : 'text-emerald-700'}>
-                            Level {currentLvl} / Target {s.targetLevel} ({Math.round(percent)}%)
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                          <div
-                            className={`h-2.5 rounded-full transition-all duration-500 ${
-                              isCritical ? 'bg-amber-500' : 'bg-emerald-600'
-                            }`}
-                            style={{ width: `${percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <CompetencyAnalytics
+            skills={skills}
+            proficiency={proficiency}
+            assessmentsTaken={assessmentsTaken}
+            averageLevel={analyticsData.avgLevel}
+            topGapSkill={analyticsData.topGapSkill}
+          />
         )}
+
 
         {/* ========================================================================= */}
         {/* TAB 5: MOSPI CADRE COMMAND CENTER & ACBP DOSSIER (PILLAR 5)               */}
@@ -1629,22 +1497,9 @@ export default function Dashboard({
         )}
       </main>
 
-      {/* Floating AI Sahayak Quick Launch Button */}
-      <aside aria-label="Karmayogi Sahayak Quick Launch" className="fixed bottom-6 right-6 z-40">
-        <button
-          type="button"
-          onClick={() => setIsSahayakOpen(true)}
-          aria-label="Open Karmayogi Sahayak AI Navigation Guide (Alt+H)"
-          className="px-4 py-2.5 rounded-full bg-[#0B2E63] hover:bg-[#123E82] text-amber-300 font-bold text-xs shadow-lg border border-amber-400/40 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-          title="Karmayogi Sahayak AI Guide (Alt+H)"
-        >
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-          <Bot className="w-4 h-4 text-amber-400" />
-          <span>Ask AI Sahayak</span>
-        </button>
-      </aside>
+      <SahayakLauncher onOpen={() => setIsSahayakOpen(true)} />
 
-      {/* Official Government Footer */}
+      {/* Prototype footer */}
       <footer className="bg-slate-900 text-slate-400 text-xs py-8 px-4 md:px-10 border-t border-slate-800 mt-16 font-body">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-center md:text-left">
@@ -1656,7 +1511,7 @@ export default function Dashboard({
                 Ministry of Statistics and Programme Implementation (MoSPI)
               </p>
               <p className="text-[11px] text-slate-400">
-                Mission Karmayogi • National Statistical Systems Training Academy (NSSTA) • DIID Sovereign Node
+                Smart India Hackathon prototype • Not an official MoSPI deployment
               </p>
             </div>
           </div>
@@ -1675,7 +1530,7 @@ export default function Dashboard({
               onClick={() => setIsSahayakOpen(true)}
               className="hover:text-amber-300 transition-colors cursor-pointer"
             >
-              AI Navigation Guide (Alt+H)
+              Sahayak Guide (Alt+H)
             </button>
             <span>•</span>
             <button
@@ -1704,7 +1559,7 @@ export default function Dashboard({
         onClose={() => setIsAcbpModalOpen(false)}
       />
 
-      {/* Karmayogi Sahayak Interactive AI Guide Modal */}
+      {/* Karmayogi Sahayak prototype guide modal */}
       <KarmayogiSahayakModal
         isOpen={isSahayakOpen}
         onClose={() => setIsSahayakOpen(false)}
@@ -1781,7 +1636,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
       });
     }
 
-    // Dispatch live xAPI statement to iGOT Karmayogi LRS with network error handling
+    // Send the xAPI-formatted statement to the configured prototype telemetry endpoint.
     fetch('http://localhost:5000/api/telemetry/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1789,7 +1644,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
         userId: 'JSO_1042',
         userName: 'MoSPI Field Officer',
         quizId: q.id || `eval-${index + 1}`,
-        quizName: q.topic || 'MoSPI Official Assessment',
+        quizName: q.topic || 'StatSkill competency assessment',
         score: opt === q.correctAnswer ? 100 : 0,
       }),
     })
@@ -1912,7 +1767,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
               <BookOpen className="w-4 h-4 text-[#0B2E63] flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <span className="font-bold text-[#0B2E63] block mb-0.5 font-display">Source Context:</span>
-                <p className="text-slate-700 font-body">{q.sourceCitation || 'Official MoSPI Reference'}</p>
+                <p className="text-slate-700 font-body">{q.sourceCitation || 'Bundled assessment reference'}</p>
                 {q.explanation && (
                   <p className="mt-1 text-slate-800 font-body">
                     <strong>Explanation:</strong> {q.explanation}

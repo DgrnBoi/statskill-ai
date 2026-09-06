@@ -20,6 +20,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { AcbpDossierModal } from './AcbpDossierModal';
+import { EmptyState, PageHeader } from '../ui/PageHeader';
 
 export interface DivisionItem {
   id: string;
@@ -82,143 +83,8 @@ export function AdminCommandCenter({ onBackToLearner }: AdminCommandCenterProps)
       }
     } catch (err: any) {
       console.warn('Admin divisions fetch warning:', err);
-      setError('We could not load real-time telemetry from the NSSTA server. Displaying cached cadre data.');
-      // Resilient fallback state
-      setData({
-        ministry: 'Ministry of Statistics and Programme Implementation (MoSPI)',
-        totalCadreStrength: 3220,
-        systemReadinessScore: 78.4,
-        acbpComplianceScore: 84.2,
-        divisions: [
-          {
-            id: 'fod',
-            code: 'FOD-NSSO',
-            name: 'Field Operations Division (FOD), NSSO',
-            mandate: 'Primary household and enterprise survey enumeration, Computer-Assisted Personal Interviewing (CAPI), and Agricultural Statistics crop estimation.',
-            headquarters: 'Sankhyiki Bhawan, CBD Belapur, Navi Mumbai / New Delhi',
-            totalOfficers: 1840,
-            readinessScore: 76.2,
-            domainScores: {
-              'Statistical Competencies': 82.5,
-              'Technical Competencies': 71.0,
-              'Digital Governance': 68.4,
-              'Behavioural & Managerial': 83.0,
-            },
-            criticalBottlenecks: [
-              'First Stage Unit (FSU) Hamlet-Group Selection Rules in complex peri-urban strata',
-              'Offline CAPI Tablet Cloud Sync reconciliation during low-bandwidth field tours',
-              'DPDPA 2023 Digital Informant Consent compliance protocols',
-            ],
-            priorityCourses: [
-              {
-                courseId: 'igot-surv-01',
-                title: 'CAPI Field Protocols and Digital Household Enumeration',
-                provider: 'iGOT Karmayogi',
-                targetOfficers: 420,
-                duration: '6 Hours',
-              },
-              {
-                courseId: 'nssta-stat-02',
-                title: 'NSSO Multistage Stratified Sampling & Listing Masterclass',
-                provider: 'NSSTA TPAC',
-                targetOfficers: 310,
-                duration: '12 Hours',
-              },
-            ],
-          },
-          {
-            id: 'dpd',
-            code: 'DPD-NSSO',
-            name: 'Data Processing Division (DPD), NSSO',
-            mandate: 'Microdata validation, editing rules, imputation pipelines, sampling weight estimation, and statistical tabulation.',
-            headquarters: 'Mahalanobis Bhavan, 164 Gopal Lal Tagore Road, Kolkata',
-            totalOfficers: 620,
-            readinessScore: 81.5,
-            domainScores: {
-              'Statistical Competencies': 88.0,
-              'Technical Competencies': 84.5,
-              'Digital Governance': 74.0,
-              'Behavioural & Managerial': 79.5,
-            },
-            criticalBottlenecks: [
-              'Automated Multiplier Calculation for 2-stage circular systematic samples',
-              'Python and R pipelines for microdata anonymization before public release',
-            ],
-            priorityCourses: [
-              {
-                courseId: 'igot-tech-04',
-                title: 'Automated Microdata Cleaning & Anonymization Pipelines',
-                provider: 'iGOT Karmayogi',
-                targetOfficers: 180,
-                duration: '8 Hours',
-              },
-            ],
-          },
-          {
-            id: 'nad',
-            code: 'NAD-CSO',
-            name: 'National Accounts Division (NAD), CSO',
-            mandate: 'Compilation of Gross Domestic Product (GDP), Gross Value Added (GVA), Consumer Price Index (CPI), and National Balance Sheets.',
-            headquarters: 'Sardar Patel Bhawan, Sansad Marg, New Delhi',
-            totalOfficers: 310,
-            readinessScore: 84.0,
-            domainScores: {
-              'Statistical Competencies': 92.0,
-              'Technical Competencies': 80.5,
-              'Digital Governance': 79.0,
-              'Behavioural & Managerial': 84.5,
-            },
-            criticalBottlenecks: [
-              'Supply and Use Tables (SUT) rebasing under 2026 National Accounts framework',
-              'High-frequency econometric time-series deflators for service sector GVA',
-            ],
-            priorityCourses: [
-              {
-                courseId: 'nssta-nad-01',
-                title: 'National Accounts Aggregation & SUT Balancing Framework',
-                provider: 'NSSTA TPAC',
-                targetOfficers: 95,
-                duration: '15 Hours',
-              },
-            ],
-          },
-          {
-            id: 'diid',
-            code: 'DIID-MoSPI',
-            name: 'Data Informatics & Innovation Division (DIID)',
-            mandate: 'Sovereign cloud compute, AI/ML statistical nowcasting, Karmayogi telemetry pipelines, and enterprise cybersecurity.',
-            headquarters: 'Khurshid Lal Bhawan, Janpath, New Delhi',
-            totalOfficers: 450,
-            readinessScore: 82.8,
-            domainScores: {
-              'Statistical Competencies': 81.0,
-              'Technical Competencies': 89.5,
-              'Digital Governance': 87.0,
-              'Behavioural & Managerial': 78.0,
-            },
-            criticalBottlenecks: [
-              'Sovereign Cloud Data Residency Architecture for unit-level microdata',
-              'AI/ML Statistical Foundation Model fine-tuning with local language survey audio',
-            ],
-            priorityCourses: [
-              {
-                courseId: 'igot-gov-06',
-                title: 'Digital Data Governance & Sovereign Cloud Security for Civil Services',
-                provider: 'iGOT Karmayogi',
-                targetOfficers: 130,
-                duration: '10 Hours',
-              },
-            ],
-          },
-        ],
-        regionalCircles: [
-          { circle: 'Northern Circle (New Delhi, Chandigarh, Jaipur)', headcount: 820, readiness: 81.2 },
-          { circle: 'Western Circle (Mumbai, Ahmedabad, Pune)', headcount: 740, readiness: 79.5 },
-          { circle: 'Southern Circle (Chennai, Bengaluru, Hyderabad)', headcount: 690, readiness: 83.1 },
-          { circle: 'Eastern Circle (Kolkata, Bhubaneswar, Patna)', headcount: 610, readiness: 74.8 },
-          { circle: 'North-Eastern Circle (Guwahati, Shillong, Agartala)', headcount: 360, readiness: 71.4 },
-        ],
-      });
+      setError('The administrative data service is unavailable. No cached figures are being substituted.');
+      setData(null);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -231,6 +97,17 @@ export function AdminCommandCenter({ onBackToLearner }: AdminCommandCenterProps)
 
   const displayedDivisions =
     data?.divisions.filter((d) => selectedDivisionId === 'all' || d.id === selectedDivisionId) || [];
+
+  if (!loading && !data) {
+    return (
+      <section className="space-y-5" aria-label="Administration data status">
+        <PageHeader title="Capacity & Readiness Administration" description="Restricted prototype view for division-level capacity planning." actions={onBackToLearner ? <Button variant="outline" onClick={onBackToLearner}><ArrowLeft className="w-4 h-4" /> Back to officer view</Button> : undefined} />
+        <EmptyState title="Administrative data is unavailable" description={error || 'Start the backend service and retry the request.'}>
+          <Button onClick={() => fetchDivisionMetrics(true)} isLoading={isRefreshing}>Retry data service</Button>
+        </EmptyState>
+      </section>
+    );
+  }
 
 /* Hallmark · component: AdminCommandCenter · genre: modern-minimal · theme: Cobalt/Gov */
 /* states: default · hover · focus · active */
@@ -263,7 +140,7 @@ export function AdminCommandCenter({ onBackToLearner }: AdminCommandCenterProps)
               MoSPI Cadre Capacity & Readiness Command Center
             </h2>
             <p className="text-xs text-slate-600 mt-0.5 font-body">
-              Live capacity tracking across 3,220 officers, 4 statistical divisions, and 5 regional circles under Mission Karmayogi.
+              Division-level capacity planning from the connected administrative data service.
             </p>
           </div>
         </div>

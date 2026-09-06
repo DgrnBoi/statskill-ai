@@ -7,6 +7,7 @@ import { ShowcasedCoursesCarousel } from '../components/landing/ShowcasedCourses
 import { KarmayogiHubsOrbit } from '../components/landing/KarmayogiHubsOrbit';
 import { LandingFooter } from '../components/landing/LandingFooter';
 import { LandingInfoModal, InfoModalType } from '../components/landing/LandingInfoModal';
+import { SahayakLauncher } from '../components/ui/SahayakLauncher';
 
 interface LandingPageProps {
   onLaunchAssessment: (courseTopic?: string) => void;
@@ -28,22 +29,17 @@ export function LandingPage({
   onOpenSahayak,
 }: LandingPageProps) {
   const [infoModalType, setInfoModalType] = useState<InfoModalType>(null);
-  const [fontScale, setFontScale] = useState(1);
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col" style={{ fontSize: fontScale === 1 ? undefined : `${Math.round(fontScale * 100)}%` }}>
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       <LandingHeader
         onOpenLogin={onOpenLogin}
         onOpenSecretAdmin={onOpenSecretAdmin}
         onOpenAccessibility={onOpenAccessibility}
-        onOpenSahayak={onOpenSahayak}
         onOpenInfo={(type) => setInfoModalType(type)}
         onLaunchPortal={() => onLaunchAssessment()}
-        fontScale={fontScale}
-        setFontScale={setFontScale}
       />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <LandingHero
           onLaunchAssessment={() => onLaunchAssessment()}
           onExploreCourses={onExploreCourses}
@@ -58,6 +54,7 @@ export function LandingPage({
       </main>
 
       <LandingFooter onOpenInfo={(type) => setInfoModalType(type)} />
+      <SahayakLauncher onOpen={onOpenSahayak} />
 
       <LandingInfoModal
         type={infoModalType}

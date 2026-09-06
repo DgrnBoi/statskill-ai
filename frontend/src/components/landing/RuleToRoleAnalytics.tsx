@@ -127,8 +127,8 @@ export function RuleToRoleAnalytics({ onOpenDashboard }: { onOpenDashboard?: () 
             Rule-to-Role &amp; Democratised Statistical Learning
           </h2>
           <p className="mt-3 text-slate-600">
-            Live intelligence on Annual Capacity Building Plans (ACBP), FRAC competency distribution, and
-            division-wise progress across MoSPI and 36 State DES.
+            An illustrative dashboard concept for Annual Capacity Building Plans (ACBP), FRAC competency
+            distribution, and division-wise progress. Figures below are prototype data, not live records.
           </p>
         </div>
 
@@ -280,7 +280,7 @@ export function RuleToRoleAnalytics({ onOpenDashboard }: { onOpenDashboard?: () 
           </div>
         </div>
 
-        {/* eHRMS banner */}
+        {/* Future integration concept */}
         <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-2xl bg-[#0B2E63] p-6 text-white sm:flex-row sm:items-center shadow-lg">
           <div className="flex items-center gap-4">
             <span className="grid h-12 w-12 place-items-center rounded-xl bg-white/10 text-amber-400">
@@ -289,7 +289,7 @@ export function RuleToRoleAnalytics({ onOpenDashboard }: { onOpenDashboard?: () 
             <div>
               <p className="text-lg font-bold">Right Officer for the Right Statistical Role</p>
               <p className="text-sm text-slate-200">
-                Automated competency telemetry syncing with e-HRMS 2.0 electronic service books.
+                A future integration concept for user-approved competency records; no e-HRMS connection is active.
               </p>
             </div>
           </div>
@@ -298,7 +298,7 @@ export function RuleToRoleAnalytics({ onOpenDashboard }: { onOpenDashboard?: () 
             onClick={onOpenDashboard}
             className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-xs font-bold text-slate-900 transition hover:bg-amber-400 shadow-xs cursor-pointer"
           >
-            Explore eHRMS Integration
+            Open prototype dashboard
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

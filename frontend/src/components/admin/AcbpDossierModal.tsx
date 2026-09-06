@@ -7,6 +7,7 @@ import { X, Printer, Download, CheckCircle2, Landmark, ShieldCheck, Building2, B
 import { IndianFlag } from '../ui/IndianFlag';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 
 export interface AcbpDossierData {
   documentId: string;
@@ -47,6 +48,7 @@ interface AcbpDossierModalProps {
 }
 
 export function AcbpDossierModal({ isOpen, onClose }: AcbpDossierModalProps) {
+  const dialogRef = useDialogAccessibility(isOpen, onClose);
   const [dossier, setDossier] = useState<AcbpDossierData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,78 +76,8 @@ export function AcbpDossierModal({ isOpen, onClose }: AcbpDossierModalProps) {
       .catch((err) => {
         if (err.name !== 'AbortError') {
           console.error('ACBP Dossier fetch failed:', err);
-          setError('We could not load the live ACBP Dossier from the NSSTA server. Displaying cached official version.');
-          setDossier({
-            documentId: 'ACBP-MoSPI-2026-7842',
-            ministry: 'Ministry of Statistics and Programme Implementation (MoSPI)',
-            authority: 'National Statistical Systems Training Academy (NSSTA) & Capacity Building Commission (CBC)',
-            generatedAt: new Date().toISOString(),
-            fiscalYear: '2026-2027',
-            executiveSummary: {
-              totalStatisticalCadreTracked: 3220,
-              overallSystemReadiness: '78.4%',
-              acbpFulfillmentRate: '84.2%',
-              status: 'Compliant with Mission Karmayogi National Competency Framework',
-            },
-            divisionAllocations: [
-              {
-                divisionName: 'Field Operations Division (FOD), NSSO',
-                officersCovered: 1840,
-                readinessLevel: '76.2%',
-                identifiedGaps: [
-                  'First Stage Unit (FSU) Hamlet-Group Selection in complex strata',
-                  'Offline CAPI Tablet Cloud Sync reconciliation',
-                  'DPDPA 2023 Digital Informant Consent protocols',
-                ],
-                recommendedInterventions: [
-                  {
-                    courseId: 'igot-surv-01',
-                    title: 'CAPI Field Protocols and Digital Household Enumeration',
-                    provider: 'iGOT Karmayogi',
-                    targetOfficers: 420,
-                    duration: '6 Hours',
-                  },
-                  {
-                    courseId: 'nssta-stat-02',
-                    title: 'NSSO Multistage Stratified Sampling & Listing Masterclass',
-                    provider: 'NSSTA TPAC',
-                    targetOfficers: 310,
-                    duration: '12 Hours',
-                  },
-                ],
-              },
-              {
-                divisionName: 'Data Processing Division (DPD), NSSO',
-                officersCovered: 620,
-                readinessLevel: '81.5%',
-                identifiedGaps: [
-                  'Automated Multiplier Calculation for 2-stage systematic samples',
-                  'Python and R pipelines for microdata anonymization',
-                ],
-                recommendedInterventions: [
-                  {
-                    courseId: 'igot-tech-04',
-                    title: 'Automated Microdata Cleaning & Anonymization Pipelines',
-                    provider: 'iGOT Karmayogi',
-                    targetOfficers: 180,
-                    duration: '8 Hours',
-                  },
-                ],
-              },
-            ],
-            regionalBreakdown: [
-              { circle: 'Northern Circle (New Delhi, Chandigarh, Jaipur)', headcount: 820, readiness: '81.2%' },
-              { circle: 'Western Circle (Mumbai, Ahmedabad, Pune)', headcount: 740, readiness: '79.5%' },
-              { circle: 'Southern Circle (Chennai, Bengaluru, Hyderabad)', headcount: 690, readiness: '83.1%' },
-              { circle: 'Eastern Circle (Kolkata, Bhubaneswar, Patna)', headcount: 610, readiness: '74.8%' },
-              { circle: 'North-Eastern Circle (Guwahati, Shillong, Agartala)', headcount: 360, readiness: '71.4%' },
-            ],
-            mandates: [
-              'Mandatory 30 hours of annual capacity building per officer under Mission Karmayogi guidelines.',
-              '100% completion of DPDPA 2023 digital privacy modules prior to Q3 2026 field surveys.',
-              'Quarterly synchronization of offline xAPI evaluation records with the central NSSTA Sovereign LRS.'
-            ],
-          });
+          setError('The ACBP dossier service is unavailable. No sample allocations are being substituted.');
+          setDossier(null);
         }
       })
       .finally(() => setLoading(false));
@@ -168,23 +100,24 @@ export function AcbpDossierModal({ isOpen, onClose }: AcbpDossierModalProps) {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="acbp-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4 overflow-y-auto font-body"
     >
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Top Sovereign Bar */}
+        {/* Prototype dossier header */}
         <div className="bg-[#0B2E63] text-white px-6 py-4 flex items-center justify-between border-b border-[#123E82]">
           <div className="flex items-center gap-3">
             <IndianFlag variant="circular" width={36} height={36} />
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-amber-300 text-[10px] font-bold uppercase tracking-wider font-mono">
-                  Official Capacity Building Plan (ACBP)
+                  Prototype Capacity Building Plan (ACBP)
                 </span>
                 <span className="text-slate-400 text-xs">•</span>
-                <span className="text-slate-200 text-[11px]">CBC Audit Dossier</span>
+                <span className="text-slate-200 text-[11px]">Dossier preview</span>
               </div>
               <h2 id="acbp-modal-title" className="text-base font-bold text-white font-display">
                 MoSPI Annual Capacity Building Plan 2026-2027
@@ -220,7 +153,7 @@ export function AcbpDossierModal({ isOpen, onClose }: AcbpDossierModalProps) {
             <div className="py-16 text-center space-y-3">
               <div className="w-10 h-10 border-4 border-[#0B2E63] border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-sm font-semibold text-slate-600 font-body">
-                Generating authoritative ACBP Dossier from NSSTA live records...
+                Loading ACBP dossier from the connected data service…
               </p>
             </div>
           ) : error && !dossier ? (
@@ -367,13 +300,13 @@ export function AcbpDossierModal({ isOpen, onClose }: AcbpDossierModalProps) {
                   Statutory Capacity Building Mandates (Mission Karmayogi 2026)
                 </div>
                 <ul className="list-disc list-inside space-y-1 text-amber-900/90 pl-1 font-body">
-                  {(dossier.mandates || [
-                    'Mandatory 30 hours of annual capacity building per officer under Mission Karmayogi guidelines.',
-                    '100% completion of DPDPA 2023 digital privacy modules prior to Q3 2026 field surveys.',
-                    'Quarterly synchronization of offline xAPI evaluation records with the central NSSTA Sovereign LRS.'
-                  ]).map((m, mIdx) => (
-                    <li key={mIdx}>{m}</li>
-                  ))}
+                  {dossier.mandates?.length ? (
+                    dossier.mandates.map((mandate, mandateIndex) => (
+                      <li key={mandateIndex}>{mandate}</li>
+                    ))
+                  ) : (
+                    <li>No policy directives were included in the connected service response.</li>
+                  )}
                 </ul>
               </div>
             </div>
@@ -384,7 +317,7 @@ export function AcbpDossierModal({ isOpen, onClose }: AcbpDossierModalProps) {
         <div className="bg-slate-50 border-t border-slate-200/90 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-slate-500 font-body">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            Signed electronically under NSSTA Sovereign Telemetry Node.
+            Prototype export from the connected data service · Not an official signed record
           </div>
 
           <div className="flex items-center gap-2.5">

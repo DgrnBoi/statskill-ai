@@ -74,7 +74,7 @@ export function OfflineStatusBar() {
               <WifiOff className="w-4 h-4 text-slate-950 animate-pulse" />
             </span>
             <span>
-              <strong>Offline Field Mode Active:</strong> Running from local device cache. Assessment engine and offline question bank are 100% operational.
+              <strong>You are offline:</strong> Saved progress and cached pages remain available. New assessment generation and telemetry delivery may require a connection.
             </span>
           </div>
           <button
@@ -100,7 +100,7 @@ export function OfflineStatusBar() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs font-semibold">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-            <span>Connection Restored - Offline learning telemetry synced with sovereign node.</span>
+            <span>Connection restored. Pending network requests can now be retried.</span>
           </div>
           <button
             type="button"
@@ -126,7 +126,7 @@ export function OfflineStatusBar() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-slate-200">
-              Install <strong>StatSkill AI</strong> on your mobile or CAPI tablet for offline field survey practice.
+              Install <strong>StatSkill AI</strong> for quicker access on a mobile or CAPI tablet. Network-dependent features still require connectivity.
             </span>
           </div>
           <div className="flex items-center gap-2">

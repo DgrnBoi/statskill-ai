@@ -188,6 +188,13 @@ const createMockFetch = () => {
       } as Response);
     }
 
+    if (url.includes('/api/recommend/analyze-assessment')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ success: true, analysis: { scorePercentage: 100, status: 'passed', misconceptionsFound: [], recommendedCohorts: [] } }),
+      } as Response);
+    }
+
     if (url.includes('/api/recommend/pathway')) {
       return Promise.resolve({
         ok: true,
@@ -256,6 +263,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
   beforeEach(() => {
     originalFetch = globalThis.fetch;
     globalThis.fetch = createMockFetch();
+    window.localStorage.clear();
   });
 
   afterEach(() => {
@@ -266,7 +274,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
   // Helper function to generate quiz via question bank
   const triggerAssessmentPaper = async () => {
     const practiceBtn = screen.getByRole('button', {
-      name: /Practice from Verified Question Bank/i,
+      name: /Practise with Question Bank/i,
     });
     fireEvent.click(practiceBtn);
     // Advance timers for the 1500ms polling interval in Dashboard.tsx
@@ -280,7 +288,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
 
     // 1. Initial view: Assessment Engine
     expect(
-      screen.getByText(/Sovereign Edge-AI Assessment Generator/i)
+      screen.getByText(/Competency assessment generator/i)
     ).toBeDefined();
 
     // 2. Switch to Discover tab
@@ -292,7 +300,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
       await screen.findByText(/Government of India Course Discovery/i)
     ).toBeDefined();
     expect(
-      screen.getByPlaceholderText(/Search 880\+ official courses/i)
+      screen.getByPlaceholderText(/Search by course, provider, or topic/i)
     ).toBeDefined();
 
     // 3. Switch to Competency Profile tab
@@ -313,9 +321,9 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
     });
     fireEvent.click(analyticsTabBtn);
     expect(
-      screen.getByText(/MoSPI Division Competency Analytics/i)
+      screen.getByText(/Competency Analytics/i)
     ).toBeDefined();
-    expect(screen.getByText(/Assessments Logged/i)).toBeDefined();
+    expect(screen.getByText(/Completed assessments/i)).toBeDefined();
 
     // Return to Assessment Engine tab
     const assessmentTabBtn = screen.getByRole('button', {
@@ -323,8 +331,33 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
     });
     fireEvent.click(assessmentTabBtn);
     expect(
-      screen.getByText(/Sovereign Edge-AI Assessment Generator/i)
+      screen.getByText(/Competency assessment generator/i)
     ).toBeDefined();
+  });
+
+  it('TC_INT_001A: ignores stale assessment topic keys and caps stored levels at 5 when averaging proficiency', async () => {
+    window.localStorage.setItem(
+      'statskill_officer_progress_v1',
+      JSON.stringify({
+        'Junior Statistical Officer (JSO)': {
+          assessmentsTaken: 1,
+          proficiency: {
+            'Survey Design & Sampling': 9,
+            'CAPI & Digital Field Enumeration': 7,
+            'Data Privacy & DPDPA 2023': 5,
+            'Public Ethics & Field Communication': 5,
+            'Sampling Techniques': 4,
+            'GDP Compilation': 4,
+          },
+        },
+      })
+    );
+    render(<Dashboard />);
+
+    fireEvent.click(screen.getByRole('button', { name: /MoSPI Analytics/i }));
+
+    expect(screen.getByText(/Average proficiency/i).parentElement?.textContent).toContain('5.0');
+    expect(screen.getByText(/Average proficiency/i).parentElement?.textContent).toContain('/ 5');
   });
 
   it('TC_INT_002: Cadre designation switcher updates division name and competency benchmark levels', async () => {
@@ -375,7 +408,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
     render(<Dashboard />);
 
     const practiceBtn = screen.getByRole('button', {
-      name: /Practice from Verified Question Bank/i,
+      name: /Practise with Question Bank/i,
     });
     fireEvent.click(practiceBtn);
 
@@ -384,7 +417,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
       await vi.advanceTimersByTimeAsync(1600);
     });
 
-    expect(screen.getByText('Official Assessment Paper')).toBeDefined();
+    expect(screen.getByText('Assessment paper')).toBeDefined();
     expect(screen.getByText('Paper: Set A')).toBeDefined();
     expect(
       screen.getByText(
@@ -455,7 +488,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
   it('TC_INT_006: Answering an assessment question triggers feedback and updates proficiency', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
 
-    render(<Dashboard />);
+    const { unmount } = render(<Dashboard />);
     await triggerAssessmentPaper();
 
     // Find and select the correct option "Census Village"
@@ -479,15 +512,30 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
       screen.getByText(/NSSO Survey Design Manual Vol\. 78/i)
     ).toBeDefined();
 
-    // Switch to MoSPI Analytics tab and verify an assessment was captured
+    // Finish the paper; an attempt is counted once, not once per answer.
+    const secondCorrectOptionBtn = screen.getByRole('button', { name: /Data Fiduciary/i });
+    await act(async () => {
+      fireEvent.click(secondCorrectOptionBtn);
+      await Promise.resolve();
+    });
+
+    // Switch to MoSPI Analytics tab and verify the completed assessment was captured.
     const analyticsTabBtn = screen.getByRole('button', {
       name: /MoSPI Analytics/i,
     });
     fireEvent.click(analyticsTabBtn);
 
-    // Assessments Logged count should now be 1
-    const assessmentCountElem = screen.getByText('1');
-    expect(assessmentCountElem).toBeDefined();
+    const assessmentMetric = screen.getByText(/Completed assessments/i).parentElement;
+    expect(assessmentMetric?.textContent).toContain('1');
+    expect(screen.getByText(/Average proficiency/i).parentElement?.textContent).toMatch(/[0-5]\.\d\s*\/\s*5/);
+
+    const storedProgress = JSON.parse(window.localStorage.getItem('statskill_officer_progress_v1') || '{}');
+    expect(storedProgress['Junior Statistical Officer (JSO)'].assessmentsTaken).toBe(1);
+
+    unmount();
+    render(<Dashboard />);
+    fireEvent.click(screen.getByRole('button', { name: /MoSPI Analytics/i }));
+    expect(screen.getByText(/Completed assessments/i).parentElement?.textContent).toContain('1');
 
     vi.useRealTimers();
   });
@@ -505,7 +553,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
 
     // Click telemetry launcher button in header
     const telemetryBtn = screen.getByRole('button', {
-      name: /iGOT LRS Telemetry/i,
+      name: /xAPI Payload Inspector/i,
     });
     fireEvent.click(telemetryBtn);
 
@@ -521,7 +569,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
     ).toBeDefined();
   });
 
-  it('TC_INT_008: Telemetry drawer displays live actor, verb, and score data, and closes via close button and backdrop click', async () => {
+  it('TC_INT_008: Telemetry drawer displays the latest prepared actor, verb, and score data, and closes via close button and backdrop click', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
 
     render(<Dashboard />);
@@ -538,7 +586,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
 
     // Open telemetry drawer
     const telemetryBtn = screen.getByRole('button', {
-      name: /iGOT LRS Telemetry/i,
+      name: /xAPI Payload Inspector/i,
     });
     fireEvent.click(telemetryBtn);
 
@@ -591,7 +639,7 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
 
     // Search for "Python"
     const searchInput = screen.getByPlaceholderText(
-      /Search 880\+ official courses/i
+      /Search by course, provider, or topic/i
     );
     fireEvent.change(searchInput, { target: { value: 'Python' } });
 

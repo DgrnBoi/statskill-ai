@@ -54,13 +54,13 @@ export function LandingFooter({
                   StatSkill AI
                 </span>
                 <span className="block text-xs text-amber-400 font-mono">
-                  MoSPI Sovereign Node · Mission Karmayogi
+                  SIH prototype · Mission Karmayogi use case
                 </span>
               </div>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-300">
-              The sovereign capacity-building node for India's Official Statistical System — empowering
-              civil servants for a Viksit Bharat with precision AI diagnostics and role-aligned FRAC competencies.
+              A Smart India Hackathon prototype for role-aligned statistical learning, competency diagnostics,
+              and government-course discovery.
             </p>
           </div>
 
@@ -103,9 +103,9 @@ export function LandingFooter({
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-slate-400 sm:flex-row">
           <p>
-            &copy; Copyright 2026-2027 StatSkill AI • Ministry of Statistics and Programme Implementation (MoSPI), Government of India.
+            &copy; 2026 StatSkill AI · Smart India Hackathon prototype. Government names and marks identify the intended use case.
           </p>
-          <p>Compliant with GIGW 3.0 &amp; WCAG 2.2 AAA Accessibility Standards</p>
+          <p>Designed toward GIGW and WCAG accessibility guidance; formal conformance has not been certified.</p>
         </div>
       </div>
     </footer>

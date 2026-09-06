@@ -5,7 +5,7 @@ import {
   GraduationCap,
   MessageSquare,
   Network,
-  Play,
+  ArrowRight,
   Target,
 } from 'lucide-react';
 import { IndianFlag } from '../ui/IndianFlag';
@@ -19,7 +19,7 @@ const HUBS = [
   {
     name: 'Learn Hub',
     icon: GraduationCap,
-    desc: 'Access 880+ authenticated e-learning courses across statistical theory and software tools.',
+    desc: 'Browse the prototype catalog of sourced government learning links across statistical theory and software tools.',
   },
   {
     name: 'Competency Hub',
@@ -133,26 +133,26 @@ export function KarmayogiHubsOrbit({ onLaunchAssessment }: { onLaunchAssessment?
               <button
                 type="button"
                 onClick={onLaunchAssessment}
-                aria-label="Play registration guide video"
+                aria-label="Start baseline competency assessment"
                 className="grid h-16 w-16 place-items-center rounded-full bg-amber-500 text-slate-900 shadow-lg transition group-hover:scale-110 cursor-pointer"
               >
-                <Play className="ml-1 h-7 w-7 fill-current" />
+                <ArrowRight className="h-7 w-7" />
               </button>
               <div className="absolute bottom-3 left-3 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full overflow-hidden border border-amber-400">
                   <IndianFlag variant="circular" width={24} height={24} />
                 </span>
                 <span className="text-xs font-medium text-white/90">
-                  StatSkill AI · MoSPI Sovereign Node
+                  StatSkill AI · SIH prototype
                 </span>
               </div>
             </div>
             <h3 className="mt-5 text-lg font-bold text-white">
-              How to Take Your Baseline Competency Assessment on StatSkill AI?
+              Ready to establish a competency baseline?
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-300">
-              A step-by-step video walkthrough covering Jan Parichay SSO, cadre selection (JSO/SSO/ISS/Analyst),
-              offline paper sets, and eHRMS credit syncing.
+              Start the prototype assessment flow, choose a statistical cadre, and review the resulting
+              competency gaps and recommended learning path.
             </p>
           </div>
         </div>

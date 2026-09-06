@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 
 export type InfoModalType =
   | 'about'
@@ -33,6 +34,7 @@ interface LandingInfoModalProps {
 }
 
 export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoModalProps) {
+  const dialogRef = useDialogAccessibility(Boolean(type), onClose);
   if (!type) return null;
 
   const modalConfig: Record<
@@ -46,7 +48,7 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
   > = {
     about: {
       title: 'About StatSkill AI & MoSPI Mandate',
-      subtitle: 'National Statistical Systems Training Academy (NSSTA) Sovereign Node',
+      subtitle: 'Smart India Hackathon prototype for statistical capacity building',
       icon: Building2,
       content: (
         <div className="space-y-4 text-sm text-slate-700">
@@ -56,9 +58,9 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
               Sovereign Capacity Building Mission
             </h4>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-800">
-              StatSkill AI is the specialized artificial intelligence and competency diagnostic
-              engine created under Mission Karmayogi (NPCSCB) for the Ministry of Statistics and
-              Programme Implementation (MoSPI), Government of India.
+              StatSkill AI is a Smart India Hackathon prototype exploring an artificial-intelligence
+              competency diagnostic workflow for statistical officers. It is designed around Mission
+              Karmayogi and MoSPI training use cases; it is not an official government deployment.
             </p>
           </div>
 
@@ -91,8 +93,8 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
               <li className="flex items-start gap-2 rounded-lg bg-slate-100 p-2.5">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
                 <span>
-                  <strong>xAPI Telemetry &amp; Governance:</strong> Real-time competency auditing complying
-                  with the Digital Personal Data Protection (DPDP) Act 2023.
+                  <strong>xAPI Telemetry &amp; Governance:</strong> A prototype xAPI statement workflow for
+                  future learning-record integration, designed with data-minimisation in mind.
                 </span>
               </li>
             </ul>
@@ -111,11 +113,15 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
     },
 
     newsroom: {
-      title: 'MoSPI & Statistical Newsroom',
-      subtitle: 'Official Press Releases, Survey Updates & Gazette Notifications',
+      title: 'Prototype Newsroom',
+      subtitle: 'Illustrative cards for a future verified announcements feed',
       icon: Newspaper,
       content: (
         <div className="space-y-3.5 text-sm">
+          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            These sample stories demonstrate the proposed newsroom layout. They are not official
+            MoSPI announcements; verify current releases on the ministry website.
+          </p>
           {[
             {
               date: 'September 04, 2026',
@@ -152,7 +158,7 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
             >
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span className="rounded bg-[#0B2E63]/10 px-2 py-0.5 font-semibold text-[#0B2E63]">
-                  {item.tag}
+                  Sample · {item.tag}
                 </span>
                 <span className="text-slate-500 flex items-center gap-1 font-mono text-[11px]">
                   <Calendar className="h-3 w-3" />
@@ -239,32 +245,36 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
     },
 
     tenders: {
-      title: 'Active MoSPI Tenders & Procurement',
-      subtitle: 'Central Public Procurement Portal (CPPP) & GeM Notices',
+      title: 'Prototype Procurement Directory',
+      subtitle: 'Illustrative tender cards with a link to the official procurement portal',
       icon: FileText,
       content: (
         <div className="space-y-3.5 text-sm">
+          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            The entries below are interface samples, not active tenders. Use the official CPPP portal
+            for current notices, documents, deadlines, and eligibility rules.
+          </p>
           {[
             {
               id: 'MoSPI/DIID/2026/RFP-08',
               title: 'Supply and Maintenance of High-Security CAPI Tablet Terminals with Biometric 2FA',
               value: '₹ 14.80 Crore',
               closing: 'September 28, 2026 (15:00 IST)',
-              status: 'Active · Bid Submission Open',
+              status: 'Illustrative only',
             },
             {
               id: 'NSSTA/EST-2026/EOI-04',
               title: 'Empanelment of Academic Institutions for Specialized Masterclasses in Machine Learning for Official Statistics',
               value: '₹ 2.40 Crore',
               closing: 'October 12, 2026 (17:00 IST)',
-              status: 'Active · EOI Under Review',
+              status: 'Illustrative only',
             },
             {
               id: 'MoSPI/NAD/2026/CONS-02',
               title: 'Consultancy Services for Satellite Accounts Integration & Environmental Economic Accounting (SEEA)',
               value: '₹ 3.15 Crore',
               closing: 'October 05, 2026 (14:00 IST)',
-              status: 'Active · Technical Evaluation',
+              status: 'Illustrative only',
             },
           ].map((t, idx) => (
             <div
@@ -300,11 +310,15 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
     },
 
     notifications: {
-      title: 'Gazette Notifications & Circulars',
-      subtitle: 'Official Administrative Circulars, ACBP Directives & Examination Schedules',
+      title: 'Prototype Circulars Directory',
+      subtitle: 'Illustrative notification cards for the proposed portal',
       icon: Bell,
       content: (
         <div className="space-y-3 text-sm">
+          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            These reference cards are sample content for the SIH prototype and are not gazette notices
+            or official administrative directions.
+          </p>
           {[
             {
               num: 'No. 12016/04/2026-ISS',
@@ -351,7 +365,7 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
 
     help: {
       title: 'StatSkill Support & Help Centre',
-      subtitle: '24x7 Sovereign Technical Assistance, Jan Parichay SSO Support & CAPI Field Helpdesk',
+      subtitle: 'Prototype guidance for assessment, catalog, sign-in, and offline use',
       icon: HelpCircle,
       content: (
         <div className="space-y-4 text-sm text-slate-700">
@@ -359,21 +373,21 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
             <div className="rounded-xl border border-[#0B2E63]/20 bg-[#0B2E63]/5 p-3.5">
               <div className="flex items-center gap-2 text-[#0B2E63] font-semibold text-xs">
                 <Phone className="h-4 w-4 text-amber-600" />
-                <span>Toll-Free National Helpline</span>
+                <span>Prototype support status</span>
               </div>
-              <p className="mt-1 font-mono text-base font-bold text-[#0B2E63]">1800-11-2026</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Mon–Sat, 09:00 to 18:00 IST</p>
+              <p className="mt-1 text-sm font-bold text-[#0B2E63]">No live helpline connected</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">Use the in-app guide during this demo.</p>
             </div>
 
             <div className="rounded-xl border border-[#0B2E63]/20 bg-[#0B2E63]/5 p-3.5">
               <div className="flex items-center gap-2 text-[#0B2E63] font-semibold text-xs">
                 <Mail className="h-4 w-4 text-amber-600" />
-                <span>Nodal Support Email</span>
+                <span>Support mailbox</span>
               </div>
               <p className="mt-1 font-mono text-xs font-bold text-[#0B2E63] break-all">
-                support-statskill@mospi.gov.in
+                Not configured
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Average response under 4 hours</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">No messages are sent by this prototype.</p>
             </div>
           </div>
 
@@ -388,8 +402,9 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
                   <ChevronRight className="h-4 w-4 text-slate-400 transition group-open:rotate-90" />
                 </summary>
                 <p className="mt-2 text-slate-600 leading-relaxed pl-1">
-                  Click 'Log In' in the top navigation bar, select 'Continue with Jan Parichay',
-                  and input your official @gov.in or @nic.in credentials or Aadhaar-linked OTP.
+                  Click 'Log In' and choose one of the four demo officer profiles. The prototype
+                  requests a signed session token from its own backend; it does not connect to Jan
+                  Parichay or ask for real government credentials.
                 </p>
               </details>
 
@@ -399,8 +414,8 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
                   <ChevronRight className="h-4 w-4 text-slate-400 transition group-open:rotate-90" />
                 </summary>
                 <p className="mt-2 text-slate-600 leading-relaxed pl-1">
-                  Upon completing a validated domain assessment, your competency score is cryptographically
-                  signed and pushed via the secure MoSPI API to your electronic Service Book (e-HRMS 2.0).
+                  It is not connected to e-HRMS. Completed assessment summaries are saved in this
+                  browser so the dashboard can preserve progress across refreshes.
                 </p>
               </details>
 
@@ -440,6 +455,7 @@ export function LandingInfoModal({ type, onClose, onLaunchPortal }: LandingInfoM
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"

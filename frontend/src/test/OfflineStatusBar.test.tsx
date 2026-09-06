@@ -26,7 +26,7 @@ describe('OfflineStatusBar Component', () => {
     });
 
     expect(screen.getByRole('complementary', { name: /Network Status Alert/i })).toBeDefined();
-    expect(screen.getByText(/Offline Field Mode Active/i)).toBeDefined();
+    expect(screen.getByText(/You are offline/i)).toBeDefined();
   });
 
   it('allows user to dismiss offline alert', () => {
@@ -39,7 +39,7 @@ describe('OfflineStatusBar Component', () => {
     const dismissBtn = screen.getByRole('button', { name: /Dismiss offline alert/i });
     fireEvent.click(dismissBtn);
 
-    expect(screen.queryByText(/Offline Field Mode Active/i)).toBeNull();
+    expect(screen.queryByText(/You are offline/i)).toBeNull();
   });
 
   it('shows connection restored alert on reconnection', () => {

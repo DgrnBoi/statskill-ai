@@ -3,6 +3,7 @@
 /* contrast: pass (WCAG AA 4.5:1+) */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 import {
   ShieldAlert,
   Lock,
@@ -28,6 +29,7 @@ export function SecretAdminGatewayModal({
   onClose,
   onUnlockAdmin,
 }: SecretAdminGatewayModalProps) {
+  const dialogRef = useDialogAccessibility(isOpen, onClose);
   const [passcode, setPasscode] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -58,7 +60,7 @@ export function SecretAdminGatewayModal({
         onClose();
       }, 700);
     } else {
-      setErrorMessage('Invalid ministerial PIN. Authorized codes: MOSPI2026 or 1042.');
+      setErrorMessage('Invalid demo key. Try MOSPI2026 or 1042.');
       setPasscode('');
     }
   };
@@ -75,6 +77,7 @@ export function SecretAdminGatewayModal({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="secret-admin-title"
@@ -93,11 +96,11 @@ export function SecretAdminGatewayModal({
             <div>
               <div className="flex items-center gap-2">
                 <h3 id="secret-admin-title" className="font-bold text-base font-display text-white">
-                  MoSPI Sovereign Gateway
+                  Demo Admin Gateway
                 </h3>
-                <Badge variant="destructive" className="text-[10px] font-mono">RESTRICTED</Badge>
+                <Badge variant="destructive" className="text-[10px] font-mono">PROTOTYPE</Badge>
               </div>
-              <p className="text-xs text-amber-300/80 mt-0.5 font-mono">HQ Administrative Clearance Required</p>
+              <p className="text-xs text-amber-300/80 mt-0.5 font-mono">Demo access key required</p>
             </div>
           </div>
 
@@ -114,12 +117,12 @@ export function SecretAdminGatewayModal({
         {/* Form Body */}
         <form onSubmit={handleVerify} className="p-6 space-y-5">
           <p className="text-xs text-slate-300 leading-relaxed">
-            Enter the ministerial authorization clearance passcode to unlock the <strong className="text-amber-300">MoSPI HQ Admin Command Center</strong>, division allocations, and ACBP fiscal dossier.
+            Enter the prototype access key to preview the <strong className="text-amber-300">administrative dashboard</strong>, division data, and ACBP dossier supplied by the demo backend.
           </p>
 
           <div className="space-y-2">
             <label htmlFor="admin-pin-input" className="block text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
-              Ministerial Clearance Passcode:
+              Demo access key:
             </label>
             <div className="relative">
               <Key className="w-4 h-4 text-amber-400 absolute left-3.5 top-3.5" />
@@ -130,7 +133,7 @@ export function SecretAdminGatewayModal({
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 placeholder="Enter PIN (e.g. MOSPI2026)..."
-                aria-label="Ministerial Clearance Passcode"
+                aria-label="Demo admin access key"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm font-mono text-amber-300 placeholder:text-slate-600 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
               />
             </div>
@@ -147,7 +150,7 @@ export function SecretAdminGatewayModal({
           {isSuccess && (
             <div role="alert" className="p-3 bg-emerald-950/80 border border-emerald-500/60 rounded-xl flex items-center gap-2 text-xs text-emerald-200 animate-fade-in">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 animate-bounce" />
-              <span className="font-bold">Ministerial Clearance Verified. Unlocking HQ Command Center...</span>
+              <span className="font-bold">Demo key accepted. Opening the admin preview...</span>
             </div>
           )}
 
@@ -159,7 +162,7 @@ export function SecretAdminGatewayModal({
               className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:bg-slate-800 text-slate-950 disabled:text-slate-600 font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
               <Unlock className="w-4 h-4" />
-              Authenticate Clearance
+              Open admin preview
             </button>
 
             <button
@@ -168,7 +171,7 @@ export function SecretAdminGatewayModal({
               className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold border border-amber-500/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              Use Sovereign Demo Clearance Key (MOSPI2026)
+              Use demo access key (MOSPI2026)
             </button>
           </div>
         </form>
@@ -176,7 +179,7 @@ export function SecretAdminGatewayModal({
         {/* Footer info */}
         <div className="px-6 py-3 bg-slate-950 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
           <span>Secret Entrance: <strong className="text-amber-400">Ctrl+Shift+A</strong></span>
-          <span>MoSPI DIID Node</span>
+          <span>SIH prototype</span>
         </div>
       </div>
     </div>

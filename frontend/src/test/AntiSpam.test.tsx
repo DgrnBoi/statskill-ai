@@ -127,7 +127,7 @@ describe('Anti-Spam Click Shield & Search Debounce Suite', () => {
   it('TC_SPAM_006: renders anti-spam banner and disables practice button on rapid click burst in Dashboard', async () => {
     render(<Dashboard activeTab="dashboard" />);
 
-    const practiceBtn = screen.getByRole('button', { name: /Practice from Verified Question Bank/i });
+    const practiceBtn = screen.getByRole('button', { name: /Practise with Question Bank/i });
     expect(practiceBtn).toBeDefined();
     expect(practiceBtn.hasAttribute('disabled')).toBe(false);
 

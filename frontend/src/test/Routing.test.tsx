@@ -1,13 +1,47 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from '../App';
 
 describe('App Routing and Browser History Navigation', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     window.localStorage.clear();
+    document.documentElement.lang = '';
+    document.documentElement.style.fontSize = '';
+  });
+
+  afterEach(() => {
+    document.documentElement.lang = '';
+    document.documentElement.style.fontSize = '';
+  });
+
+  it('switches the public gateway interface to Hindi and updates the document language', async () => {
+    window.history.pushState({}, '', '/');
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Toggle language preference/i }));
+
+    expect(document.documentElement.lang).toBe('hi');
+    expect(screen.getByRole('heading', { name: /अपनी भूमिका के लिए आवश्यक कौशल विकसित करें/i })).toBeDefined();
+  });
+
+  it('applies the landing text-size control to the complete application root', () => {
+    window.history.pushState({}, '', '/');
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Increase text size/i }));
+
+    expect(document.documentElement.style.fontSize).toBe('110%');
+  });
+
+  it('provides the Sahayak dialog launcher as a bottom-right floating control', () => {
+    window.history.pushState({}, '', '/');
+    render(<App />);
+
+    const launcher = screen.getByRole('complementary', { name: /Karmayogi Sahayak quick launch/i });
+    expect(launcher.querySelector('button[aria-haspopup="dialog"]')).not.toBeNull();
   });
 
   it('renders login route on /login and handles Back to Portal button click', async () => {
@@ -17,7 +51,7 @@ describe('App Routing and Browser History Navigation', () => {
 
     // Login page should be displayed
     expect(await screen.findByText(/MeriPehchan · Jan Parichay/i)).toBeDefined();
-    expect(screen.getByText(/Sign in to your StatSkill workspace/i)).toBeDefined();
+    expect(screen.getByText(/Access your statistical learning workspace/i)).toBeDefined();
 
     // Click "Back to Portal"
     const backToPortalBtn = screen.getByRole('button', { name: /Back to StatSkill Portal/i });
@@ -29,7 +63,7 @@ describe('App Routing and Browser History Navigation', () => {
 
     // Should navigate back to Public Gateway Landing Page
     expect(screen.getAllByText(/StatSkill AI/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Sovereign Capacity Building for India's Statistical Cadres/i)).toBeDefined();
+    expect(screen.getByRole('heading', { name: /Build the skills your role calls for/i })).toBeDefined();
   });
 
   it('updates route when popstate (browser back/forward) is triggered', async () => {
@@ -37,7 +71,7 @@ describe('App Routing and Browser History Navigation', () => {
     render(<App />);
 
     // Initially on Public Gateway Landing Page
-    expect(screen.getByText(/Sovereign Capacity Building for India's Statistical Cadres/i)).toBeDefined();
+    expect(screen.getByRole('heading', { name: /Build the skills your role calls for/i })).toBeDefined();
 
     // Trigger popstate to /login
     await act(async () => {
@@ -47,34 +81,35 @@ describe('App Routing and Browser History Navigation', () => {
 
     expect(await screen.findByText(/MeriPehchan · Jan Parichay/i)).toBeDefined();
 
-    // Trigger popstate to /admin
+    // A direct admin route is gated and returns to the public gateway.
     await act(async () => {
       window.history.pushState({}, '', '/admin');
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
 
-    expect(await screen.findByText(/MoSPI Cadre Capacity & Readiness Command Center/i)).toBeDefined();
+    expect(await screen.findByRole('heading', { name: /Build the skills your role calls for/i })).toBeDefined();
+    expect(window.location.pathname).toBe('/');
   });
 
   it('navigates from Landing Page to Assessment Engine when Launch Assessment CTA is clicked', async () => {
     window.history.pushState({}, '', '/');
     render(<App />);
 
-    const launchCta = screen.getByRole('button', { name: /Launch Diagnostic Assessment/i });
+    const launchCta = screen.getByRole('button', { name: /Start an assessment/i });
     
     await act(async () => {
       fireEvent.click(launchCta);
     });
 
     expect(window.location.pathname).toBe('/dashboard');
-    expect(await screen.findByText(/Sovereign Edge-AI Assessment Generator/i)).toBeDefined();
+    expect(await screen.findByText(/Competency assessment generator/i)).toBeDefined();
   });
 
   it('navigates between Portal tabs and updates history when in portal view', async () => {
     window.history.pushState({}, '', '/dashboard');
     render(<App />);
 
-    const discoverTab = screen.getByRole('button', { name: /Discover \(880\+ Catalog\)/i });
+    const discoverTab = await screen.findByRole('button', { name: /Discover \(880\+ Catalog\)/i });
     
     await act(async () => {
       fireEvent.click(discoverTab);

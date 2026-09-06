@@ -22,6 +22,7 @@ import {
   Keyboard,
   Volume2
 } from 'lucide-react';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 
 export interface AccessibilitySettings {
   highContrast: boolean;
@@ -81,6 +82,7 @@ export function AccessibilityModal({
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const dialogRef = useDialogAccessibility(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -226,6 +228,7 @@ export function AccessibilityModal({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Accessibility Menu (CTRL+U)"

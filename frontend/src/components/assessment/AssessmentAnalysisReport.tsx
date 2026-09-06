@@ -67,23 +67,23 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
   const remainingSecondsTaken = timeTakenSeconds % 60;
   const formattedTimeTaken = `${minutesTaken > 0 ? `${minutesTaken}m ` : ''}${remainingSecondsTaken}s`;
 
-  let ratingTitle = 'Foundational Deficit';
-  let ratingDescription = 'Diagnostic indicates foundational gaps requiring prerequisite scaffolding before reassessment.';
+  let ratingTitle = 'Foundational support needed';
+  let ratingDescription = 'This attempt indicates topics to review before taking another assessment.';
 
   if (percentage === 100) {
-    ratingTitle = 'Exemplary Cadre Readiness';
-    ratingDescription = 'All competencies meet or exceed official MoSPI departmental benchmarks.';
+    ratingTitle = 'All items correct';
+    ratingDescription = 'Every item in this assessment was answered correctly.';
   } else if (percentage >= 80) {
-    ratingTitle = 'Proficient Cadre Competence';
-    ratingDescription = 'Strong mastery demonstrated with minor operational reinforcement required.';
+    ratingTitle = 'Strong assessment result';
+    ratingDescription = 'Most items were answered correctly; review the remaining explanations before the next attempt.';
   } else if (percentage >= 60) {
-    ratingTitle = 'Operational Working Level';
-    ratingDescription = 'Working knowledge demonstrated; targeted remediation recommended in flagged topics.';
+    ratingTitle = 'Working assessment result';
+    ratingDescription = 'The attempt shows working knowledge with targeted review recommended for missed topics.';
   }
 
   return (
     <Card className="border border-[#0B2E63]/30 bg-white overflow-hidden shadow-md animate-fade-in font-body">
-      {/* Official Scorecard Header */}
+      {/* Prototype scorecard header */}
       <div className="bg-[#0B2E63] text-white p-6 sm:p-8 shadow-[inset_0_-1px_0_rgba(255,255,255,0.1)]">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div className="space-y-2 max-w-2xl">
@@ -91,17 +91,17 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
               <span className="p-1 bg-emerald-400/20 text-emerald-300 rounded border border-emerald-400/30 flex items-center justify-center">
                 <CheckCircle2 className="w-4 h-4 text-emerald-300" />
               </span>
-              <Badge variant="success">Official Examination Finalized</Badge>
+              <Badge variant="success">Assessment completed</Badge>
               <Badge variant="neutral" className="bg-white/10 text-white border-white/20 font-mono">
                 Paper: {paperSet}
               </Badge>
             </div>
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display">
-              Assessment Performance & Diagnostic Analysis
+              Assessment result and topic review
             </h3>
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-body">
-              Official evaluation summary for <strong className="text-white font-semibold">{cadre}</strong> ({division}).
-              Results have been registered to your competency record and synchronized to iGOT Karmayogi LRS.
+              Prototype evaluation summary for <strong className="text-white font-semibold">{cadre}</strong> ({division}).
+              Results have been saved to this prototype&apos;s competency record. Open the telemetry inspector to review the xAPI payload prepared for integration.
             </p>
           </div>
 
@@ -130,7 +130,7 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
           <div className="bg-white/5 border border-white/10 rounded-lg p-3 flex items-center gap-3">
             <Award className="w-5 h-5 text-amber-300 shrink-0" />
             <div>
-              <span className="text-[10px] uppercase font-semibold text-slate-300 block font-mono">Readiness Rating</span>
+              <span className="text-[10px] uppercase font-semibold text-slate-300 block font-mono">Assessment band</span>
               <span className="text-sm font-semibold text-white font-display">{ratingTitle}</span>
             </div>
           </div>
@@ -138,9 +138,9 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
           <div className="bg-white/5 border border-white/10 rounded-lg p-3 flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-blue-300 shrink-0" />
             <div>
-              <span className="text-[10px] uppercase font-semibold text-slate-300 block font-mono">Diagnostic Verdict</span>
+              <span className="text-[10px] uppercase font-semibold text-slate-300 block font-mono">Answer summary</span>
               <span className="text-sm font-semibold text-white font-body">
-                {correctCount} Validated • {incorrectCount} Deficit
+                {correctCount} correct • {incorrectCount} to review
               </span>
             </div>
           </div>
@@ -175,7 +175,7 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-display">
               <BarChart3 className="w-4 h-4 text-[#0B2E63]" />
-              Itemized Question Audit & Competency Verification
+              Question-by-question review
             </h4>
             <span className="text-xs font-semibold text-slate-600 font-mono">
               {correctCount} of {totalQuestions} Correct
@@ -205,7 +205,7 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
                           : 'bg-red-100 text-red-900 border border-red-300'
                       }`}
                     >
-                      {ans.isCorrect ? 'Correct (+Level Up)' : 'Gap Identified (Level 2)'}
+                      {ans.isCorrect ? 'Correct · level updated' : 'Review recommended'}
                     </span>
                   </div>
                   <p className="text-xs font-semibold text-slate-900 leading-snug font-body">{ans.questionText}</p>
@@ -248,7 +248,7 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
               className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:translate-y-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63]"
             >
               <Terminal className="w-3.5 h-3.5 text-slate-600" />
-              <span>Inspect iGOT xAPI Statement</span>
+              <span>Inspect xAPI payload</span>
             </button>
             <button
               type="button"
