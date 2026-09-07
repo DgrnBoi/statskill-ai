@@ -829,6 +829,10 @@ export default function Dashboard({
     }
     formData.append('numQuestions', '5');
     formData.append('difficulty', 'intermediate');
+    const localApiKey = localStorage.getItem('statskill_api_key');
+    if (localApiKey) {
+      formData.append('apiKey', localApiKey);
+    }
 
     try {
       const response = await fetch(`http://localhost:5000/api/quiz/generate-async?mode=${deviceMode}`, {
@@ -1107,21 +1111,20 @@ export default function Dashboard({
                   </div>
                   <h3 className="text-base font-bold text-slate-900 mb-1 font-display">
                     {isUploading
-                      ? 'Synthesizing Examination Paper...'
-                      : 'Upload MoSPI Manual or Training PDF'}
+                      ? 'Synthesizing Dynamic Examination Paper...'
+                      : 'Upload MoSPI Manual or Custom Training Document'}
                   </h3>
                   <p className="text-xs text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed font-body">
-                    Upload training material or practise with the bundled question bank. Questions and
-                    answer choices are shuffled to create a fresh attempt.
+                    Upload official manuals (PDF, TXT, MD) to extract dynamic, non-hardcoded questions from the text, or practise with the verified question bank.
                   </p>
 
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     <input
                       type="file"
-                      accept="application/pdf"
+                      accept=".pdf,.txt,.md,application/pdf,text/plain"
                       className="sr-only"
                       id="pdf-upload"
-                      aria-label="Upload official training circular or manual in PDF format"
+                      aria-label="Upload official training circular or manual in PDF or TXT format"
                       disabled={isUploading || isAntiSpamLocked}
                       onChange={(e) => {
                         if (!e.target.files || e.target.files.length === 0) return;
@@ -1146,7 +1149,7 @@ export default function Dashboard({
                       }`}
                     >
                       <FileText className="w-4 h-4" aria-hidden="true" />
-                      {isUploading ? 'Processing File...' : 'Browse Local PDF'}
+                      {isUploading ? 'Extracting Questions...' : 'Browse Document (PDF, TXT)'}
                     </label>
 
                     <Button

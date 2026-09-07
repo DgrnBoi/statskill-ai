@@ -499,5 +499,221 @@
         "recommendedCourseTitle": "Foundations of Official Statistics"
       }
     }
+  },
+  {
+    "id": "qb-doc-def-1788757009681-1",
+    "courseId": "NSS 78th Round Manual",
+    "topic": "First Stage Units",
+    "bloomLevel": "Recall",
+    "question": "According to the uploaded document, what is the operational definition or purpose of \"First Stage Units\"?",
+    "options": [
+      "Computed using unweighted arithmetic aggregations without non-response adjustments.",
+      "households in both rural and urban sectors selected for complete enumeration",
+      "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector",
+      "Applies only when variance thresholds exceed statutory limits for First Stage Units."
+    ],
+    "correctAnswer": "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector",
+    "explanation": "The uploaded manual specifies: \"First Stage Units refers to the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector\".",
+    "sourceCitation": "Uploaded Document: Section on First Stage Units",
+    "distractorAnalysis": {
+      "households in both rural and urban sectors selected for complete enumeration": {
+        "misconception": "Confusing the definition of \"First Stage Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "Applies only when variance thresholds exceed statutory limits for First Stage Units.": {
+        "misconception": "Confusing the definition of \"First Stage Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "Computed using unweighted arithmetic aggregations without non-response adjustments.": {
+        "misconception": "Confusing the definition of \"First Stage Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-def-1788757009681-2",
+    "courseId": "NSS 78th Round Manual",
+    "topic": "Ultimate Stage Units",
+    "bloomLevel": "Recall",
+    "question": "According to the uploaded document, what is the operational definition or purpose of \"Ultimate Stage Units\"?",
+    "options": [
+      "Applies only when variance thresholds exceed statutory limits for Ultimate Stage Units.",
+      "households in both rural and urban sectors selected for complete enumeration",
+      "Computed using unweighted arithmetic aggregations without non-response adjustments.",
+      "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector"
+    ],
+    "correctAnswer": "households in both rural and urban sectors selected for complete enumeration",
+    "explanation": "The uploaded manual specifies: \"Ultimate Stage Units refers to households in both rural and urban sectors selected for complete enumeration\".",
+    "sourceCitation": "Uploaded Document: Section on Ultimate Stage Units",
+    "distractorAnalysis": {
+      "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector": {
+        "misconception": "Confusing the definition of \"Ultimate Stage Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "Applies only when variance thresholds exceed statutory limits for Ultimate Stage Units.": {
+        "misconception": "Confusing the definition of \"Ultimate Stage Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "Computed using unweighted arithmetic aggregations without non-response adjustments.": {
+        "misconception": "Confusing the definition of \"Ultimate Stage Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-meth-1788757009681-1",
+    "courseId": "NSS 78th Round Manual",
+    "topic": "the 78th Round",
+    "bloomLevel": "Understanding",
+    "question": "Based on the provisions for \"the 78th Round\" in the document, which procedural requirement is explicitly stated?",
+    "options": [
+      "First Stage Units refers to the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector.",
+      "Chapter 2: SAMPLING DESIGN AND ESTIMATION PROCEDURE\nA stratified multi-stage design was adopted for the survey.",
+      "Ultimate Stage Units is defined as households in both rural and urban sectors selected for complete enumeration.",
+      "the focus is on multi-stage stratification and domestic tourism expenditure"
+    ],
+    "correctAnswer": "the focus is on multi-stage stratification and domestic tourism expenditure",
+    "explanation": "The document explicitly states: \"Under the 78th Round, the focus is on multi-stage stratification and domestic tourism expenditure.\".",
+    "sourceCitation": "Uploaded Document: Rule under the 78th Round",
+    "distractorAnalysis": {
+      "Chapter 2: SAMPLING DESIGN AND ESTIMATION PROCEDURE\nA stratified multi-stage design was adopted for the survey.": {
+        "misconception": "Misattributing procedural guidelines under \"the 78th Round\".",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "First Stage Units refers to the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector.": {
+        "misconception": "Misattributing procedural guidelines under \"the 78th Round\".",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "Ultimate Stage Units is defined as households in both rural and urban sectors selected for complete enumeration.": {
+        "misconception": "Misattributing procedural guidelines under \"the 78th Round\".",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-def-1788757052925-1",
+    "courseId": "test_asi_doc.txt",
+    "topic": "Primary Sampling Units",
+    "bloomLevel": "Recall",
+    "question": "According to the uploaded document, what is the operational definition or purpose of \"Primary Sampling Units\"?",
+    "options": [
+      "the census factories employing 100 or more workers",
+      "Computed using unweighted arithmetic aggregations without non-response adjustments.",
+      "Deprecated methodology superseded by legacy census baseline procedures.",
+      "Applies only when variance thresholds exceed statutory limits for Primary Sampling Units."
+    ],
+    "correctAnswer": "the census factories employing 100 or more workers",
+    "explanation": "The uploaded manual specifies: \"Primary Sampling Units refers to the census factories employing 100 or more workers\".",
+    "sourceCitation": "Uploaded Document: Section on Primary Sampling Units",
+    "distractorAnalysis": {
+      "Applies only when variance thresholds exceed statutory limits for Primary Sampling Units.": {
+        "misconception": "Confusing the definition of \"Primary Sampling Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      },
+      "Computed using unweighted arithmetic aggregations without non-response adjustments.": {
+        "misconception": "Confusing the definition of \"Primary Sampling Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      },
+      "Deprecated methodology superseded by legacy census baseline procedures.": {
+        "misconception": "Confusing the definition of \"Primary Sampling Units\" with related statistical concepts in the manual.",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-meth-1788757052926-3",
+    "courseId": "test_asi_doc.txt",
+    "topic": "Section 4.2 of ASI Guidelines",
+    "bloomLevel": "Understanding",
+    "question": "Based on the provisions for \"Section 4.2 of ASI Guidelines\" in the document, which procedural requirement is explicitly stated?",
+    "options": [
+      "field verification of capital assets requires inspection of Form 1 schedules and balance sheets",
+      "The multiplier formula for factory estimation is calculated as the inverse of selection probability multiplied by non-response correction we",
+      "Primary Sampling Units refers to the census factories employing 100 or more workers.",
+      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic activity"
+    ],
+    "correctAnswer": "field verification of capital assets requires inspection of Form 1 schedules and balance sheets",
+    "explanation": "The document explicitly states: \"Under Section 4.2 of ASI Guidelines, field verification of capital assets requires inspection of Form 1 schedules and balance sheets.\".",
+    "sourceCitation": "Uploaded Document: Rule under Section 4.2 of ASI Guidelines",
+    "distractorAnalysis": {
+      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic activity": {
+        "misconception": "Misattributing procedural guidelines under \"Section 4.2 of ASI Guidelines\".",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      },
+      "Primary Sampling Units refers to the census factories employing 100 or more workers.": {
+        "misconception": "Misattributing procedural guidelines under \"Section 4.2 of ASI Guidelines\".",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      },
+      "The multiplier formula for factory estimation is calculated as the inverse of selection probability multiplied by non-response correction we": {
+        "misconception": "Misattributing procedural guidelines under \"Section 4.2 of ASI Guidelines\".",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-form-1788757052926-4",
+    "courseId": "test_asi_doc.txt",
+    "topic": "Estimation & Formulae",
+    "bloomLevel": "Application",
+    "question": "Regarding calculation and estimation methodology in the uploaded manual, which of the following is correct?",
+    "options": [
+      "Under Section 4.2 of ASI Guidelines, field verification of capital assets requires inspection of Form 1 schedules and balance shee",
+      "Primary Sampling Units refers to the census factories employing 100 or more workers.",
+      "the inverse of selection probability multiplied by non-response correction weights",
+      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic"
+    ],
+    "correctAnswer": "the inverse of selection probability multiplied by non-response correction weights",
+    "explanation": "Document reference: \"The multiplier formula for factory estimation is calculated as the inverse of selection probability multiplied by non-response correction weights.\".",
+    "sourceCitation": "Uploaded Document: Formula / Estimation Section",
+    "distractorAnalysis": {
+      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic": {
+        "misconception": "Incorrect estimation formulation or index calculation logic.",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      },
+      "Primary Sampling Units refers to the census factories employing 100 or more workers.": {
+        "misconception": "Incorrect estimation formulation or index calculation logic.",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      },
+      "Under Section 4.2 of ASI Guidelines, field verification of capital assets requires inspection of Form 1 schedules and balance shee": {
+        "misconception": "Incorrect estimation formulation or index calculation logic.",
+        "remedialSkill": "test_asi_doc.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "test_asi_doc.txt"
+      }
+    }
   }
 ]
