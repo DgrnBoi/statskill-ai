@@ -580,6 +580,7 @@ export default function Dashboard({
   const [userExamAnswers, setUserExamAnswers] = useState<Record<number, QuestionAnswerRecord>>({});
   const [isExamCompleted, setIsExamCompleted] = useState<boolean>(false);
   const [examTimeTaken, setExamTimeTaken] = useState<number>(0);
+  const [latestAnalysisData, setLatestAnalysisData] = useState<any>(null);
   const examTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const hasFinalizedExamRef = React.useRef(false);
 
@@ -880,6 +881,7 @@ export default function Dashboard({
     });
 
     const controller = new AbortController();
+    const localApiKey = typeof window !== 'undefined' ? window.localStorage.getItem('statskill_api_key') : null;
     fetch('http://localhost:5000/api/recommend/analyze-assessment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -888,6 +890,7 @@ export default function Dashboard({
         cadre: designation,
         answers: answersList,
         proficiencies: proficiency,
+        apiKey: localApiKey || undefined,
       }),
       signal: controller.signal,
     })
@@ -898,6 +901,7 @@ export default function Dashboard({
       .then((data) => {
         if (!data.success || !data.analysis) return;
         const analysis = data.analysis;
+        setLatestAnalysisData(analysis);
         if (analysis.updatedProficiency) {
           setProficiency((current) => ({ ...current, ...Object.fromEntries(Object.entries(analysis.updatedProficiency).map(([skillName, level]) => [skillName, clampProficiencyLevel(level)])) }));
         }
@@ -983,6 +987,7 @@ export default function Dashboard({
     setUserExamAnswers({});
     setIsExamCompleted(false);
     setExamTimeTaken(0);
+    setLatestAnalysisData(null);
     hasFinalizedExamRef.current = false;
 
     const formData = new FormData();
@@ -1542,6 +1547,7 @@ export default function Dashboard({
                         paperSet={paperSet}
                         cadre={designation}
                         division={getCadreData(designation).division}
+                        analysisData={latestAnalysisData}
                         onNavigateToPathway={() => {
                           handleTabChange('competency');
                           setTimeout(() => {

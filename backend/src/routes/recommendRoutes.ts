@@ -32,7 +32,7 @@ router.post('/course', async (req, res) => {
 // POST /api/recommend/analyze-assessment - Cognitive Misconception & Diagnostic Recommendation Engine
 router.post('/analyze-assessment', async (req, res) => {
   try {
-    const { officerId, cadre, answers, proficiencies } = req.body;
+    const { officerId, cadre, answers, proficiencies, apiKey } = req.body;
 
     if (!Array.isArray(answers) || answers.length === 0) {
       return res.status(400).json({ error: 'Answers array is required for diagnostic assessment analysis.' });
@@ -42,7 +42,8 @@ router.post('/analyze-assessment', async (req, res) => {
       officerId || 'JSO_1042',
       cadre || 'Junior Statistical Officer (JSO)',
       answers,
-      proficiencies || {}
+      proficiencies || {},
+      apiKey
     );
 
     return res.status(200).json({

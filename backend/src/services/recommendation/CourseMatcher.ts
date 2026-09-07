@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { userDb } from '../../db/UserDatabase';
 import { CompetencyEngine } from '../CompetencyEngine';
+import { AIEvaluationService, AIEvaluationResult } from '../ai/AIEvaluationService';
 
 export interface CatalogCourse {
   id: string;
@@ -187,6 +188,7 @@ export interface AssessmentAnalysisResult {
 export class CourseMatcherService {
   private courses: CatalogCourse[] = [];
   private competencyEngine: CompetencyEngine = new CompetencyEngine();
+  private aiEvaluationService: AIEvaluationService = new AIEvaluationService();
   private progressionData: {
     version: string;
     totalMapped: number;
@@ -575,184 +577,16 @@ export class CourseMatcherService {
     officerId: string = 'JSO_1042',
     cadre: string = 'Junior Statistical Officer (JSO)',
     answers: AssessmentAnswerSubmission[] = [],
-    currentProficiency: Record<string, number> = {}
-  ): Promise<AssessmentAnalysisResult> {
-    const totalQuestions = answers.length || 1;
-    const correctCount = answers.filter((a) => a.isCorrect).length;
-    const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
-    const status: 'passed' | 'remedial' = scorePercentage >= 70 ? 'passed' : 'remedial';
-
-    const updatedProficiency: Record<string, number> = { ...currentProficiency };
-    const misconceptionsFound: MisconceptionDiagnosticRecord[] = [];
-
-    // Derive 4-pillar competencies for this cadre and ensure baseline initialization
-    const cadreCompetencies = await this.competencyEngine.getRequiredSkillsForRole(cadre);
-    cadreCompetencies.forEach((comp) => {
-      if (typeof updatedProficiency[comp.skillName] !== 'number') {
-        updatedProficiency[comp.skillName] = Math.max(1, comp.targetLevel - 1);
-      }
-    });
-
-    // Load question bank for fallback distractor search if needed
-    let bankQuestions: any[] = [];
-    try {
-      const qbPath = path.join(__dirname, '../../data/question_bank.json');
-      if (fs.existsSync(qbPath)) {
-        bankQuestions = JSON.parse(fs.readFileSync(qbPath, 'utf8'));
-      }
-    } catch {}
-
-    // 1. Process each question answer
-    for (const ans of answers) {
-      const topicKey = ans.topic || cadreCompetencies[0]?.skillName || 'Survey Design & Sampling';
-
-      // Find matching cadre competency if exists
-      const matchedComp = cadreCompetencies.find(
-        (c) =>
-          c.skillName.toLowerCase() === topicKey.toLowerCase() ||
-          topicKey.toLowerCase().includes(c.skillName.toLowerCase()) ||
-          c.skillName.toLowerCase().includes(topicKey.toLowerCase())
-      );
-      const targetSkillKey = matchedComp ? matchedComp.skillName : topicKey;
-
-      if (ans.isCorrect) {
-        // Increment proficiency on demonstrated mastery
-        updatedProficiency[targetSkillKey] = Math.min(5, (updatedProficiency[targetSkillKey] || 3) + 1);
-        if (targetSkillKey !== topicKey) {
-          updatedProficiency[topicKey] = Math.min(5, (updatedProficiency[topicKey] || 3) + 1);
-        }
-      } else {
-        // Decrement proficiency on identified gap
-        updatedProficiency[targetSkillKey] = Math.max(1, (updatedProficiency[targetSkillKey] || 3) - 1);
-        if (targetSkillKey !== topicKey) {
-          updatedProficiency[topicKey] = Math.max(1, (updatedProficiency[topicKey] || 3) - 1);
-        }
-
-        // Find distractor diagnostic info
-        let diag = ans.distractorAnalysis?.[ans.selectedOption];
-        if (!diag) {
-          const match = bankQuestions.find(
-            (b) => (b.question || '').toLowerCase() === (ans.questionText || '').toLowerCase()
-          );
-          if (match?.distractorAnalysis?.[ans.selectedOption]) {
-            diag = match.distractorAnalysis[ans.selectedOption];
-          }
-        }
-
-        const misconception = diag?.misconception || ("Misconception identified in " + topicKey + " enumeration protocols.");
-        const remedialSkill = diag?.remedialSkill || targetSkillKey;
-        const remedialCourseTitle = diag?.recommendedCourseTitle || ("Remedial Module: " + targetSkillKey);
-        const remedialCourseId = diag?.recommendedCourseId || 'nsso-sampling-201';
-
-        misconceptionsFound.push({
-          question: ans.questionText,
-          chosenAnswer: ans.selectedOption,
-          correctAnswer: ans.correctAnswer,
-          misconception,
-          remedialCourse: remedialCourseTitle,
-          remedialCourseId,
-          remedialSkill,
-        });
-      }
-    }
-
-    // 2. Query 884-course graph for targeted remedial courses
-    const recommendedCourses: Array<CatalogCourse & { rationale: string }> = [];
-    for (const misc of misconceptionsFound) {
-      const matched = await this.recommendCourse(misc.remedialSkill, misc.misconception, 2);
-      if (matched && !recommendedCourses.some((c) => c.id === matched.id)) {
-        recommendedCourses.push(matched);
-      }
-    }
-
-    // 3. Dynamic Capacity Cohorts matched to lowest competency dimensions
-    const allCohorts: CapacityCohortItem[] = [
-      {
-        id: 'cohort-1',
-        name: 'NSSO 79th Round Household Survey',
-        division: 'FOD · Field Operations',
-        officersCount: 14,
-        focusArea: 'CAPI & Circular Systematic Sampling',
-        badgeVariant: 'saffron',
-        imageGradient: 'from-amber-600 to-amber-900',
-        relevanceMatch: (updatedProficiency['Survey Design & Sampling'] || 3) <= 3 ? 96 : 80,
-      },
-      {
-        id: 'cohort-2',
-        name: 'National Accounts SNA 2008 Working Group',
-        division: 'NAD · Macroeconomics',
-        officersCount: 8,
-        focusArea: 'Supply-Use Tables & GVA Deflators',
-        badgeVariant: 'default',
-        imageGradient: 'from-blue-700 to-indigo-950',
-        relevanceMatch: (updatedProficiency['National Accounts & Macro Indices'] || 3) <= 3 ? 94 : 75,
-      },
-      {
-        id: 'cohort-3',
-        name: 'AI & Big Data for Official Statistics',
-        division: 'DIID · Modernization',
-        officersCount: 19,
-        focusArea: 'Satellite Imagery & Nowcasting',
-        badgeVariant: 'success',
-        imageGradient: 'from-emerald-700 to-teal-950',
-        relevanceMatch: (updatedProficiency['Statistical Data Analytics (R & Python)'] || 3) <= 3 ? 92 : 78,
-      },
-      {
-        id: 'cohort-4',
-        name: 'DPDPA 2023 Data Fiduciary Taskforce',
-        division: 'DPD · Microdata Scrutiny',
-        officersCount: 12,
-        focusArea: 'Unit-Level Anonymization & Consent',
-        badgeVariant: 'neutral',
-        imageGradient: 'from-amber-700 to-stone-900',
-        relevanceMatch: (updatedProficiency['Data Privacy & DPDPA 2023'] || 3) <= 3 ? 98 : 72,
-      },
-    ];
-
-    const recommendedCohorts = allCohorts.sort((a, b) => b.relevanceMatch - a.relevanceMatch);
-
-    // Sync into UserDatabase if user exists
-    try {
-      const user = userDb.getUserByParichayId(officerId) || userDb.getUserById(officerId);
-      if (user) {
-        userDb.recordAssessment(user.id, {
-          id: `eval-${Date.now()}`,
-          courseId: answers[0]?.topic || 'Assessment',
-          courseTitle: answers[0]?.topic || 'Competency Diagnostic Assessment',
-          category: cadre,
-          score: correctCount * 20,
-          totalScore: totalQuestions * 20,
-          scorePercentage,
-          status,
-          durationMinutes: 3,
-          date: new Date().toISOString().split('T')[0],
-          misconceptions: misconceptionsFound,
-        });
-        userDb.updateUser(user.id, {
-          proficiency: updatedProficiency,
-        });
-      }
-    } catch {
-      // Safe fallback if database sync encounters non-critical issue
-    }
-
-    // Calculate overall mastery
-    const profValues = Object.values(updatedProficiency);
-    const avgScore = profValues.length > 0 ? (profValues.reduce((a, b) => a + b, 0) / (profValues.length * 5)) * 100 : scorePercentage;
-    const overallMastery = Math.round(avgScore);
-
-    return {
+    currentProficiency: Record<string, number> = {},
+    customApiKey?: string
+  ): Promise<AIEvaluationResult> {
+    return this.aiEvaluationService.evaluateAssessment(
       officerId,
       cadre,
-      score: correctCount * 20,
-      totalScore: totalQuestions * 20,
-      scorePercentage,
-      status,
-      updatedProficiency,
-      overallMastery,
-      misconceptionsFound,
-      recommendedCourses,
-      recommendedCohorts,
-    };
+      answers as any,
+      currentProficiency,
+      customApiKey
+    );
   }
 }
+
