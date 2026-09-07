@@ -1,6 +1,6 @@
 [
   {
-    "id": "qb-stat-001",
+    "id": "qb-surv-001",
     "courseId": "Survey Design and Stratification",
     "topic": "Sampling Theory",
     "bloomLevel": "Recall",
@@ -36,7 +36,7 @@
     }
   },
   {
-    "id": "qb-stat-002",
+    "id": "qb-surv-002",
     "courseId": "Survey Design and Stratification",
     "topic": "Sampling Variance",
     "bloomLevel": "Application",
@@ -48,7 +48,7 @@
       "To avoid calculating survey multipliers"
     ],
     "correctAnswer": "To minimize intra-stratum variance and reduce standard error",
-    "explanation": "Stratification groups similar population units together, minimizing variance within each stratum, which maximizes the precision (reduces standard error) of aggregate estimators.",
+    "explanation": "Stratification groups similar population units together, minimizing variance within each stratum, which maximizes precision (reduces standard error) of aggregate estimators.",
     "sourceCitation": "Concepts and Definitions in NSS Surveys, Chapter 4",
     "distractorAnalysis": {
       "To increase total sample size arbitrarily": {
@@ -72,7 +72,7 @@
     }
   },
   {
-    "id": "qb-stat-003",
+    "id": "qb-surv-003",
     "courseId": "Survey Design and Stratification",
     "topic": "Estimation & Multipliers",
     "bloomLevel": "Analysis",
@@ -100,43 +100,37 @@
         "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
       },
       "A correction coefficient for price inflation": {
-        "misconception": "Conflating survey sample multipliers with macroeconomic CPI/GDP price deflators.",
-        "remedialSkill": "National Accounts & Macro Indices",
-        "recommendedCourseId": "nad-macro-indices-301",
-        "recommendedCourseTitle": "National Accounts Statistics & Macro Indices"
+        "misconception": "Conflating macroeconomic price deflators with statistical sample expansion multipliers.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
       }
     }
   },
   {
-    "id": "qb-stat-004",
+    "id": "qb-surv-004",
     "courseId": "Survey Design and Stratification",
-    "topic": "Sampling Techniques",
-    "bloomLevel": "Recall",
-    "question": "Which sampling technique is standardly employed when selecting households within an NSS FSU?",
+    "topic": "Sampling Technique",
+    "bloomLevel": "Understanding",
+    "question": "Why is Circular Systematic Sampling preferred over Simple Random Sampling when selecting Ultimate Stage Units from an ordered listing?",
     "options": [
-      "Circular Systematic Sampling",
-      "Cluster Sampling with Replacement",
-      "Convenience Quota Sampling",
-      "Snowball Network Sampling"
+      "It guarantees uniform spread across the entire listing interval with a single random start",
+      "It completely eliminates the possibility of zero sample variance",
+      "It requires no knowledge of the total population size N",
+      "It eliminates the need for calculating standard errors"
     ],
-    "correctAnswer": "Circular Systematic Sampling",
-    "explanation": "Circular systematic sampling is standardly utilized in secondary stage unit (SSU) selection to ensure an even geographic spread across the selected hamlet/block.",
-    "sourceCitation": "NSS Field Operations Handbook, Part II",
+    "correctAnswer": "It guarantees uniform spread across the entire listing interval with a single random start",
+    "explanation": "Circular systematic sampling provides an implicit stratification effect, ensuring representative spatial and socio-economic coverage across listed units with a single random start.",
+    "sourceCitation": "NSSO Sampling Design Manual, Chapter 3",
     "distractorAnalysis": {
-      "Cluster Sampling with Replacement": {
-        "misconception": "Assuming replacement sampling is standard in NSSO household listings (NSSO uses without replacement).",
+      "It completely eliminates the possibility of zero sample variance": {
+        "misconception": "Believing systematic selection alters basic variance calculation boundaries.",
         "remedialSkill": "Survey Design & Sampling",
         "recommendedCourseId": "nsso-sampling-201",
         "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
       },
-      "Convenience Quota Sampling": {
-        "misconception": "Assuming non-probabilistic quota methods are permitted in official national statistics.",
-        "remedialSkill": "Survey Design & Sampling",
-        "recommendedCourseId": "nsso-sampling-201",
-        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
-      },
-      "Snowball Network Sampling": {
-        "misconception": "Confusing hidden population network sampling with standardized geographic household enumeration.",
+      "It requires no knowledge of the total population size N": {
+        "misconception": "Incorrectly assuming sampling intervals can be derived without population count N.",
         "remedialSkill": "Survey Design & Sampling",
         "recommendedCourseId": "nsso-sampling-201",
         "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
@@ -144,373 +138,682 @@
     }
   },
   {
-    "id": "qb-tech-001",
-    "courseId": "CAPI & Digital Field Enumeration",
-    "topic": "CAPI Operations",
-    "bloomLevel": "Recall",
-    "question": "What is the core operational advantage of Computer Assisted Personal Interviewing (CAPI) over PAPI?",
-    "options": [
-      "Real-time validation checks and instant logic error flagging at the point of data capture",
-      "Elimination of the need for trained field investigators",
-      "Complete immunity from hardware battery drainage",
-      "Automatic replacement of non-responding households without supervisor approval"
-    ],
-    "correctAnswer": "Real-time validation checks and instant logic error flagging at the point of data capture",
-    "explanation": "CAPI software enforces range checks, skip patterns, and consistency conditions immediately during interview, preventing dirty data from entering the central database.",
-    "sourceCitation": "MoSPI CAPI Implementation Guidelines, Chapter 1",
-    "distractorAnalysis": {
-      "Elimination of the need for trained field investigators": {
-        "misconception": "Assuming digital automation replaces enumerator skill rather than assisting field execution.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
-      },
-      "Complete immunity from hardware battery drainage": {
-        "misconception": "Overestimating physical hardware constraints in rural enumeration environments.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
-      },
-      "Automatic replacement of non-responding households without supervisor approval": {
-        "misconception": "Bypassing statutory substitution rules and casualty casualty protocols in NSSO surveys.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
-      }
-    }
-  },
-  {
-    "id": "qb-tech-002",
-    "courseId": "CAPI & Digital Field Enumeration",
-    "topic": "Field Data Sync",
+    "id": "qb-surv-005",
+    "courseId": "Survey Design and Stratification",
+    "topic": "Hamlet-Group Selection",
     "bloomLevel": "Application",
-    "question": "When a field investigator completes interviews in an offline rural village, what protocol must be followed in CAPI?",
+    "question": "When an FSU village has a large population (e.g. > 1200), what procedure does NSSO mandate to manage listing workload?",
     "options": [
-      "Store records in encrypted local SQLite cache and sync to cloud once network is re-established",
-      "Immediately discard incomplete survey schedules",
-      "Disable tablet GPS geotagging to conserve battery",
-      "Manually re-enter survey data into a paper schedule"
+      "Formation of hamlet-groups of roughly equal population and random selection of sample hgs",
+      "Excluding the peripheral hamlets completely from the survey frame",
+      "Subsampling only households with government employees",
+      "Abandoning the FSU and selecting a replacement village"
     ],
-    "correctAnswer": "Store records in encrypted local SQLite cache and sync to cloud once network is re-established",
-    "explanation": "CAPI platforms use store-and-forward architecture: schedules are cryptographically signed and stored locally, then synchronized via HTTPS once cellular connectivity is acquired.",
-    "sourceCitation": "NSSO Digital Survey SOP, Module 4",
+    "correctAnswer": "Formation of hamlet-groups of roughly equal population and random selection of sample hgs",
+    "explanation": "NSSO protocols specify dividing large FSUs into approximately equal-sized hamlet-groups (hg) or sub-blocks, selecting 2 hgs (one with highest population and one randomly selected).",
+    "sourceCitation": "NSS Field Operations Manual, Section 1.4",
     "distractorAnalysis": {
-      "Immediately discard incomplete survey schedules": {
-        "misconception": "Violating NSS data retention protocols by destroying partial field records.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      "Excluding the peripheral hamlets completely from the survey frame": {
+        "misconception": "Violating probability sampling by arbitrarily truncating geographic coverage.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
       },
-      "Disable tablet GPS geotagging to conserve battery": {
-        "misconception": "Disabling mandatory verification telemetry (GPS/timestamping) during field enumeration.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
-      },
-      "Manually re-enter survey data into a paper schedule": {
-        "misconception": "Unnecessarily reverting to manual paper schedules instead of trusting local cryptographic storage.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      "Abandoning the FSU and selecting a replacement village": {
+        "misconception": "Violating random selection principles by improperly substituting allocated sample units.",
+        "remedialSkill": "Survey Design & Sampling",
+        "recommendedCourseId": "nsso-sampling-201",
+        "recommendedCourseTitle": "Planning & Designing Large-Scale Sample Surveys"
       }
     }
   },
   {
-    "id": "qb-tech-003",
-    "courseId": "CAPI & Digital Field Enumeration",
-    "topic": "Data Validation",
-    "bloomLevel": "Analysis",
-    "question": "In CAPI validation scripting, what does a Hard Check represent compared to a Soft Check?",
-    "options": [
-      "A hard check blocks the enumerator from continuing until an impossible contradiction is resolved",
-      "A hard check only generates an advisory warning message",
-      "A hard check is executed only after the survey is uploaded to the server",
-      "A hard check requires internet connection to validate"
-    ],
-    "correctAnswer": "A hard check blocks the enumerator from continuing until an impossible contradiction is resolved",
-    "explanation": "A hard check enforces strict mathematical/logical consistency (e.g., child older than parent) and refuses form progression until corrected by the enumerator.",
-    "sourceCitation": "BLAISE / CAPI Logic Design Standard, Section 5",
-    "distractorAnalysis": {
-      "A hard check only generates an advisory warning message": {
-        "misconception": "Confusing blocking Hard Checks with non-blocking advisory Soft Checks.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
-      },
-      "A hard check is executed only after the survey is uploaded to the server": {
-        "misconception": "Assuming validation logic runs only on server rather than client-side on device.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
-      },
-      "A hard check requires internet connection to validate": {
-        "misconception": "Assuming local rule engines in BLAISE/CAPI require real-time cloud connectivity.",
-        "remedialSkill": "CAPI & Digital Field Enumeration",
-        "recommendedCourseId": "capi-field-101",
-        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
-      }
-    }
-  },
-  {
-    "id": "qb-econ-001",
-    "courseId": "National Accounts Statistics",
-    "topic": "GDP Compilation",
-    "bloomLevel": "Recall",
-    "question": "What is the fundamental relationship between Gross Domestic Product (GDP) at market prices and Gross Value Added (GVA) at basic prices?",
-    "options": [
-      "GDP = GVA (at basic prices) + Product Taxes - Product Subsidies",
-      "GDP = GVA (at basic prices) - Product Taxes + Product Subsidies",
-      "GDP = GVA (at factor cost) + Operating Surplus",
-      "GDP = GVA (at basic prices) * Wholesale Price Index"
-    ],
-    "correctAnswer": "GDP = GVA (at basic prices) + Product Taxes - Product Subsidies",
-    "explanation": "Under SNA 2008 / National Accounts base year 2011-12 series, GDP at market prices is derived by adding net product taxes (Taxes less Subsidies) to GVA at basic prices.",
-    "sourceCitation": "Sources and Methods: National Accounts Statistics 2011-12, CSO",
-    "distractorAnalysis": {
-      "GDP = GVA (at basic prices) - Product Taxes + Product Subsidies": {
-        "misconception": "Misunderstanding of statutory principles in GDP Compilation.",
-        "remedialSkill": "GDP Compilation",
-        "recommendedCourseId": "National Accounts Statistics",
-        "recommendedCourseTitle": "Foundations of GDP Compilation"
-      },
-      "GDP = GVA (at factor cost) + Operating Surplus": {
-        "misconception": "Misunderstanding of statutory principles in GDP Compilation.",
-        "remedialSkill": "GDP Compilation",
-        "recommendedCourseId": "National Accounts Statistics",
-        "recommendedCourseTitle": "Foundations of GDP Compilation"
-      },
-      "GDP = GVA (at basic prices) * Wholesale Price Index": {
-        "misconception": "Misunderstanding of statutory principles in GDP Compilation.",
-        "remedialSkill": "GDP Compilation",
-        "recommendedCourseId": "National Accounts Statistics",
-        "recommendedCourseTitle": "Foundations of GDP Compilation"
-      }
-    }
-  },
-  {
-    "id": "qb-econ-002",
+    "id": "qb-cpi-001",
     "courseId": "Consumer Price Index (CPI) Methodology",
     "topic": "Price Index Formulas",
-    "bloomLevel": "Application",
-    "question": "Which index formulation is standardly used for compiling the headline Consumer Price Index (CPI) in India?",
-    "options": [
-      "Modified Laspeyres price index formula with base year consumption weights",
-      "Unweighted Paasche price index with current year weights",
-      "Fisher Ideal Index with geometric chaining",
-      "Simple Marshall-Edgeworth arithmetic mean"
-    ],
-    "correctAnswer": "Modified Laspeyres price index formula with base year consumption weights",
-    "explanation": "All-India CPI (Rural, Urban, Combined) compiled by MoSPI utilizes the Laspeyres index methodology with fixed base-year expenditure weights obtained from the Consumer Expenditure Survey.",
-    "sourceCitation": "Manual on Consumer Price Index Numbers, CSO Price Statistics Division",
-    "distractorAnalysis": {
-      "Unweighted Paasche price index with current year weights": {
-        "misconception": "Misunderstanding of statutory principles in Price Index Formulas.",
-        "remedialSkill": "Price Index Formulas",
-        "recommendedCourseId": "Consumer Price Index (CPI) Methodology",
-        "recommendedCourseTitle": "Foundations of Price Index Formulas"
-      },
-      "Fisher Ideal Index with geometric chaining": {
-        "misconception": "Misunderstanding of statutory principles in Price Index Formulas.",
-        "remedialSkill": "Price Index Formulas",
-        "recommendedCourseId": "Consumer Price Index (CPI) Methodology",
-        "recommendedCourseTitle": "Foundations of Price Index Formulas"
-      },
-      "Simple Marshall-Edgeworth arithmetic mean": {
-        "misconception": "Misunderstanding of statutory principles in Price Index Formulas.",
-        "remedialSkill": "Price Index Formulas",
-        "recommendedCourseId": "Consumer Price Index (CPI) Methodology",
-        "recommendedCourseTitle": "Foundations of Price Index Formulas"
-      }
-    }
-  },
-  {
-    "id": "qb-gov-001",
-    "courseId": "Data Privacy and DPDPA Compliance",
-    "topic": "DPDPA 2023 Framework",
-    "bloomLevel": "Recall",
-    "question": "Under the Digital Personal Data Protection Act (DPDPA), 2023, what is the statutory role of MoSPI when collecting citizen survey data?",
-    "options": [
-      "Data Fiduciary",
-      "Data Principal",
-      "Data Protection Board of India",
-      "Consent Manager"
-    ],
-    "correctAnswer": "Data Fiduciary",
-    "explanation": "Under DPDPA 2023, any government entity or ministry determining the purpose and means of processing citizen personal data acts as a Data Fiduciary.",
-    "sourceCitation": "DPDPA 2023, Section 2(i) & Central Government Guidelines",
-    "distractorAnalysis": {
-      "Data Principal": {
-        "misconception": "Confusing the Data Fiduciary (the ministry processing data) with the Data Principal (the citizen whose data is collected).",
-        "remedialSkill": "Data Privacy & DPDPA 2023",
-        "recommendedCourseId": "dpdpa-2023-compliance",
-        "recommendedCourseTitle": "Data Privacy, Cybersecurity & DPDPA 2023 Compliance"
-      },
-      "Data Protection Board of India": {
-        "misconception": "Confusing the statutory regulatory tribunal with individual government ministries.",
-        "remedialSkill": "Data Privacy & DPDPA 2023",
-        "recommendedCourseId": "dpdpa-2023-compliance",
-        "recommendedCourseTitle": "Data Privacy, Cybersecurity & DPDPA 2023 Compliance"
-      },
-      "Consent Manager": {
-        "misconception": "Confusing technical consent management intermediaries with statutory Data Fiduciaries.",
-        "remedialSkill": "Data Privacy & DPDPA 2023",
-        "recommendedCourseId": "dpdpa-2023-compliance",
-        "recommendedCourseTitle": "Data Privacy, Cybersecurity & DPDPA 2023 Compliance"
-      }
-    }
-  },
-  {
-    "id": "qb-gov-002",
-    "courseId": "Data Privacy and DPDPA Compliance",
-    "topic": "Micro-Data Anonymization",
     "bloomLevel": "Analysis",
-    "question": "Before releasing public unit-level micro-data from NSS surveys, which anonymization practice is mandatory?",
+    "question": "Why is the Laspeyres price index known to have an upward substitution bias?",
     "options": [
-      "Masking or perturbing direct identifiers like respondent names, phone numbers, and precise village codes",
-      "Removing all demographic variables completely",
-      "Encrypting micro-data so researchers cannot open it in R or Stata",
-      "Releasing data only to central government ministries"
+      "It uses fixed base-period expenditure weights and fails to reflect consumer shift toward cheaper substitutes",
+      "It uses current-period quantities which overstate consumption changes",
+      "It applies arithmetic averaging to price relatives rather than geometric averaging",
+      "It excludes service sector commodities from the national basket"
     ],
-    "correctAnswer": "Masking or perturbing direct identifiers like respondent names, phone numbers, and precise village codes",
-    "explanation": "To prevent re-identification attacks while preserving research utility, statistical agencies perform k-anonymity, top-coding, and suppression of direct geographic and personal identifiers.",
-    "sourceCitation": "MoSPI National Microdata Policy & Data Anonymization Guidelines",
+    "correctAnswer": "It uses fixed base-period expenditure weights and fails to reflect consumer shift toward cheaper substitutes",
+    "explanation": "Because consumers naturally substitute away from goods whose relative prices have risen toward goods whose relative prices have fallen, a fixed base-period basket (Laspeyres) overstates the true cost of living increase.",
+    "sourceCitation": "Consumer Price Index Manual: Theory and Practice (ILO/IMF/MoSPI), Chapter 15",
     "distractorAnalysis": {
-      "Removing all demographic variables completely": {
-        "misconception": "Misunderstanding of statutory principles in Micro-Data Anonymization.",
-        "remedialSkill": "Micro-Data Anonymization",
-        "recommendedCourseId": "Data Privacy and DPDPA Compliance",
-        "recommendedCourseTitle": "Foundations of Micro-Data Anonymization"
+      "It uses current-period quantities which overstate consumption changes": {
+        "misconception": "Confusing the Laspeyres index (fixed base quantities) with the Paasche index (current quantities).",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
       },
-      "Encrypting micro-data so researchers cannot open it in R or Stata": {
-        "misconception": "Misunderstanding of statutory principles in Micro-Data Anonymization.",
-        "remedialSkill": "Micro-Data Anonymization",
-        "recommendedCourseId": "Data Privacy and DPDPA Compliance",
-        "recommendedCourseTitle": "Foundations of Micro-Data Anonymization"
+      "It applies arithmetic averaging to price relatives rather than geometric averaging": {
+        "misconception": "Conflating micro-level elementary index formulas (Carli vs Jevons) with macro-level basket weighting.",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
       },
-      "Releasing data only to central government ministries": {
-        "misconception": "Misunderstanding of statutory principles in Micro-Data Anonymization.",
-        "remedialSkill": "Micro-Data Anonymization",
-        "recommendedCourseId": "Data Privacy and DPDPA Compliance",
-        "recommendedCourseTitle": "Foundations of Micro-Data Anonymization"
+      "It excludes service sector commodities from the national basket": {
+        "misconception": "Falsely assuming service items are omitted from modern MoSPI CPI baskets.",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
       }
     }
   },
   {
-    "question": "According to the system architecture and recommendation flow, what is the primary mechanism that ensures a training pathway is valid and trustworthy before it is presented to the user?",
+    "id": "qb-cpi-002",
+    "courseId": "Consumer Price Index (CPI) Methodology",
+    "topic": "Elementary Aggregates",
+    "bloomLevel": "Understanding",
+    "question": "Which elementary aggregate formula is recommended by international standards to avoid the upward bias of the Carli index?",
     "options": [
-      "The Large Language Model (LLM) generates the pathway based on the user's natural language input and verifies its existence in real-time.",
-      "The recommendation service filters and ranks pathways strictly from a pre-existing, verified catalogue, while the LLM only explains the match.",
-      "The beneficiary confirms the pathway's validity through a secondary verification step after the initial AI suggestion.",
-      "The facilitator manually creates the pathway entry in the database if it does not already exist in the system."
+      "Jevons Index (Geometric Mean of price relatives)",
+      "Dutot Index (Ratio of arithmetic mean prices)",
+      "Laspeyres Base Weighting",
+      "Paasche Current Weighting"
     ],
-    "correctAnswer": "The recommendation service filters and ranks pathways strictly from a pre-existing, verified catalogue, while the LLM only explains the match.",
-    "explanation": "Section 12 explicitly states: 'A recommendation is trustworthy only when the pathway exists in the catalogue. The LLM explains the match, but the application’s recommendation service controls which pathways may be shown.' This distinguishes the role of the deterministic recommendation engine (filtering/ranking from a fixed source) from the generative role of the LLM (explanation), preventing the AI from hallucinating non-existent courses.",
-    "sourceCitation": "Section 12: Recommendation flow",
-    "id": "qb-ai-1788540825262-1",
-    "courseId": "SRS.pdf",
+    "correctAnswer": "Jevons Index (Geometric Mean of price relatives)",
+    "explanation": "The Jevons index computes the geometric mean of price relatives, satisfying the time reversal and transitivity tests and avoiding the upward drift of the Carli index.",
+    "sourceCitation": "MoSPI Technical Advisory Committee on Price Statistics Guidelines",
+    "distractorAnalysis": {
+      "Dutot Index (Ratio of arithmetic mean prices)": {
+        "misconception": "Believing Dutot is scale-invariant across heterogeneously packaged commodities.",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
+      },
+      "Laspeyres Base Weighting": {
+        "misconception": "Confusing elementary level unweighted aggregations with higher level weighted aggregations.",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
+      }
+    }
+  },
+  {
+    "id": "qb-cpi-003",
+    "courseId": "Consumer Price Index (CPI) Methodology",
+    "topic": "Item Substitution",
     "bloomLevel": "Application",
-    "distractorAnalysis": {
-      "The Large Language Model (LLM) generates the pathway based on the user's natural language input and verifies its existence in real-time.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
-      },
-      "The beneficiary confirms the pathway's validity through a secondary verification step after the initial AI suggestion.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
-      },
-      "The facilitator manually creates the pathway entry in the database if it does not already exist in the system.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
-      }
-    }
-  },
-  {
-    "question": "In the context of the 'Complete system flow' and 'Beneficiary journey', what is the specific purpose of the step where the system displays a readable summary of the extracted information before identifying skill gaps?",
+    "question": "When a specific commodity model disappears from a surveyed market, what is the standard MoSPI price imputation protocol?",
     "options": [
-      "To allow the administrator to audit the data quality before the profile is saved to the central database.",
-      "To enable the user to confirm or edit the information, thereby preventing the AI from silently making incorrect assumptions.",
-      "To generate a final PDF report that the beneficiary can download for future reference.",
-      "To trigger the voice-to-text conversion process for the next set of questions."
+      "Select a closely comparable substitute and adjust for quality differences using overlap or hedonic methods",
+      "Carry forward the last observed price indefinitely until the item reappears",
+      "Drop the entire commodity sub-class from the index calculation",
+      "Replace the price with the national average GDP deflator"
     ],
-    "correctAnswer": "To enable the user to confirm or edit the information, thereby preventing the AI from silently making incorrect assumptions.",
-    "explanation": "Section 6.4 ('Confirming the profile') states: 'The user can confirm or edit the information. This prevents the AI from silently making incorrect assumptions.' The flowchart in Section 5 also shows a decision node 'User confirms?' leading to 'Correct profile' or 'Identify skill gaps', confirming that this step is a human-in-the-loop validation mechanism for data accuracy, not an administrative audit or output generation step.",
-    "sourceCitation": "Section 6.4: Confirming the profile; Section 5: Complete system flow",
-    "id": "qb-ai-1788540825262-2",
-    "courseId": "SRS.pdf",
-    "bloomLevel": "Application",
+    "correctAnswer": "Select a closely comparable substitute and adjust for quality differences using overlap or hedonic methods",
+    "explanation": "Official statistical practice prohibits unadjusted price carry-forward; field officers must select the most comparable substitute and record overlap prices to isolate pure price change from quality variation.",
+    "sourceCitation": "MoSPI CPI Field Price Collection Manual, Chapter 6",
     "distractorAnalysis": {
-      "To allow the administrator to audit the data quality before the profile is saved to the central database.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
+      "Carry forward the last observed price indefinitely until the item reappears": {
+        "misconception": "Using unadjusted carry-forward which artificially dampens inflation variance and creates price shelf-life distortions.",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
       },
-      "To generate a final PDF report that the beneficiary can download for future reference.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
-      },
-      "To trigger the voice-to-text conversion process for the next set of questions.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
+      "Drop the entire commodity sub-class from the index calculation": {
+        "misconception": "Disrupting time-series continuity by discarding entire sub-groups instead of imputing missing varieties.",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
       }
     }
   },
   {
-    "question": "Based on the 'External service connections' table, what is the designated fallback strategy if the Sarvam speech-to-text (STT) service is unavailable or access is not granted?",
+    "id": "qb-cpi-004",
+    "courseId": "Consumer Price Index (CPI) Methodology",
+    "topic": "Index Formulas",
+    "bloomLevel": "Recall",
+    "question": "What is Fisher's Ideal Price Index mathematically defined as?",
     "options": [
-      "The system automatically switches to the AI4Bharat Indic Parler-TTS provider to handle input processing.",
-      "The system relies solely on the LLM to interpret the raw audio file without text conversion.",
-      "The user can provide a typed answer or use prerecorded audio.",
-      "The system disables the voice interface and requires the facilitator to manually enter all data."
+      "The geometric mean of the Laspeyres and Paasche price indices",
+      "The arithmetic mean of the Laspeyres and Paasche price indices",
+      "The harmonic mean of current and base period price ratios",
+      "The weighted median of elementary price relatives"
     ],
-    "correctAnswer": "The user can provide a typed answer or use prerecorded audio.",
-    "explanation": "Section 10 ('External service connections') lists 'Sarvam STT' with the purpose 'Convert short voice recordings into text.' In the 'Fallback' column for this specific service, it explicitly states: 'Typed answer or prerecorded audio.' This indicates a graceful degradation strategy that maintains user agency without requiring manual data entry by a third party (facilitator) or relying on unverified external APIs.",
-    "sourceCitation": "Section 10: External service connections",
-    "id": "qb-ai-1788540825262-3",
-    "courseId": "SRS.pdf",
-    "bloomLevel": "Application",
+    "correctAnswer": "The geometric mean of the Laspeyres and Paasche price indices",
+    "explanation": "Fisher's Ideal Index is defined as P_F = sqrt(P_L * P_P). It satisfies both the time reversal and factor reversal tests.",
+    "sourceCitation": "Index Number Theory, Chapter 2",
     "distractorAnalysis": {
-      "The system automatically switches to the AI4Bharat Indic Parler-TTS provider to handle input processing.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
-      },
-      "The system relies solely on the LLM to interpret the raw audio file without text conversion.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
-      },
-      "The system disables the voice interface and requires the facilitator to manually enter all data.": {
-        "misconception": "Misunderstanding of statutory principles in Official Statistics.",
-        "remedialSkill": "Statistical Competencies",
-        "recommendedCourseId": "SRS.pdf",
-        "recommendedCourseTitle": "Foundations of Official Statistics"
+      "The arithmetic mean of the Laspeyres and Paasche price indices": {
+        "misconception": "Confusing Fisher's Ideal geometric index with the Drobisch arithmetic index.",
+        "remedialSkill": "Price Statistics & Index Number Theory",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
       }
     }
   },
   {
-    "id": "qb-doc-def-1788757009681-1",
+    "id": "qb-cpi-005",
+    "courseId": "Consumer Price Index (CPI) Methodology",
+    "topic": "Core Inflation",
+    "bloomLevel": "Analysis",
+    "question": "What components are excluded from headline CPI to calculate Core (Underlying) Inflation in India?",
+    "options": [
+      "Food and Beverages and Fuel and Light groups due to transient volatility",
+      "Housing and Education expenditures",
+      "Transport and Communication services",
+      "Manufactured industrial goods"
+    ],
+    "correctAnswer": "Food and Beverages and Fuel and Light groups due to transient volatility",
+    "explanation": "Core inflation excludes the volatile Food and Beverage and Fuel and Light sub-indices to measure persistent, demand-driven price pressures across the broader economy.",
+    "sourceCitation": "RBI Monetary Policy Report & MoSPI CPI Analytics",
+    "distractorAnalysis": {
+      "Housing and Education expenditures": {
+        "misconception": "Confusing structural service consumption with volatile supply-side food/fuel commodities.",
+        "remedialSkill": "High-Frequency Econometric Modeling",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
+      }
+    }
+  },
+  {
+    "id": "qb-nad-001",
+    "courseId": "National Accounts Statistics",
+    "topic": "Macroeconomic Aggregates",
+    "bloomLevel": "Understanding",
+    "question": "Under the System of National Accounts (SNA 2008), what is the exact relationship between GVA at Basic Prices and GDP at Market Prices?",
+    "options": [
+      "GDP at Market Prices = GVA at Basic Prices + Product Taxes - Product Subsidies",
+      "GDP at Market Prices = GVA at Basic Prices - Production Taxes + Production Subsidies",
+      "GDP at Market Prices = GVA at Factor Cost + Mixed Income",
+      "GDP at Market Prices = Gross National Disposable Income - Depreciation"
+    ],
+    "correctAnswer": "GDP at Market Prices = GVA at Basic Prices + Product Taxes - Product Subsidies",
+    "explanation": "In SNA 2008 / India 2011-12 base series, GDP at Market Prices = sum of GVA at basic prices of all industries + Net Product Taxes (Product Taxes - Product Subsidies).",
+    "sourceCitation": "National Accounts Statistics: Sources and Methods 2012, MoSPI CSO",
+    "distractorAnalysis": {
+      "GDP at Market Prices = GVA at Basic Prices - Production Taxes + Production Subsidies": {
+        "misconception": "Confusing production taxes (e.g. land revenues/stamp duty) with product taxes (e.g. GST/excise per unit of output).",
+        "remedialSkill": "National Accounts & Macro Indices",
+        "recommendedCourseId": "nssta-nad-01",
+        "recommendedCourseTitle": "National Accounts Aggregation & SUT Balancing Framework"
+      },
+      "GDP at Market Prices = GVA at Factor Cost + Mixed Income": {
+        "misconception": "Relying on pre-2015 obsolete GDP at Factor Cost frameworks discontinued in modern official statistics.",
+        "remedialSkill": "National Accounts & Macro Indices",
+        "recommendedCourseId": "nssta-nad-01",
+        "recommendedCourseTitle": "National Accounts Aggregation & SUT Balancing Framework"
+      }
+    }
+  },
+  {
+    "id": "qb-nad-002",
+    "courseId": "National Accounts Statistics",
+    "topic": "Deflation Method",
+    "bloomLevel": "Analysis",
+    "question": "What is the primary advantage of Double Deflation over Single Extrapolation when estimating Real Gross Value Added?",
+    "options": [
+      "It independently deflates gross output with output deflators and intermediate inputs with input deflators",
+      "It applies the CPI deflator directly to both inputs and final consumption",
+      "It eliminates the need to compile Supply and Use Tables (SUT)",
+      "It guarantees that real GVA growth is always higher than nominal GVA"
+    ],
+    "correctAnswer": "It independently deflates gross output with output deflators and intermediate inputs with input deflators",
+    "explanation": "Double deflation deflates gross output using relevant product output price indices and intermediate inputs using input cost price indices, preventing input price shocks from distorting real value added.",
+    "sourceCitation": "Advisory Committee on National Accounts Reports, MoSPI",
+    "distractorAnalysis": {
+      "It applies the CPI deflator directly to both inputs and final consumption": {
+        "misconception": "Using consumer prices for industrial intermediate inputs instead of specific wholesale producer price deflators.",
+        "remedialSkill": "Time Series & Seasonal Adjustment",
+        "recommendedCourseId": "nssta-nad-01",
+        "recommendedCourseTitle": "National Accounts Aggregation & SUT Balancing Framework"
+      }
+    }
+  },
+  {
+    "id": "qb-nad-003",
+    "courseId": "National Accounts Statistics",
+    "topic": "Financial Intermediation",
+    "bloomLevel": "Application",
+    "question": "How is Financial Intermediation Services Indirectly Measured (FISIM) allocated in National Accounts?",
+    "options": [
+      "As the difference between reference rate interest and actual interest paid/received by borrowers and depositors",
+      "As direct explicit fees and commission charges on banking transactions",
+      "As total gross bank dividend payouts to foreign investors",
+      "As the net profit margin of the central bank after foreign exchange interventions"
+    ],
+    "correctAnswer": "As the difference between reference rate interest and actual interest paid/received by borrowers and depositors",
+    "explanation": "FISIM represents indirect service charges by financial intermediaries, calculated using a reference interest rate to separate pure interest transfers from implicit service margins.",
+    "sourceCitation": "System of National Accounts (SNA 2008), Chapter 6",
+    "distractorAnalysis": {
+      "As direct explicit fees and commission charges on banking transactions": {
+        "misconception": "Confusing explicit invoiced banking fees (direct output) with indirectly measured interest spread margins (FISIM).",
+        "remedialSkill": "National Accounts & Macro Indices",
+        "recommendedCourseId": "nssta-nad-01",
+        "recommendedCourseTitle": "National Accounts Aggregation & SUT Balancing Framework"
+      }
+    }
+  },
+  {
+    "id": "qb-nad-004",
+    "courseId": "National Accounts Statistics",
+    "topic": "Supply-Use Tables",
+    "bloomLevel": "Understanding",
+    "question": "What is the key accounting identity enforced across rows in a Supply and Use Table (SUT)?",
+    "options": [
+      "Total Supply of each product (Domestic Output + Imports) must equal Total Use (Intermediate Consumption + Final Demand + Exports)",
+      "Total tax collections must equal total government capital expenditure",
+      "Corporate savings must equal net household borrowing",
+      "Gross capital formation must equal total foreign direct investment"
+    ],
+    "correctAnswer": "Total Supply of each product (Domestic Output + Imports) must equal Total Use (Intermediate Consumption + Final Demand + Exports)",
+    "explanation": "The product balance in SUT requires that the total supply of every product at purchasers' prices equals total use across intermediate and final demand categories.",
+    "sourceCitation": "SUT Manual, MoSPI CSO",
+    "distractorAnalysis": {
+      "Total tax collections must equal total government capital expenditure": {
+        "misconception": "Confusing fiscal budget balances with national macroeconomic commodity balances.",
+        "remedialSkill": "National Accounts & Macro Indices",
+        "recommendedCourseId": "nssta-nad-01",
+        "recommendedCourseTitle": "National Accounts Aggregation & SUT Balancing Framework"
+      }
+    }
+  },
+  {
+    "id": "qb-nad-005",
+    "courseId": "National Accounts Statistics",
+    "topic": "Seasonal Adjustment",
+    "bloomLevel": "Analysis",
+    "question": "Why is X-13ARIMA-SEATS seasonal adjustment applied to quarterly GDP time series?",
+    "options": [
+      "To remove recurring calendar-day and seasonal holiday variations and reveal underlying economic trends",
+      "To artificially boost quarterly growth during monsoon quarters",
+      "To convert current price GDP directly to purchasing power parity",
+      "To eliminate the need for primary survey data"
+    ],
+    "correctAnswer": "To remove recurring calendar-day and seasonal holiday variations and reveal underlying economic trends",
+    "explanation": "Seasonal adjustment filters out regular within-year fluctuations (agricultural harvest cycles, festival spending, differing working days) to allow valid quarter-on-quarter growth analysis.",
+    "sourceCitation": "Time Series Modeling for Official Statistics, NSSTA",
+    "distractorAnalysis": {
+      "To convert current price GDP directly to purchasing power parity": {
+        "misconception": "Conflating cross-country currency conversion with within-country time-series seasonal filtering.",
+        "remedialSkill": "Time Series & Seasonal Adjustment",
+        "recommendedCourseId": "nssta-nad-01",
+        "recommendedCourseTitle": "National Accounts Aggregation & SUT Balancing Framework"
+      }
+    }
+  },
+  {
+    "id": "qb-priv-001",
+    "courseId": "Data Privacy and DPDPA Compliance",
+    "topic": "Statutory Fiduciary Duty",
+    "bloomLevel": "Understanding",
+    "question": "Under Section 8 of the Digital Personal Data Protection Act (DPDPA) 2023, what is MoSPI's statutory obligation as a Data Fiduciary?",
+    "options": [
+      "Implement reasonable security safeguards to prevent personal data breaches and erase data once specified purpose is fulfilled",
+      "Monetize anonymized statistical microdata through commercial auction platforms",
+      "Store unencrypted respondent Aadhaar numbers in public survey repositories",
+      "Share raw unmasked survey microdata directly with private advertising networks"
+    ],
+    "correctAnswer": "Implement reasonable security safeguards to prevent personal data breaches and erase data once specified purpose is fulfilled",
+    "explanation": "The DPDPA 2023 mandates that Data Fiduciaries maintain technical and organizational safeguards against data compromise, protect Data Principal rights, and observe purpose limitation.",
+    "sourceCitation": "Digital Personal Data Protection Act, 2023, Section 8",
+    "distractorAnalysis": {
+      "Monetize anonymized statistical microdata through commercial auction platforms": {
+        "misconception": "Viewing official statistical repositories as commercial assets rather than protected public trust data.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection Act (DPDPA) 2023 for Civil Servants"
+      },
+      "Share raw unmasked survey microdata directly with private advertising networks": {
+        "misconception": "Severe statutory violation of Section 6 purpose limitation and confidentiality provisions.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection Act (DPDPA) 2023 for Civil Servants"
+      }
+    }
+  },
+  {
+    "id": "qb-priv-002",
+    "courseId": "Data Privacy and DPDPA Compliance",
+    "topic": "Microdata Anonymization",
+    "bloomLevel": "Application",
+    "question": "Before releasing public survey microdata (e.g. PLFS / NSS unit records), which statistical disclosure control method is mandatory?",
+    "options": [
+      "k-anonymity, l-diversity, and perturbation/top-coding of direct and quasi-identifiers",
+      "Publishing full respondent telephone numbers for public verification",
+      "Retaining exact GPS coordinates of sampled household doorways",
+      "Removing only the respondent first name while leaving full postal addresses unmasked"
+    ],
+    "correctAnswer": "k-anonymity, l-diversity, and perturbation/top-coding of direct and quasi-identifiers",
+    "explanation": "Statistical Disclosure Control (SDC) requires suppressing direct identifiers and perturbing or top-coding quasi-identifiers (e.g., exact age, precise village boundary, rare income values) so individuals cannot be re-identified.",
+    "sourceCitation": "MoSPI Microdata Dissemination Policy & SDC Guidelines",
+    "distractorAnalysis": {
+      "Removing only the respondent first name while leaving full postal addresses unmasked": {
+        "misconception": "Believing superficial pseudonymization protects against linkage attacks when quasi-identifiers remain unmasked.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection Act (DPDPA) 2023 for Civil Servants"
+      }
+    }
+  },
+  {
+    "id": "qb-priv-003",
+    "courseId": "Data Privacy and DPDPA Compliance",
+    "topic": "Incident Reporting",
+    "bloomLevel": "Recall",
+    "question": "What is the statutory deadline for reporting a personal data breach to the Data Protection Board of India and affected individuals?",
+    "options": [
+      "Promptly without delay within the prescribed timeframe (standard 6-hour reporting to CERT-In)",
+      "30 days after completing a formal internal departmental inquiry",
+      "Only during the annual parliamentary auditing session",
+      "Breach notification is optional for government statistical agencies"
+    ],
+    "correctAnswer": "Promptly without delay within the prescribed timeframe (standard 6-hour reporting to CERT-In)",
+    "explanation": "Section 8(6) of DPDPA 2023 and CERT-In directions mandate immediate breach notification to prevent cascading harm to data principals.",
+    "sourceCitation": "CERT-In Cyber Security Directions & DPDPA Section 8(6)",
+    "distractorAnalysis": {
+      "30 days after completing a formal internal departmental inquiry": {
+        "misconception": "Delayed internal reporting creates severe non-compliance penalties under the DPDPA 2023 schedule.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection Act (DPDPA) 2023 for Civil Servants"
+      }
+    }
+  },
+  {
+    "id": "qb-priv-004",
+    "courseId": "Data Privacy and DPDPA Compliance",
+    "topic": "Consent Architecture",
+    "bloomLevel": "Understanding",
+    "question": "What constitutes valid informed consent from a survey respondent under DPDPA 2023?",
+    "options": [
+      "Consent that is free, specific, informed, unconditional, and unambiguous with clear affirmative action",
+      "A pre-ticked checkbox hidden in a 50-page legal disclaimer",
+      "Oral permission without explaining the statistical purpose of data processing",
+      "Assuming consent by default unless the citizen files a formal written objection"
+    ],
+    "correctAnswer": "Consent that is free, specific, informed, unconditional, and unambiguous with clear affirmative action",
+    "explanation": "Section 6(1) of DPDPA 2023 specifies that consent must be an explicit affirmative action based on clear notice in itemized language.",
+    "sourceCitation": "DPDPA 2023, Section 6",
+    "distractorAnalysis": {
+      "A pre-ticked checkbox hidden in a 50-page legal disclaimer": {
+        "misconception": "Deceptive design patterns (dark patterns) are expressly prohibited under consumer protection and data privacy rules.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection Act (DPDPA) 2023 for Civil Servants"
+      }
+    }
+  },
+  {
+    "id": "qb-priv-005",
+    "courseId": "Data Privacy and DPDPA Compliance",
+    "topic": "Collection of Statistics Act",
+    "bloomLevel": "Analysis",
+    "question": "How does the Collection of Statistics Act 2008 protect statistical informants against prosecution?",
+    "options": [
+      "Information disclosed by an informant in official survey schedules cannot be used as evidence in tax or criminal proceedings against them",
+      "Informants are granted diplomatic immunity during census periods",
+      "Statistical officers can seize private property without judicial warrants",
+      "All survey respondents receive direct cash exemptions"
+    ],
+    "correctAnswer": "Information disclosed by an informant in official survey schedules cannot be used as evidence in tax or criminal proceedings against them",
+    "explanation": "Section 11 of the Collection of Statistics Act 2008 guarantees statutory confidentiality: individual returns cannot be disclosed to tax or law enforcement authorities, protecting respondents and ensuring truthful reporting.",
+    "sourceCitation": "Collection of Statistics Act, 2008, Section 11",
+    "distractorAnalysis": {
+      "Informants are granted diplomatic immunity during census periods": {
+        "misconception": "Confusing statistical confidentiality protections with foreign diplomatic legal status.",
+        "remedialSkill": "Data Privacy & DPDPA 2023",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection Act (DPDPA) 2023 for Civil Servants"
+      }
+    }
+  },
+  {
+    "id": "qb-capi-001",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "Validation Rules",
+    "bloomLevel": "Application",
+    "question": "In a CAPI tablet survey schedule (Blaise / CSPro), what is the primary function of an 'online consistency check'?",
+    "options": [
+      "To alert enumerators to logical contradictions (e.g. child age < 5 recorded with tertiary degrees) while still in the household",
+      "To automatically connect the tablet to public cellular data towers during non-working hours",
+      "To wipe tablet storage automatically if the interview takes longer than 30 minutes",
+      "To submit completed interviews to national television broadcast stations"
+    ],
+    "correctAnswer": "To alert enumerators to logical contradictions (e.g. child age < 5 recorded with tertiary degrees) while still in the household",
+    "explanation": "CAPI consistency checks enforce real-time range and logic validations during the interview, enabling immediate clarification and eliminating costly field re-visits.",
+    "sourceCitation": "NSS CAPI System User Manual, Version 4.2",
+    "distractorAnalysis": {
+      "To automatically connect the tablet to public cellular data towers during non-working hours": {
+        "misconception": "Confusing data synchronization protocols with survey logic error checking.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
+  },
+  {
+    "id": "qb-capi-002",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "Geotagging & Paradata",
+    "bloomLevel": "Understanding",
+    "question": "How is survey paradata (timestamping, GPS coordinates, keystroke logs) utilized by MoSPI field supervisors?",
+    "options": [
+      "To audit field interview integrity, verify physical visit compliance, and detect fabricated schedules",
+      "To calculate individual household electricity bills",
+      "To rank enumerators by typing speed for annual bonus distributions",
+      "To transmit real-time audio recordings of respondent living rooms"
+    ],
+    "correctAnswer": "To audit field interview integrity, verify physical visit compliance, and detect fabricated schedules",
+    "explanation": "Paradata provides an objective audit trail of interview duration, geolocation, and navigation paths, allowing field inspection squads to identify curbstoning (fabricated interviews) and ensure high data fidelity.",
+    "sourceCitation": "NSS Field Inspection and Quality Control Guidelines",
+    "distractorAnalysis": {
+      "To transmit real-time audio recordings of respondent living rooms": {
+        "misconception": "Violating privacy laws by misinterpreting statistical paradata as intrusive surveillance audio.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
+  },
+  {
+    "id": "qb-capi-003",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "Offline Synchronization",
+    "bloomLevel": "Application",
+    "question": "What is the recommended protocol for enumerators operating CAPI tablets in zero-connectivity remote rural FSUs?",
+    "options": [
+      "Complete interviews in encrypted local offline storage and perform batch upload once cellular network or regional office Wi-Fi is reached",
+      "Abort the survey and return to state headquarters immediately",
+      "Ask respondents to travel to the nearest urban center to complete their interviews",
+      "Revert to unstandardized paper napkins and discard the tablet"
+    ],
+    "correctAnswer": "Complete interviews in encrypted local offline storage and perform batch upload once cellular network or regional office Wi-Fi is reached",
+    "explanation": "CAPI applications are designed for full offline operation using local encrypted SQLite/FlatBuffers databases with cryptographic hashing and atomic batch sync upon reconnection.",
+    "sourceCitation": "NSS CAPI System User Manual, Version 4.2",
+    "distractorAnalysis": {
+      "Abort the survey and return to state headquarters immediately": {
+        "misconception": "Failing to utilize standard offline-first data caching designed specifically for rural fieldwork.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
+  },
+  {
+    "id": "qb-capi-004",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "Listing Schedule Protocol",
+    "bloomLevel": "Recall",
+    "question": "In NSS Schedule 0.0 (Listing of Households), what is the vital operational step before selecting sample households?",
+    "options": [
+      "Complete physical boundary reconnaissance and list every structure, household, and affluent/non-affluent stratification criteria",
+      "Interview only the village headman and estimate total village wealth",
+      "Collect property tax receipts from local municipal offices",
+      "Draw lottery numbers in the village square without conducting physical listing"
+    ],
+    "correctAnswer": "Complete physical boundary reconnaissance and list every structure, household, and affluent/non-affluent stratification criteria",
+    "explanation": "Schedule 0.0 provides the exhaustive frame from which sample households are drawn using circular systematic sampling; omitting unlisted households creates severe under-coverage bias.",
+    "sourceCitation": "NSS Listing Schedule 0.0 Instructions",
+    "distractorAnalysis": {
+      "Interview only the village headman and estimate total village wealth": {
+        "misconception": "Violating scientific household listing principles by relying on subjective key-informant estimates.",
+        "remedialSkill": "CAPI & Digital Field Enumeration",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
+  },
+  {
+    "id": "qb-capi-005",
+    "courseId": "CAPI & Digital Field Enumeration",
+    "topic": "Measurement Error Mitigation",
+    "bloomLevel": "Analysis",
+    "question": "How does CAPI technology minimize non-sampling measurement errors compared to traditional Pen-and-Paper Personal Interviewing (PAPI)?",
+    "options": [
+      "By enforcing automated skip patterns, range checks, mandatory field validations, and eliminating manual data entry transcription errors",
+      "By doubling the total length of the survey questionnaire",
+      "By eliminating the need to train statistical investigators",
+      "By ensuring all respondents give 100% positive answers"
+    ],
+    "correctAnswer": "By enforcing automated skip patterns, range checks, mandatory field validations, and eliminating manual data entry transcription errors",
+    "explanation": "CAPI eliminates routing errors (skipping questions inappropriately), out-of-range inputs, and secondary data punch errors common in traditional paper schedules.",
+    "sourceCitation": "Total Survey Error Framework in Official Statistics",
+    "distractorAnalysis": {
+      "By eliminating the need to train statistical investigators": {
+        "misconception": "Believing digital tools replace rigorous field investigator training in statistical concepts.",
+        "remedialSkill": "Public Ethics & Field Communication",
+        "recommendedCourseId": "capi-field-101",
+        "recommendedCourseTitle": "CAPI & BLAISE Field Operations & Validation Rules"
+      }
+    }
+  },
+  {
+    "id": "qb-bigdata-001",
+    "courseId": "Big Data, Cloud & AI/ML Architecture",
+    "topic": "Alternative Data Sources",
+    "bloomLevel": "Application",
+    "question": "How are VIIRS Nighttime Lights satellite imagery datasets used in official statistical nowcasting?",
+    "options": [
+      "As high-frequency proxy indicators for local economic activity, electrification, and district-level GDP estimation",
+      "To count the exact number of motor vehicles parked on residential driveways",
+      "To determine individual household television channel preferences",
+      "To replace the decennial population census entirely without field enumeration"
+    ],
+    "correctAnswer": "As high-frequency proxy indicators for local economic activity, electrification, and district-level GDP estimation",
+    "explanation": "Satellite nighttime radiance data correlates strongly with electricity consumption, commercial density, and local economic output, providing timely nowcasts ahead of published survey aggregates.",
+    "sourceCitation": "UN Big Data Working Group & MoSPI DIID Modernization Roadmap",
+    "distractorAnalysis": {
+      "To replace the decennial population census entirely without field enumeration": {
+        "misconception": "Over-extending satellite proxies beyond their capability to substitute exhaustive demographic enumerations.",
+        "remedialSkill": "Big Data, Cloud & AI/ML Architecture",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection & Sovereign Clouds"
+      }
+    }
+  },
+  {
+    "id": "qb-bigdata-002",
+    "courseId": "Big Data, Cloud & AI/ML Architecture",
+    "topic": "High-Frequency Indicators",
+    "bloomLevel": "Understanding",
+    "question": "What is the primary statistical challenge when incorporating web-scraped e-commerce prices into official CPI indexes?",
+    "options": [
+      "Addressing selection bias toward urban online consumers and accounting for dynamic pricing algorithms and stock-outs",
+      "Web scraping requires physical visits to retail supermarkets",
+      "Internet data cannot be stored in relational databases",
+      "Online prices never fluctuate across time"
+    ],
+    "correctAnswer": "Addressing selection bias toward urban online consumers and accounting for dynamic pricing algorithms and stock-outs",
+    "explanation": "Web scraped data covers primarily online goods bought by specific demographics and features rapid product churn, requiring careful weighting and representativeness adjustments.",
+    "sourceCitation": "Billion Prices Project & IMF CPI Big Data Guidelines",
+    "distractorAnalysis": {
+      "Web scraping requires physical visits to retail supermarkets": {
+        "misconception": "Confusing automated web scraping with physical field price enumeration.",
+        "remedialSkill": "High-Frequency Econometric Modeling",
+        "recommendedCourseId": "nssta-price-01",
+        "recommendedCourseTitle": "Price Statistics & Index Number Construction"
+      }
+    }
+  },
+  {
+    "id": "qb-bigdata-003",
+    "courseId": "Big Data, Cloud & AI/ML Architecture",
+    "topic": "Machine Learning in Statistics",
+    "bloomLevel": "Analysis",
+    "question": "Why is Random Forest / Gradient Boosting favored over unregularized high-degree polynomials when nowcasting macroeconomic time series?",
+    "options": [
+      "They handle non-linear interactions without severe overfitting and provide feature importance metrics",
+      "They guarantee zero prediction error on unseen out-of-sample data",
+      "They eliminate the need to split data into train and test sets",
+      "They run without any computational hardware"
+    ],
+    "correctAnswer": "They handle non-linear interactions without severe overfitting and provide feature importance metrics",
+    "explanation": "Ensemble decision trees capture complex non-linear economic signals from high-dimensional administrative datasets while mitigating overfitting through bagging and feature subsampling.",
+    "sourceCitation": "Machine Learning for Official Statistics, UNECE",
+    "distractorAnalysis": {
+      "They guarantee zero prediction error on unseen out-of-sample data": {
+        "misconception": "Believing any machine learning algorithm eliminates irreducible generalization error.",
+        "remedialSkill": "Big Data, Cloud & AI/ML Architecture",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection & Sovereign Clouds"
+      }
+    }
+  },
+  {
+    "id": "qb-bigdata-004",
+    "courseId": "Big Data, Cloud & AI/ML Architecture",
+    "topic": "Data Lake Architecture",
+    "bloomLevel": "Understanding",
+    "question": "What is the key architectural purpose of the National Data Governance Framework for official statistics?",
+    "options": [
+      "Standardizing data exchange APIs, anonymized metadata catalogs, and secure cross-ministry data linkage",
+      "Storing all national data on unencrypted personal laptops",
+      "Preventing state statistical bureaus from accessing national data standards",
+      "Restricting official statistics to paper-only filing systems"
+    ],
+    "correctAnswer": "Standardizing data exchange APIs, anonymized metadata catalogs, and secure cross-ministry data linkage",
+    "explanation": "NDAP and the National Data Governance Framework establish unified metadata standards, interoperable REST APIs, and privacy-preserving record linkage protocols across government agencies.",
+    "sourceCitation": "National Data Governance Framework Policy, MeitY / MoSPI",
+    "distractorAnalysis": {
+      "Storing all national data on unencrypted personal laptops": {
+        "misconception": "Severe breach of government cloud security and data localization policies.",
+        "remedialSkill": "Official Statistics Architecture",
+        "recommendedCourseId": "igot-gov-01",
+        "recommendedCourseTitle": "Digital Personal Data Protection & Sovereign Clouds"
+      }
+    }
+  },
+  {
+    "id": "qb-bigdata-005",
+    "courseId": "Big Data, Cloud & AI/ML Architecture",
+    "topic": "Spatial Statistics",
+    "bloomLevel": "Analysis",
+    "question": "In geospatial statistical modeling of district-level poverty indicators, what does Moran's I measure?",
+    "options": [
+      "Spatial autocorrelation: the degree to which neighboring districts exhibit similar values compared to random spatial distribution",
+      "The exact distance between state capitals and New Delhi",
+      "The percentage of land covered by water bodies",
+      "The total number of satellite passes per day"
+    ],
+    "correctAnswer": "Spatial autocorrelation: the degree to which neighboring districts exhibit similar values compared to random spatial distribution",
+    "explanation": "Moran's I is a measure of global spatial autocorrelation; positive values indicate spatial clustering of similar values, which informs Small Area Estimation (SAE) models.",
+    "sourceCitation": "Spatial Econometrics & Small Area Estimation, NSSTA",
+    "distractorAnalysis": {
+      "The exact distance between state capitals and New Delhi": {
+        "misconception": "Confusing spatial statistical autocorrelation with simple Euclidean point-to-point distances.",
+        "remedialSkill": "Big Data, Cloud & AI/ML Architecture",
+        "recommendedCourseId": "nssta-stat-01",
+        "recommendedCourseTitle": "Advanced Sampling Theory & Small Area Estimation"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-def-1788763957799-1",
     "courseId": "NSS 78th Round Manual",
     "topic": "First Stage Units",
     "bloomLevel": "Recall",
     "question": "According to the uploaded document, what is the operational definition or purpose of \"First Stage Units\"?",
     "options": [
       "Computed using unweighted arithmetic aggregations without non-response adjustments.",
+      "Applies only when variance thresholds exceed statutory limits for First Stage Units.",
       "households in both rural and urban sectors selected for complete enumeration",
-      "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector",
-      "Applies only when variance thresholds exceed statutory limits for First Stage Units."
+      "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector"
     ],
     "correctAnswer": "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector",
     "explanation": "The uploaded manual specifies: \"First Stage Units refers to the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector\".",
@@ -537,14 +840,14 @@
     }
   },
   {
-    "id": "qb-doc-def-1788757009681-2",
+    "id": "qb-doc-def-1788763957799-2",
     "courseId": "NSS 78th Round Manual",
     "topic": "Ultimate Stage Units",
     "bloomLevel": "Recall",
     "question": "According to the uploaded document, what is the operational definition or purpose of \"Ultimate Stage Units\"?",
     "options": [
-      "Applies only when variance thresholds exceed statutory limits for Ultimate Stage Units.",
       "households in both rural and urban sectors selected for complete enumeration",
+      "Applies only when variance thresholds exceed statutory limits for Ultimate Stage Units.",
       "Computed using unweighted arithmetic aggregations without non-response adjustments.",
       "the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector"
     ],
@@ -573,16 +876,16 @@
     }
   },
   {
-    "id": "qb-doc-meth-1788757009681-1",
+    "id": "qb-doc-meth-1788763957799-1",
     "courseId": "NSS 78th Round Manual",
     "topic": "the 78th Round",
     "bloomLevel": "Understanding",
     "question": "Based on the provisions for \"the 78th Round\" in the document, which procedural requirement is explicitly stated?",
     "options": [
-      "First Stage Units refers to the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector.",
       "Chapter 2: SAMPLING DESIGN AND ESTIMATION PROCEDURE\nA stratified multi-stage design was adopted for the survey.",
+      "the focus is on multi-stage stratification and domestic tourism expenditure",
       "Ultimate Stage Units is defined as households in both rural and urban sectors selected for complete enumeration.",
-      "the focus is on multi-stage stratification and domestic tourism expenditure"
+      "First Stage Units refers to the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector."
     ],
     "correctAnswer": "the focus is on multi-stage stratification and domestic tourism expenditure",
     "explanation": "The document explicitly states: \"Under the 78th Round, the focus is on multi-stage stratification and domestic tourism expenditure.\".",
@@ -609,182 +912,38 @@
     }
   },
   {
-    "id": "qb-doc-def-1788757052925-1",
-    "courseId": "test_asi_doc.txt",
-    "topic": "Primary Sampling Units",
-    "bloomLevel": "Recall",
-    "question": "According to the uploaded document, what is the operational definition or purpose of \"Primary Sampling Units\"?",
-    "options": [
-      "the census factories employing 100 or more workers",
-      "Computed using unweighted arithmetic aggregations without non-response adjustments.",
-      "Deprecated methodology superseded by legacy census baseline procedures.",
-      "Applies only when variance thresholds exceed statutory limits for Primary Sampling Units."
-    ],
-    "correctAnswer": "the census factories employing 100 or more workers",
-    "explanation": "The uploaded manual specifies: \"Primary Sampling Units refers to the census factories employing 100 or more workers\".",
-    "sourceCitation": "Uploaded Document: Section on Primary Sampling Units",
-    "distractorAnalysis": {
-      "Applies only when variance thresholds exceed statutory limits for Primary Sampling Units.": {
-        "misconception": "Confusing the definition of \"Primary Sampling Units\" with related statistical concepts in the manual.",
-        "remedialSkill": "test_asi_doc.txt",
-        "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
-      },
-      "Computed using unweighted arithmetic aggregations without non-response adjustments.": {
-        "misconception": "Confusing the definition of \"Primary Sampling Units\" with related statistical concepts in the manual.",
-        "remedialSkill": "test_asi_doc.txt",
-        "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
-      },
-      "Deprecated methodology superseded by legacy census baseline procedures.": {
-        "misconception": "Confusing the definition of \"Primary Sampling Units\" with related statistical concepts in the manual.",
-        "remedialSkill": "test_asi_doc.txt",
-        "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
-      }
-    }
-  },
-  {
-    "id": "qb-doc-meth-1788757052926-3",
-    "courseId": "test_asi_doc.txt",
-    "topic": "Section 4.2 of ASI Guidelines",
-    "bloomLevel": "Understanding",
-    "question": "Based on the provisions for \"Section 4.2 of ASI Guidelines\" in the document, which procedural requirement is explicitly stated?",
-    "options": [
-      "field verification of capital assets requires inspection of Form 1 schedules and balance sheets",
-      "The multiplier formula for factory estimation is calculated as the inverse of selection probability multiplied by non-response correction we",
-      "Primary Sampling Units refers to the census factories employing 100 or more workers.",
-      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic activity"
-    ],
-    "correctAnswer": "field verification of capital assets requires inspection of Form 1 schedules and balance sheets",
-    "explanation": "The document explicitly states: \"Under Section 4.2 of ASI Guidelines, field verification of capital assets requires inspection of Form 1 schedules and balance sheets.\".",
-    "sourceCitation": "Uploaded Document: Rule under Section 4.2 of ASI Guidelines",
-    "distractorAnalysis": {
-      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic activity": {
-        "misconception": "Misattributing procedural guidelines under \"Section 4.2 of ASI Guidelines\".",
-        "remedialSkill": "test_asi_doc.txt",
-        "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
-      },
-      "Primary Sampling Units refers to the census factories employing 100 or more workers.": {
-        "misconception": "Misattributing procedural guidelines under \"Section 4.2 of ASI Guidelines\".",
-        "remedialSkill": "test_asi_doc.txt",
-        "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
-      },
-      "The multiplier formula for factory estimation is calculated as the inverse of selection probability multiplied by non-response correction we": {
-        "misconception": "Misattributing procedural guidelines under \"Section 4.2 of ASI Guidelines\".",
-        "remedialSkill": "test_asi_doc.txt",
-        "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
-      }
-    }
-  },
-  {
-    "id": "qb-doc-form-1788757052926-4",
-    "courseId": "test_asi_doc.txt",
+    "id": "qb-doc-form-1788763958344-1",
+    "courseId": "NSS_Weights_Instruction.txt",
     "topic": "Estimation & Formulae",
     "bloomLevel": "Application",
     "question": "Regarding calculation and estimation methodology in the uploaded manual, which of the following is correct?",
     "options": [
-      "Under Section 4.2 of ASI Guidelines, field verification of capital assets requires inspection of Form 1 schedules and balance shee",
-      "Primary Sampling Units refers to the census factories employing 100 or more workers.",
-      "the inverse of selection probability multiplied by non-response correction weights",
-      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic"
+      "Applies only when variance thresholds exceed statutory limits for Formula.",
+      "Data fiduciaries must comply with Digital Personal Data Protection mandates by redacting informant identifiers.",
+      "M_ih = (1 / P_i) * (H_i / h_i)",
+      "The non-sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers."
     ],
-    "correctAnswer": "the inverse of selection probability multiplied by non-response correction weights",
-    "explanation": "Document reference: \"The multiplier formula for factory estimation is calculated as the inverse of selection probability multiplied by non-response correction weights.\".",
+    "correctAnswer": "M_ih = (1 / P_i) * (H_i / h_i)",
+    "explanation": "Document reference: \"Section A: NSS Sampling Weights Formulation\n In stratified two-stage sampling designs, the multiplier for household h in FSU i is calculated as M_ih = (1 / P_i) * (H_i / h_i).\".",
     "sourceCitation": "Uploaded Document: Formula / Estimation Section",
     "distractorAnalysis": {
-      "CHAPTER 1: NATIONAL INDUSTRIAL CLASSIFICATION\nThe National Industrial Classification (NIC) is defined as the standardized economic": {
+      "The non-sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers.": {
         "misconception": "Incorrect estimation formulation or index calculation logic.",
-        "remedialSkill": "test_asi_doc.txt",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
         "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
       },
-      "Primary Sampling Units refers to the census factories employing 100 or more workers.": {
+      "Data fiduciaries must comply with Digital Personal Data Protection mandates by redacting informant identifiers.": {
         "misconception": "Incorrect estimation formulation or index calculation logic.",
-        "remedialSkill": "test_asi_doc.txt",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
         "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
       },
-      "Under Section 4.2 of ASI Guidelines, field verification of capital assets requires inspection of Form 1 schedules and balance shee": {
+      "Applies only when variance thresholds exceed statutory limits for Formula.": {
         "misconception": "Incorrect estimation formulation or index calculation logic.",
-        "remedialSkill": "test_asi_doc.txt",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
         "recommendedCourseId": "document-review-mastery",
-        "recommendedCourseTitle": "test_asi_doc.txt"
-      }
-    }
-  },
-  {
-    "id": "qb-sdrd-001",
-    "courseId": "Survey Design & Sampling Theory",
-    "topic": "Survey Design & Sampling Theory",
-    "bloomLevel": "Analysis",
-    "question": "In multi-stage stratified survey sampling for NSS rounds, under what condition does Neyman Optimal Allocation allocate more sample units to a stratum?",
-    "options": [
-      "When the stratum has a larger population and higher intra-stratum standard deviation",
-      "When the sampling cost per unit in the stratum is exceptionally high",
-      "When the stratum is completely homogeneous with zero variance",
-      "When the sampling frame consists solely of urban enterprises"
-    ],
-    "correctAnswer": "When the stratum has a larger population and higher intra-stratum standard deviation",
-    "explanation": "Neyman optimal allocation dictates that sample size n_h is proportional to N_h * S_h (stratum population size multiplied by stratum standard deviation), allocating more units to larger and more variable strata.",
-    "sourceCitation": "SDRD Sampling Methodology Handbook, Chapter 5: Optimal Allocation",
-    "distractorAnalysis": {
-      "When the sampling cost per unit in the stratum is exceptionally high": {
-        "misconception": "Confusing Neyman allocation (which ignores unit cost) with Optimum Cost Allocation (which allocates fewer units when cost is high).",
-        "remedialSkill": "Survey Design & Sampling Theory",
-        "recommendedCourseId": "nssta-stat-01",
-        "recommendedCourseTitle": "Advanced Sampling Theory & Small Area Estimation"
-      },
-      "When the stratum is completely homogeneous with zero variance": {
-        "misconception": "Failing to recognize that zero stratum variance requires only 1 sample unit, not more sample allocation.",
-        "remedialSkill": "Survey Design & Sampling Theory",
-        "recommendedCourseId": "nssta-stat-01",
-        "recommendedCourseTitle": "Advanced Sampling Theory & Small Area Estimation"
-      },
-      "When the sampling frame consists solely of urban enterprises": {
-        "misconception": "Assuming geographic or enterprise categorization alone dictates mathematical sample allocation without variance weighting.",
-        "remedialSkill": "Survey Design & Sampling Theory",
-        "recommendedCourseId": "nssta-stat-01",
-        "recommendedCourseTitle": "Advanced Sampling Theory & Small Area Estimation"
-      }
-    }
-  },
-  {
-    "id": "qb-sdrd-002",
-    "courseId": "Survey Design & Sampling Theory",
-    "topic": "Non-Sampling Error & Variance Estimation",
-    "bloomLevel": "Evaluate",
-    "question": "Why is the Jackknife / Linearization replication method preferred over simple random sampling variance formulas in NSS multi-stage designs?",
-    "options": [
-      "Because complex clustering and unequal selection probabilities violate SRS independence assumptions",
-      "Because Jackknife eliminates the need to collect First Stage Unit listing data",
-      "Because simple random sampling variance formulas always produce zero standard error",
-      "Because Jackknife allows combining household data without survey multipliers"
-    ],
-    "correctAnswer": "Because complex clustering and unequal selection probabilities violate SRS independence assumptions",
-    "explanation": "Multi-stage clustered and stratified designs induce intra-cluster correlation and unequal inclusion probabilities, causing standard SRS variance formulas to severely underestimate standard errors.",
-    "sourceCitation": "NSS Survey Design Guidelines, Section 7: Variance Estimation in Complex Surveys",
-    "distractorAnalysis": {
-      "Because Jackknife eliminates the need to collect First Stage Unit listing data": {
-        "misconception": "Confusing post-survey variance estimation techniques with primary sampling frame listing requirements.",
-        "remedialSkill": "Non-Sampling Error & Variance Estimation",
-        "recommendedCourseId": "nssta-stat-02",
-        "recommendedCourseTitle": "NSSO Multistage Stratified Sampling & Listing Masterclass"
-      },
-      "Because simple random sampling variance formulas always produce zero standard error": {
-        "misconception": "Believing SRS formulas produce zero error rather than negatively biased (underestimated) variance.",
-        "remedialSkill": "Non-Sampling Error & Variance Estimation",
-        "recommendedCourseId": "nssta-stat-02",
-        "recommendedCourseTitle": "NSSO Multistage Stratified Sampling & Listing Masterclass"
-      },
-      "Because Jackknife allows combining household data without survey multipliers": {
-        "misconception": "Incorrectly assuming resampling variance methods remove the requirement for inflation factors.",
-        "remedialSkill": "Non-Sampling Error & Variance Estimation",
-        "recommendedCourseId": "nssta-stat-02",
-        "recommendedCourseTitle": "NSSO Multistage Stratified Sampling & Listing Masterclass"
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
       }
     }
   }

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { userDb } from '../../db/UserDatabase';
 
 export interface CatalogCourse {
   id: string;
@@ -688,6 +689,31 @@ export class CourseMatcherService {
     ];
 
     const recommendedCohorts = allCohorts.sort((a, b) => b.relevanceMatch - a.relevanceMatch);
+
+    // Sync into UserDatabase if user exists
+    try {
+      const user = userDb.getUserByParichayId(officerId) || userDb.getUserById(officerId);
+      if (user) {
+        userDb.recordAssessment(user.id, {
+          id: `eval-${Date.now()}`,
+          courseId: answers[0]?.topic || 'Assessment',
+          courseTitle: answers[0]?.topic || 'Competency Diagnostic Assessment',
+          category: cadre,
+          score: correctCount * 20,
+          totalScore: totalQuestions * 20,
+          scorePercentage,
+          status,
+          durationMinutes: 3,
+          date: new Date().toISOString().split('T')[0],
+          misconceptions: misconceptionsFound,
+        });
+        userDb.updateUser(user.id, {
+          proficiency: updatedProficiency,
+        });
+      }
+    } catch {
+      // Safe fallback if database sync encounters non-critical issue
+    }
 
     // Calculate overall mastery
     const profValues = Object.values(updatedProficiency);

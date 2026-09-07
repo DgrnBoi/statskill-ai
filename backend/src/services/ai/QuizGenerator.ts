@@ -171,7 +171,12 @@ export class QuizGeneratorService {
     if (!filePath) {
       console.log(`[AntiCopyEngine] Serving question set from local Question Bank for: ${courseId}`);
       const bank = this.getLocalBank();
-      let pool = bank.filter(q => q.courseId && q.courseId.toLowerCase().includes(courseId.toLowerCase()));
+      const target = (courseId || '').toLowerCase().trim();
+      let pool = bank.filter(q => {
+        if (!q.courseId) return false;
+        const qId = q.courseId.toLowerCase();
+        return qId.includes(target) || target.includes(qId) || (q.topic && target.includes(q.topic.toLowerCase()));
+      });
       if (pool.length < numQuestions) {
         pool = bank;
       }

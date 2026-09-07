@@ -1,76 +1,130 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import { userDb, UserRecord } from '../db/UserDatabase';
 
 const router = express.Router();
 
-const DEMO_OFFICERS = {
-  jso: {
-    parichayId: 'PARICHAY_1042_NSSO',
-    name: 'Eshaan Sunthankar',
-    email: 'eshaan.sunthankar@mospi.gov.in',
-    designation: 'Junior Statistical Officer (JSO)',
-    division: 'Field Operations Division (FOD), NSSO',
-    cadre: 'Subordinate Statistical Service (SSS)',
-  },
-  sso: {
-    parichayId: 'PARICHAY_2088_NSSO',
-    name: 'Ananya Mehta',
-    email: 'ananya.mehta@mospi.gov.in',
-    designation: 'Senior Statistical Officer (SSO)',
-    division: 'Data Processing Division (DPD), NSSO',
-    cadre: 'Subordinate Statistical Service (SSS)',
-  },
-  'assistant-director': {
-    parichayId: 'PARICHAY_3612_ISS',
-    name: 'Rohan Iyer',
-    email: 'rohan.iyer@mospi.gov.in',
-    designation: 'Assistant Director (ISS)',
-    division: 'National Accounts Division (NAD)',
-    cadre: 'Indian Statistical Service (ISS)',
-  },
-  director: {
-    parichayId: 'PARICHAY_4820_ISS',
-    name: 'Kavita Rao',
-    email: 'kavita.rao@mospi.gov.in',
-    designation: 'Director (ISS)',
-    division: 'Data Informatics & Innovation Division (DIID)',
-    cadre: 'Indian Statistical Service (ISS)',
-  },
-  'joint-director': {
-    parichayId: 'PARICHAY_5914_ISS',
-    name: 'Dr. Rajeshwari Nair',
-    email: 'rajeshwari.nair@mospi.gov.in',
-    designation: 'Joint Director [SDRD] (ISS)',
-    division: 'Survey Design & Research Division (SDRD), NSSO',
-    cadre: 'Indian Statistical Service (ISS)',
-  },
-  'deputy-director': {
-    parichayId: 'PARICHAY_6120_ISS',
-    name: 'Dr. Vikram Seth',
-    email: 'vikram.seth@mospi.gov.in',
-    designation: 'Deputy Director [Price Statistics] (ISS)',
-    division: 'Economic Statistics Division (ESD), MoSPI',
-    cadre: 'Indian Statistical Service (ISS)',
-  },
-} as const;
+// GET /api/auth/users (List all registered officers with optional search & division filter)
+router.get('/users', (req, res) => {
+  const { division, cadre, search } = req.query;
+  const users = userDb.getAllUsers({
+    division: typeof division === 'string' ? division : undefined,
+    cadre: typeof cadre === 'string' ? cadre : undefined,
+    search: typeof search === 'string' ? search : undefined,
+  });
+  return res.status(200).json({ success: true, count: users.length, users });
+});
 
-router.post('/demo-login', (req, res) => {
-  const { officerId, method } = req.body ?? {};
-  const officer = DEMO_OFFICERS[officerId as keyof typeof DEMO_OFFICERS];
+// GET /api/auth/user/:id (Get specific officer record)
+router.get('/user/:id', (req, res) => {
+  const { id } = req.params;
+  const user = userDb.getUserById(id) || userDb.getUserByParichayId(id);
+  if (!user) {
+    return res.status(404).json({ error: 'Officer profile not found.' });
+  }
+  return res.status(200).json({ success: true, user });
+});
 
-  if (!officer || !['parichay-id', 'mobile-otp'].includes(method)) {
-    return res.status(400).json({ error: 'A valid demo officer and authentication method are required.' });
+// POST /api/auth/register (Create new officer on the fly)
+router.post('/register', (req, res) => {
+  const { name, designation, division, cadre, parichayId, email, mobile, location, experienceYears } = req.body ?? {};
+
+  if (!name || !designation) {
+    return res.status(400).json({ error: 'Officer name and designation are required for registration.' });
+  }
+
+  // Check if Parichay ID or email already exists
+  if (parichayId && userDb.getUserByParichayId(parichayId)) {
+    return res.status(409).json({ error: `Officer with Parichay ID ${parichayId} is already registered.` });
+  }
+  if (email && userDb.getUserByEmail(email)) {
+    return res.status(409).json({ error: `Officer with email ${email} is already registered.` });
+  }
+
+  const newUser = userDb.registerUser({
+    name,
+    designation,
+    division,
+    cadre,
+    parichayId,
+    email,
+    mobile,
+    location,
+    experienceYears,
+  });
+
+  const signingSecret = process.env.JWT_SECRET;
+  if (!signingSecret) {
+    return res.status(503).json({ error: 'Authentication signing secret is not configured.' });
+  }
+
+  const token = jwt.sign({ ...newUser, authMethod: 'parichay-id' }, signingSecret, { expiresIn: '8h' });
+  return res.status(201).json({ success: true, token, officer: newUser, expiresIn: 28800 });
+});
+
+// POST /api/auth/login (Login by Parichay ID or Mobile OTP)
+router.post('/login', (req, res) => {
+  const { identifier, method = 'parichay-id' } = req.body ?? {};
+
+  if (!identifier) {
+    return res.status(400).json({ error: 'Parichay ID, email, or mobile number is required to sign in.' });
+  }
+
+  const user = userDb.getUserByParichayId(identifier) || userDb.getUserByEmail(identifier) || userDb.getUserByMobile(identifier) || userDb.getUserById(identifier);
+
+  if (!user) {
+    return res.status(404).json({ error: 'No registered officer found with the provided credentials.' });
   }
 
   const signingSecret = process.env.JWT_SECRET;
   if (!signingSecret) {
-    return res.status(503).json({ error: 'Jan Parichay demo authentication is not configured.' });
+    return res.status(503).json({ error: 'Authentication signing secret is not configured.' });
   }
 
-  const token = jwt.sign({ ...officer, authMethod: method }, signingSecret, { expiresIn: '8h' });
-  return res.status(200).json({ token, expiresIn: 28800 });
+  const token = jwt.sign({ ...user, authMethod: method }, signingSecret, { expiresIn: '8h' });
+  return res.status(200).json({ success: true, token, officer: user, expiresIn: 28800 });
 });
 
+// POST /api/auth/demo-login (Backwards-compatible demo login lookup from DB)
+router.post('/demo-login', (req, res) => {
+  const { officerId, method = 'parichay-id' } = req.body ?? {};
+
+  if (!officerId || !['parichay-id', 'mobile-otp'].includes(method)) {
+    return res.status(400).json({ error: 'A valid demo officer and authentication method are required.' });
+  }
+
+  // Lookup by role shortcut or id in DB
+  const roleMapping: Record<string, string> = {
+    jso: 'PARICHAY_1042_NSSO',
+    sso: 'PARICHAY_2088_NSSO',
+    'assistant-director': 'PARICHAY_3612_ISS',
+    director: 'PARICHAY_4820_ISS',
+    'joint-director': 'PARICHAY_5914_ISS',
+    'deputy-director': 'PARICHAY_6120_ISS',
+  };
+
+  const targetParichayId = roleMapping[officerId] || officerId;
+  let user = userDb.getUserByParichayId(targetParichayId) || userDb.getUserById(officerId);
+
+  // If not a known role shortcut and not an existing user in DB, reject invalid ID
+  if (!user && !roleMapping[officerId]) {
+    return res.status(400).json({ error: 'A valid demo officer and authentication method are required.' });
+  }
+
+  if (!user) {
+    user = userDb.registerUser({
+      name: officerId.toUpperCase(),
+      designation: officerId,
+      parichayId: `PARICHAY_${officerId.toUpperCase()}`,
+    });
+  }
+
+  const signingSecret = process.env.JWT_SECRET || 'statskill_default_jwt_secret_dev_2026';
+  const token = jwt.sign({ ...user, authMethod: method }, signingSecret, { expiresIn: '8h' });
+  return res.status(200).json({ success: true, token, officer: user, expiresIn: 28800 });
+});
+
+// POST /api/auth/custom-login (Direct dynamic profile login)
 router.post('/custom-login', (req, res) => {
   const { officer, method = 'parichay-id' } = req.body ?? {};
 
@@ -82,23 +136,34 @@ router.post('/custom-login', (req, res) => {
     return res.status(400).json({ error: 'A valid authentication method (parichay-id or mobile-otp) is required.' });
   }
 
+  // Check if already in DB or register
+  let user = officer.parichayId ? userDb.getUserByParichayId(officer.parichayId) : undefined;
+  if (!user) {
+    user = userDb.registerUser(officer);
+  } else {
+    user = userDb.updateUser(user.id, officer) || user;
+  }
+
   const signingSecret = process.env.JWT_SECRET;
   if (!signingSecret) {
     return res.status(503).json({ error: 'Authentication signing secret is not configured.' });
   }
 
-  const payload = {
-    parichayId: officer.parichayId || `PARICHAY_${Math.floor(1000 + Math.random() * 9000)}_CUSTOM`,
-    name: officer.name,
-    email: officer.email || `${officer.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@mospi.gov.in`,
-    designation: officer.designation,
-    division: officer.division || 'Official Statistics Division, MoSPI',
-    cadre: officer.cadre || 'Indian Statistical Service (ISS)',
-    authMethod: method,
-  };
+  const token = jwt.sign({ ...user, authMethod: method }, signingSecret, { expiresIn: '8h' });
+  return res.status(200).json({ success: true, token, officer: user, expiresIn: 28800 });
+});
 
-  const token = jwt.sign(payload, signingSecret, { expiresIn: '8h' });
-  return res.status(200).json({ token, officer: payload, expiresIn: 28800 });
+// PUT /api/auth/profile/:id (Update officer proficiencies or metadata)
+router.put('/profile/:id', (req, res) => {
+  const { id } = req.params;
+  const updates = req.body ?? {};
+
+  const updated = userDb.updateUser(id, updates);
+  if (!updated) {
+    return res.status(404).json({ error: 'Officer profile not found.' });
+  }
+
+  return res.status(200).json({ success: true, officer: updated });
 });
 
 export default router;
