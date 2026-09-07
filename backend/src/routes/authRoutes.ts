@@ -44,6 +44,14 @@ const DEMO_OFFICERS = {
     division: 'Survey Design & Research Division (SDRD), NSSO',
     cadre: 'Indian Statistical Service (ISS)',
   },
+  'deputy-director': {
+    parichayId: 'PARICHAY_6120_ISS',
+    name: 'Dr. Vikram Seth',
+    email: 'vikram.seth@mospi.gov.in',
+    designation: 'Deputy Director [Price Statistics] (ISS)',
+    division: 'Economic Statistics Division (ESD), MoSPI',
+    cadre: 'Indian Statistical Service (ISS)',
+  },
 } as const;
 
 router.post('/demo-login', (req, res) => {
@@ -61,6 +69,36 @@ router.post('/demo-login', (req, res) => {
 
   const token = jwt.sign({ ...officer, authMethod: method }, signingSecret, { expiresIn: '8h' });
   return res.status(200).json({ token, expiresIn: 28800 });
+});
+
+router.post('/custom-login', (req, res) => {
+  const { officer, method = 'parichay-id' } = req.body ?? {};
+
+  if (!officer || !officer.designation || !officer.name) {
+    return res.status(400).json({ error: 'A valid officer profile containing at least name and designation is required.' });
+  }
+
+  if (!['parichay-id', 'mobile-otp'].includes(method)) {
+    return res.status(400).json({ error: 'A valid authentication method (parichay-id or mobile-otp) is required.' });
+  }
+
+  const signingSecret = process.env.JWT_SECRET;
+  if (!signingSecret) {
+    return res.status(503).json({ error: 'Authentication signing secret is not configured.' });
+  }
+
+  const payload = {
+    parichayId: officer.parichayId || `PARICHAY_${Math.floor(1000 + Math.random() * 9000)}_CUSTOM`,
+    name: officer.name,
+    email: officer.email || `${officer.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@mospi.gov.in`,
+    designation: officer.designation,
+    division: officer.division || 'Official Statistics Division, MoSPI',
+    cadre: officer.cadre || 'Indian Statistical Service (ISS)',
+    authMethod: method,
+  };
+
+  const token = jwt.sign(payload, signingSecret, { expiresIn: '8h' });
+  return res.status(200).json({ token, officer: payload, expiresIn: 28800 });
 });
 
 export default router;

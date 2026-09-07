@@ -151,7 +151,31 @@ const MOSPI_CADRES_DATA: Record<string, { division: string; description: string;
       { id: 'sdrd-4', skillName: 'Methodological Research & Policy Direction', targetLevel: 5, category: 'Behavioural and Managerial', description: 'Authoring NSS survey methodology manuals, presenting to National Statistical Commission, and international harmonisation.' },
     ],
   },
+  'Deputy Director [Price Statistics] (ISS)': {
+    division: 'Economic Statistics Division (ESD), MoSPI',
+    description: 'Mid-senior statistical leadership specializing in Consumer Price Index (CPI), Wholesale Price Index (WPI), price collection protocols, and inflation nowcasting.',
+    competencies: [
+      { id: 'esd-1', skillName: 'Price Statistics & Index Number Theory', targetLevel: 4, category: 'Statistical Competencies', description: 'Laspeyres/Paasche/Fisher index formulas, geometric mean aggregation, and item substitution rules.' },
+      { id: 'esd-2', skillName: 'High-Frequency Econometric Modeling', targetLevel: 4, category: 'Technical Competencies', description: 'Real-time web-scraped price tracking, flash inflation estimation, and core inflation filtering.' },
+      { id: 'esd-3', skillName: 'Official Dissemination & Data Governance', targetLevel: 4, category: 'Digital Governance', description: 'SDDS (Special Data Dissemination Standard) compliance, embargo protocols, and national release calendars.' },
+      { id: 'esd-4', skillName: 'Inter-Ministerial Stakeholder Consultation', targetLevel: 4, category: 'Behavioural and Managerial', description: 'Coordinating with RBI, Ministry of Finance, and state statistical bureaus on inflation dynamics.' },
+    ],
+  },
 };
+
+export function getCadreData(desig: string): { division: string; description: string; competencies: Competency[] } {
+  if (MOSPI_CADRES_DATA[desig]) return MOSPI_CADRES_DATA[desig];
+  return {
+    division: desig.includes('Division') ? desig : 'Official Statistics Division, MoSPI',
+    description: `Official statistical mandate and capacity profile for ${desig}.`,
+    competencies: [
+      { id: 'custom-1', skillName: 'Survey Design & Sampling', targetLevel: 4, category: 'Statistical Competencies', description: 'Sample design, stratification, and estimation procedures.' },
+      { id: 'custom-2', skillName: 'Statistical Data Analytics (R & Python)', targetLevel: 4, category: 'Technical Competencies', description: 'Advanced computational modeling and automated pipelines.' },
+      { id: 'custom-3', skillName: 'Data Privacy & DPDPA 2023', targetLevel: 3, category: 'Digital Governance', description: 'Compliance with official statistical standards and privacy mandates.' },
+      { id: 'custom-4', skillName: 'Evidence-Based Policy Writing', targetLevel: 4, category: 'Behavioural and Managerial', description: 'Synthesizing quantitative evidence for policy insights.' },
+    ],
+  };
+}
 
 /**
  * Unbiased Fisher-Yates array shuffle extracted outside component scope
@@ -280,7 +304,7 @@ function normalizedProficiencyFor(designation: string, proficiency: Record<strin
 }
 
 function defaultProficiencyFor(designation: string) {
-  const cadre = MOSPI_CADRES_DATA[designation] || MOSPI_CADRES_DATA['Junior Statistical Officer (JSO)'];
+  const cadre = getCadreData(designation);
   return Object.fromEntries(cadre.competencies.map((skill) => [skill.skillName, 0]));
 }
 
@@ -416,7 +440,7 @@ export default function Dashboard({
       const saved = window.localStorage.getItem('statskill_demo_login');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed?.officer?.designation && MOSPI_CADRES_DATA[parsed.officer.designation]) {
+        if (parsed?.officer?.designation) {
           return parsed.officer.designation;
         }
       }
@@ -507,7 +531,7 @@ export default function Dashboard({
 
   // Pure state derivation: competencies derived directly from selected cadre
   const skills = useMemo(() => {
-    const cadreData = MOSPI_CADRES_DATA[designation] || MOSPI_CADRES_DATA['Junior Statistical Officer (JSO)'];
+    const cadreData = getCadreData(designation);
     return cadreData.competencies;
   }, [designation]);
 
@@ -1060,8 +1084,8 @@ export default function Dashboard({
             currentCadre={designation}
             onCadreChange={setDesignation}
             cadresList={Object.keys(MOSPI_CADRES_DATA)}
-            divisionName={MOSPI_CADRES_DATA[designation]?.division || 'Field Operations Division (FOD), NSSO'}
-            divisionDescription={MOSPI_CADRES_DATA[designation]?.description || ''}
+            divisionName={savedOfficerInfo?.officer?.division || getCadreData(designation).division}
+            divisionDescription={getCadreData(designation).description}
             skills={skills}
             proficiency={proficiency}
             onNavigateTab={handleTabChange}
@@ -1408,7 +1432,7 @@ export default function Dashboard({
                         timeTakenSeconds={examTimeTaken}
                         paperSet={paperSet}
                         cadre={designation}
-                        division={MOSPI_CADRES_DATA[designation]?.division || 'Field Operations Division (FOD), NSSO'}
+                        division={getCadreData(designation).division}
                         onNavigateToPathway={() => {
                           handleTabChange('competency');
                           setTimeout(() => {
@@ -1506,6 +1530,8 @@ export default function Dashboard({
                     <option value="Senior Statistical Officer (SSO)">Senior Statistical Officer (SSO)</option>
                     <option value="Assistant Director (ISS)">Assistant Director (ISS)</option>
                     <option value="Director [DIID] (ISS)">Director [DIID] (ISS)</option>
+                    <option value="Joint Director [SDRD] (ISS)">Joint Director [SDRD] (ISS)</option>
+                    <option value="Deputy Director [Price Statistics] (ISS)">Deputy Director [Price Statistics] (ISS)</option>
                   </select>
                 </div>
               </CardHeader>
@@ -1514,10 +1540,10 @@ export default function Dashboard({
                 <div className="bg-primary-50/60 border border-primary-100 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div>
                     <span className="text-xs font-bold text-primary-900 uppercase tracking-wide">
-                      Assigned Division: {MOSPI_CADRES_DATA[designation]?.division}
+                      Assigned Division: {getCadreData(designation).division}
                     </span>
                     <p className="text-xs text-slate-600 mt-0.5">
-                      {MOSPI_CADRES_DATA[designation]?.description}
+                      {getCadreData(designation).description}
                     </p>
                   </div>
                   <Badge variant="success">Cadre Active</Badge>
@@ -1725,7 +1751,7 @@ export default function Dashboard({
         onClose={() => setIsCertificateModalOpen(false)}
         officerName={savedOfficerInfo?.officer?.name || 'Statistical Investigator'}
         cadre={designation}
-        division={MOSPI_CADRES_DATA[designation]?.division || 'Field Operations Division (FOD), NSSO'}
+        division={getCadreData(designation).division}
         scorePercentage={
           generatedQuiz.length > 0
             ? Math.round(

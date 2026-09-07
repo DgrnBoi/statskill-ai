@@ -19,6 +19,7 @@ export const DEMO_OFFICERS: DemoOfficer[] = [
   { id: 'assistant-director', name: 'Rohan Iyer', designation: 'Assistant Director (ISS)', division: 'National Accounts Division (NAD)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_3612_ISS' },
   { id: 'director', name: 'Kavita Rao', designation: 'Director (ISS)', division: 'Data Informatics & Innovation Division (DIID)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_4820_ISS' },
   { id: 'joint-director', name: 'Dr. Rajeshwari Nair', designation: 'Joint Director [SDRD] (ISS)', division: 'Survey Design & Research Division (SDRD), NSSO', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_5914_ISS' },
+  { id: 'deputy-director', name: 'Dr. Vikram Seth', designation: 'Deputy Director [Price Statistics] (ISS)', division: 'Economic Statistics Division (ESD), MoSPI', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_6120_ISS' },
 ];
 
 interface LoginPageProps {

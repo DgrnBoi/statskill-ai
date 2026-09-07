@@ -15,9 +15,12 @@ export class CompetencyEngine {
       const roleMapping: Record<string, string[]> = {
         'Joint Director': ['Sampling Theory', 'Data Visualization', 'Data Privacy (DPDP)'],
         'Joint Director [SDRD] (ISS)': ['Survey Design & Sampling Theory', 'Questionnaire & Instrument Design', 'Non-Sampling Error & Variance Estimation'],
+        'Deputy Director [Price Statistics] (ISS)': ['Price Statistics & Index Number Theory', 'High-Frequency Econometric Modeling', 'Official Dissemination & Data Governance'],
+        'Deputy Director': ['Price Statistics & Index Number Theory', 'High-Frequency Econometric Modeling', 'Official Dissemination & Data Governance'],
         'Assistant Director': ['Time Series Analysis', 'Data Visualization'],
         'Assistant Director (ISS)': ['National Accounts & Macro Indices', 'Time Series & Seasonal Adjustment', 'National Data Governance Framework'],
         'Director [DIID] (ISS)': ['Official Statistics Architecture', 'Big Data, Cloud & AI/ML Architecture', 'Digital Personal Data Protection & Sovereign Clouds'],
+        'Director (ISS)': ['Official Statistics Architecture', 'Big Data, Cloud & AI/ML Architecture', 'Digital Personal Data Protection & Sovereign Clouds'],
         'JSO': ['Sampling Theory', 'Data Privacy (DPDP)'],
         'Junior Statistical Officer (JSO)': ['Survey Design & Sampling', 'CAPI & Digital Field Enumeration', 'Data Privacy & DPDPA 2023'],
         'Senior Statistical Officer (SSO)': ['Survey Design & Sampling Weights', 'Statistical Data Analytics (R & Python)', 'Cyber Security & Data Fiduciary']

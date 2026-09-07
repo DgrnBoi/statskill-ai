@@ -119,6 +119,16 @@ const CADRE_BENCHMARKS: Record<string, { division: string; defaultTargetLevel: n
     defaultTargetLevel: 5,
     focusDomains: ['Statistical Competencies', 'Technical Competencies', 'Digital Governance', 'Behavioural and Managerial'],
   },
+  'Deputy Director [Price Statistics] (ISS)': {
+    division: 'Economic Statistics Division (ESD), MoSPI',
+    defaultTargetLevel: 4,
+    focusDomains: ['Statistical Competencies', 'Technical Competencies', 'Digital Governance', 'Behavioural and Managerial'],
+  },
+  'Deputy Director (ISS)': {
+    division: 'Economic Statistics Division (ESD), MoSPI',
+    defaultTargetLevel: 4,
+    focusDomains: ['Statistical Competencies', 'Technical Competencies', 'Digital Governance', 'Behavioural and Managerial'],
+  },
 };
 
 
@@ -354,7 +364,13 @@ export class CourseMatcherService {
       this.loadCatalog();
     }
 
-    const cadreInfo = CADRE_BENCHMARKS[designation] || CADRE_BENCHMARKS['Junior Statistical Officer (JSO)'];
+    const cadreInfo = CADRE_BENCHMARKS[designation] || {
+      division: designation.includes('Division')
+        ? designation
+        : 'Official Statistics Division, MoSPI',
+      defaultTargetLevel: designation.toLowerCase().includes('director') ? 5 : designation.toLowerCase().includes('officer') ? 3 : 4,
+      focusDomains: ['Statistical Competencies', 'Technical Competencies', 'Digital Governance', 'Behavioural and Managerial'],
+    };
     const assignedDivision = cadreInfo.division;
 
     // Identify competency gaps
@@ -363,10 +379,10 @@ export class CourseMatcherService {
     let totalCurrent = 0;
 
     const defaultSkills = [
-      { name: 'Survey Design & Sampling', category: 'Statistical Competencies', target: designation.includes('Director') ? 5 : designation.includes('Assistant Director') ? 4 : designation.includes('Senior') ? 4 : 3 },
-      { name: 'CAPI & Digital Field Enumeration', category: 'Technical Competencies', target: designation.includes('Director') ? 5 : designation.includes('Assistant Director') ? 4 : designation.includes('Senior') ? 3 : 4 },
-      { name: 'Data Privacy & DPDPA 2023', category: 'Digital Governance', target: designation.includes('Director') ? 5 : designation.includes('Assistant Director') ? 4 : designation.includes('Senior') ? 3 : 2 },
-      { name: 'Public Ethics & Field Communication', category: 'Behavioural and Managerial', target: designation.includes('Director') ? 5 : designation.includes('Assistant Director') ? 4 : designation.includes('Senior') ? 4 : 3 },
+      { name: 'Survey Design & Sampling', category: 'Statistical Competencies', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 4 : 3 },
+      { name: 'CAPI & Digital Field Enumeration', category: 'Technical Competencies', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 3 : 4 },
+      { name: 'Data Privacy & DPDPA 2023', category: 'Digital Governance', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 3 : 2 },
+      { name: 'Public Ethics & Field Communication', category: 'Behavioural and Managerial', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 4 : 3 },
     ];
 
     defaultSkills.forEach((skill) => {

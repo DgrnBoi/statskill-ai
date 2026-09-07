@@ -184,6 +184,43 @@
           "description": "Authoring NSS survey methodology manuals, presenting to National Statistical Commission, and international harmonisation."
         }
       ]
+    },
+    {
+      "id": "deputy_director_esd",
+      "designation": "Deputy Director [Price Statistics] (ISS)",
+      "cadre": "Indian Statistical Service (ISS)",
+      "division": "Economic Statistics Division (ESD), MoSPI",
+      "description": "Mid-senior statistical leadership specializing in Consumer Price Index (CPI), Wholesale Price Index (WPI), price collection protocols, and inflation nowcasting.",
+      "competencies": [
+        {
+          "id": "stat-esd-01",
+          "skillName": "Price Statistics & Index Number Theory",
+          "domain": "Statistical Competencies",
+          "targetLevel": 4,
+          "description": "Laspeyres/Paasche/Fisher index formulas, geometric mean aggregation, and item substitution rules."
+        },
+        {
+          "id": "tech-esd-02",
+          "skillName": "High-Frequency Econometric Modeling",
+          "domain": "Technical Competencies",
+          "targetLevel": 4,
+          "description": "Real-time web-scraped price tracking, flash inflation estimation, and core inflation filtering."
+        },
+        {
+          "id": "gov-esd-03",
+          "skillName": "Official Dissemination & Data Governance",
+          "domain": "Digital Governance",
+          "targetLevel": 4,
+          "description": "SDDS (Special Data Dissemination Standard) compliance, embargo protocols, and national release calendars."
+        },
+        {
+          "id": "behav-esd-04",
+          "skillName": "Inter-Ministerial Stakeholder Consultation",
+          "domain": "Behavioural and Managerial Competencies",
+          "targetLevel": 4,
+          "description": "Coordinating with RBI, Ministry of Finance, and state statistical bureaus on inflation dynamics."
+        }
+      ]
     }
   ]
 }

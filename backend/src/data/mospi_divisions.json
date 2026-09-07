@@ -154,6 +154,34 @@
           "duration": "14 Hours"
         }
       ]
+    },
+    {
+      "id": "esd",
+      "code": "ESD-MoSPI",
+      "name": "Economic Statistics Division (ESD), MoSPI",
+      "mandate": "Compilation of Consumer Price Index (CPI), Wholesale Price Index (WPI), Index of Industrial Production (IIP), and Energy Statistics.",
+      "headquarters": "Khurshid Lal Bhawan, Janpath, New Delhi",
+      "totalOfficers": 240,
+      "readinessScore": 83.0,
+      "domainScores": {
+        "Statistical Competencies": 91.0,
+        "Technical Competencies": 84.0,
+        "Digital Governance": 77.0,
+        "Behavioural & Managerial": 80.0
+      },
+      "criticalBottlenecks": [
+        "Laspeyres and Paasche basket price aggregation across rural/urban markets",
+        "High-frequency web-scraped price tracking and flash inflation estimation"
+      ],
+      "priorityCourses": [
+        {
+          "courseId": "nssta-price-01",
+          "title": "Price Statistics & Index Number Construction",
+          "provider": "NSSTA TPAC",
+          "targetOfficers": 85,
+          "duration": "10 Hours"
+        }
+      ]
     }
   ],
   "regionalCircles": [
