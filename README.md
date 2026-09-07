@@ -60,13 +60,13 @@ The backend connects to PostgreSQL via Prisma ORM for persistent competency trac
 
 ## Verification & Automated Test Suites
 
-We enforce rigorous test coverage across both frontend and backend layers. The monorepo contains **83 automated tests with a 100% pass rate**.
+We enforce rigorous test coverage across both frontend and backend layers. The monorepo contains **86 automated tests with a 100% pass rate**.
 
 | Test Suite | Framework | Total Tests | Status | Coverage Areas |
 |:---|:---|:---:|:---:|:---|
-| **Frontend Unit & Integration** | Vitest + RTL | 54 | Passing | Tab switching, Cadre benchmarks, Shuffling, Radar math, Telemetry drawer, Modals, Audio synthesis |
+| **Frontend Unit & Integration** | Vitest + RTL | 57 | Passing | Tab switching, Cadre benchmarks, Shuffling, Radar math, Telemetry drawer, Modals, Audio synthesis |
 | **Backend Integration & APIs** | Jest + Supertest | 29 | Passing | xAPI formatting, Course recommendation math, Search transliteration, Security sanitization, RAG fallback |
-| **Total Automated Tests** | — | **83** | **100% Pass** | Full end-to-end regression verification |
+| **Total Automated Tests** | — | **86** | **100% Pass** | Full end-to-end regression verification |
 
 ---
 
