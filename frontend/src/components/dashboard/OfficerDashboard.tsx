@@ -5,6 +5,7 @@ import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import { EmptyState, PageHeader } from '../ui/PageHeader';
+import { useUiPreferences } from '../../contexts/UiPreferencesContext';
 import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 
 export interface CompetencyItem {
@@ -85,6 +86,7 @@ export function OfficerDashboard({
   assessmentHistory = [],
   capacityCohorts = [],
 }: OfficerDashboardProps) {
+  const { t } = useUiPreferences();
   const [selectedExam, setSelectedExam] = useState<RecentExamRecord | null>(null);
   const dialogRef = useDialogAccessibility(Boolean(selectedExam), () => setSelectedExam(null));
 
@@ -106,30 +108,30 @@ export function OfficerDashboard({
   return (
     <section className="overview-workspace" aria-label="Officer overview">
       <PageHeader
-        title="Officer Competency & Diagnostic Hub"
+        title={t('officerDashboardTitle')}
         description={divisionDescription}
-        actions={<Button onClick={() => onNavigateTab('dashboard')}>Take diagnostic exam <ArrowRight size={16} aria-hidden="true" /></Button>}
+        actions={<Button onClick={() => onNavigateTab('dashboard')}>{t('officerTakeExam')} <ArrowRight size={16} aria-hidden="true" /></Button>}
       />
 
       <div className="overview-identity-bar">
         <div className="overview-officer">
           <span className="overview-officer-icon"><GraduationCap size={20} aria-hidden="true" /></span>
-          <div><strong>{officerName || 'Demo officer'}</strong><span>{currentCadre} · {divisionName}</span></div>
+          <div><strong>{officerName || t('officerDemoOfficer')}</strong><span>{currentCadre} · {divisionName}</span></div>
         </div>
         {officerCadreId && <Badge variant="neutral">ID: {officerCadreId}</Badge>}
-        <label className="overview-cadre-select"><span>Cadre track</span><select value={currentCadre} onChange={(event) => onCadreChange(event.target.value)}>{cadresList.map((cadre) => <option key={cadre} value={cadre}>{cadre}</option>)}</select></label>
+        <label className="overview-cadre-select"><span>{t('officerCadreTrack')}</span><select value={currentCadre} onChange={(event) => onCadreChange(event.target.value)}>{cadresList.map((cadre) => <option key={cadre} value={cadre}>{cadre}</option>)}</select></label>
       </div>
 
       <div className="overview-metrics" aria-label="Learning progress summary">
-        <div><span>Assessments recorded</span><strong>{assessmentHistory.length}</strong></div>
-        <div><span>Average diagnostic score</span><strong>{summary.averageScore === null ? '—' : `${summary.averageScore}%`}</strong></div>
-        <div><span>Target competencies met</span><strong>{summary.met}<small> / {skills.length}</small></strong></div>
-        <div><span>Assessment time</span><strong>{summary.minutes}<small> min</small></strong></div>
+        <div><span>{t('officerAssessmentsRecorded')}</span><strong>{assessmentHistory.length}</strong></div>
+        <div><span>{t('officerAverageScore')}</span><strong>{summary.averageScore === null ? '—' : `${summary.averageScore}%`}</strong></div>
+        <div><span>{t('officerCompetenciesMet')}</span><strong>{summary.met}<small> / {skills.length}</small></strong></div>
+        <div><span>{t('officerAssessmentTime')}</span><strong>{summary.minutes}<small> min</small></strong></div>
       </div>
 
       <div className="overview-primary-grid">
         <Card>
-          <CardHeader><CardTitle>Learning Progress Overview</CardTitle><CardDescription>Current levels come from assessments saved for this officer on this device.</CardDescription></CardHeader>
+          <CardHeader><CardTitle>{t('officerProgressTitle')}</CardTitle><CardDescription>Current levels come from assessments saved for this officer on this device.</CardDescription></CardHeader>
           <CardContent>
             {!summary.hasData ? (
               <EmptyState title="No diagnostic results yet" description="Complete an assessment to establish a baseline. Until then, the dashboard will not substitute sample scores."><Button size="sm" onClick={() => onNavigateTab('dashboard')}>Start first assessment</Button></EmptyState>
@@ -149,7 +151,7 @@ export function OfficerDashboard({
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Capacity Cohorts</CardTitle><CardDescription>Peer groups recommended from assessed learning gaps.</CardDescription></CardHeader>
+          <CardHeader><CardTitle>{t('officerCohortsTitle')}</CardTitle><CardDescription>Peer groups recommended from assessed learning gaps.</CardDescription></CardHeader>
           <CardContent>
             {capacityCohorts.length === 0 ? (
               <EmptyState title="No cohort recommendations" description="Cohorts will appear when assessment analysis returns a matching peer group."><Button variant="outline" size="sm" onClick={() => onNavigateTab('discover')}><BookOpen size={15} /> Browse courses</Button></EmptyState>
@@ -162,7 +164,7 @@ export function OfficerDashboard({
 
       <Card>
         <CardHeader className="overview-section-heading">
-          <div><CardTitle>Recent Diagnostic Assessments & Mistake Analysis</CardTitle><CardDescription>Stored assessment attempts and item-level remediation, when available.</CardDescription></div>
+          <div><CardTitle>{t('officerAssessmentsTitle')}</CardTitle><CardDescription>Stored assessment attempts and item-level remediation, when available.</CardDescription></div>
           <div className="overview-section-actions">{onOpenTelemetry && <Button variant="ghost" size="sm" onClick={onOpenTelemetry}><Terminal size={15} /> Inspect telemetry</Button>}{onOpenAcbpModal && <Button variant="outline" size="sm" onClick={onOpenAcbpModal}>Generate officer ACBP dossier</Button>}</div>
         </CardHeader>
         <CardContent className={assessmentHistory.length ? 'overview-table-shell' : undefined}>

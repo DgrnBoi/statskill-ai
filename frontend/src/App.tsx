@@ -2,56 +2,23 @@ import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DemoOfficer } from './pages/LoginPage';
-import { PortalTab } from './components/layout/Navbar';
 import { AccessibilityModal, AccessibilitySettings, DEFAULT_ACCESSIBILITY_SETTINGS } from './components/ui/AccessibilityModal';
 import { KarmayogiSahayakModal } from './components/ui/KarmayogiSahayakModal';
 import { SecretAdminGatewayModal } from './components/admin/SecretAdminGatewayModal';
 import { OfflineStatusBar } from './components/ui/OfflineStatusBar';
-import { UiPreferencesProvider } from './contexts/UiPreferencesContext';
+import { OnboardingModal, hasCompletedOnboarding } from './components/ui/OnboardingModal';
+import { UiPreferencesProvider, useUiPreferences } from './contexts/UiPreferencesContext';
+import { AppRouteState, navigateTo, parseRoute, PortalTab } from './lib/routing';
 
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
 
-interface AppRouteState {
-  isLogin: boolean;
-  tab: PortalTab;
-}
-
-function parseRoute(pathname: string): AppRouteState {
-  const normalized = pathname.toLowerCase().replace(/\/$/, '') || '/';
-
-  if (normalized === '/login') {
-    return { isLogin: true, tab: 'dashboard' };
-  }
-  if (normalized === '/' || normalized === '/home') {
-    return { isLogin: false, tab: 'home' };
-  }
-  if (normalized === '/overview') {
-    return { isLogin: false, tab: 'overview' };
-  }
-  if (normalized === '/assessment' || normalized === '/dashboard') {
-    return { isLogin: false, tab: 'dashboard' };
-  }
-  if (normalized === '/admin') {
-    return { isLogin: false, tab: 'admin' };
-  }
-  if (normalized === '/discover') {
-    return { isLogin: false, tab: 'discover' };
-  }
-  if (normalized === '/competency') {
-    return { isLogin: false, tab: 'competency' };
-  }
-  if (normalized === '/analytics') {
-    return { isLogin: false, tab: 'analytics' };
-  }
-  return { isLogin: false, tab: 'home' };
-}
-
-function App() {
+function AppContent() {
+  const { language, t } = useUiPreferences();
   const [route, setRoute] = useState<AppRouteState>(() => parseRoute(window.location.pathname));
   const [initialCourseTopic, setInitialCourseTopic] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(() => !hasCompletedOnboarding() && parseRoute(window.location.pathname).tab === 'home' && !parseRoute(window.location.pathname).isLogin);
 
-  // Modals for Public Gateway mode
   const [isSahayakOpen, setIsSahayakOpen] = useState(false);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isSecretAdminOpen, setIsSecretAdminOpen] = useState(false);
@@ -84,40 +51,41 @@ function App() {
     } catch {}
   }, []);
 
-  useEffect(() => {
-    const handlePopState = () => {
-      setRoute(parseRoute(window.location.pathname));
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+  const syncRouteFromUrl = useCallback(() => {
+    const parsed = parseRoute(window.location.pathname);
+    if (parsed.isUnknown) {
+      navigateTo({ tab: 'home', locale: parsed.locale, replace: true });
+      setRoute({ ...parsed, isUnknown: false, tab: 'home' });
+      return;
+    }
+    setRoute(parsed);
   }, []);
+
+  useEffect(() => {
+    window.addEventListener('popstate', syncRouteFromUrl);
+    return () => window.removeEventListener('popstate', syncRouteFromUrl);
+  }, [syncRouteFromUrl]);
 
   useEffect(() => {
     if (route.tab !== 'admin' || isAdminUnlocked) return;
-    window.history.replaceState({}, '', '/');
-    setRoute({ isLogin: false, tab: 'home' });
-  }, [isAdminUnlocked, route.tab]);
+    navigateTo({ tab: 'home', locale: language, replace: true });
+    setRoute({ locale: language, isLogin: false, tab: 'home', isUnknown: false });
+  }, [isAdminUnlocked, language, route.tab]);
 
   const handleTabChange = useCallback((newTab: PortalTab) => {
-    const path = newTab === 'home' ? '/' : `/${newTab}`;
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path);
-    }
-    setRoute({ isLogin: false, tab: newTab });
-  }, []);
+    navigateTo({ tab: newTab, locale: language });
+    setRoute({ locale: language, isLogin: false, tab: newTab, isUnknown: false });
+  }, [language]);
 
   const handleOpenLogin = useCallback(() => {
-    if (window.location.pathname !== '/login') {
-      window.history.pushState({}, '', '/login');
-    }
-    setRoute((prev) => ({ ...prev, isLogin: true }));
-  }, []);
+    navigateTo({ tab: 'home', locale: language, isLogin: true });
+    setRoute({ locale: language, isLogin: true, tab: 'dashboard', isUnknown: false });
+  }, [language]);
 
   const handleBackFromLogin = useCallback(() => {
-    window.history.pushState({}, '', '/');
-    setRoute({ isLogin: false, tab: 'home' });
-  }, []);
+    navigateTo({ tab: 'home', locale: language });
+    setRoute({ locale: language, isLogin: false, tab: 'home', isUnknown: false });
+  }, [language]);
 
   const handleDemoLogin = useCallback(async (officer: DemoOfficer, method: 'parichay-id' | 'mobile-otp') => {
     const response = await fetch('http://localhost:5000/api/auth/demo-login', {
@@ -127,18 +95,17 @@ function App() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data?.token) {
-      throw new Error(data?.error || 'The demo authentication service is unavailable. Start the backend and try again.');
+      throw new Error(data?.error || t('demoAuthUnavailable'));
     }
     window.localStorage.setItem('auth_token', data.token);
 
     try {
       window.localStorage.setItem('statskill_demo_login', JSON.stringify({ officer, method }));
     } catch {}
-    window.history.pushState({}, '', '/overview');
-    setRoute({ isLogin: false, tab: 'overview' });
-  }, []);
+    navigateTo({ tab: 'overview', locale: language });
+    setRoute({ locale: language, isLogin: false, tab: 'overview', isUnknown: false });
+  }, [language, t]);
 
-  // Global keyboard shortcuts (Alt+A for accessibility, Alt+H for sahayak, Ctrl+Shift+A for secret admin)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
@@ -164,16 +131,15 @@ function App() {
   }, []);
 
   return (
-    <UiPreferencesProvider>
-      <ErrorBoundary>
-        <div className="App min-h-screen bg-slate-50">
-        <a href="#main-content" className="skip-link">Skip to main content</a>
+    <ErrorBoundary>
+      <div className="App min-h-screen bg-slate-50">
+        <a href="#main-content" className="skip-link">{t('skipToMain')}</a>
         <OfflineStatusBar />
         <Suspense
           fallback={
             <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 p-8">
               <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Loading StatSkill AI Module...</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('loadingModule')}</p>
             </div>
           }
         >
@@ -207,8 +173,21 @@ function App() {
           )}
         </Suspense>
 
-        {/* Global Modals active on Public Gateway Landing Page */}
-        {route.tab === 'home' && !route.isLogin && (
+        {showOnboarding && route.tab === 'home' && !route.isLogin && (
+          <OnboardingModal
+            onDismiss={() => setShowOnboarding(false)}
+            onGetStarted={() => {
+              setShowOnboarding(false);
+              handleTabChange('dashboard');
+            }}
+            onSignIn={() => {
+              setShowOnboarding(false);
+              handleOpenLogin();
+            }}
+          />
+        )}
+
+        {!route.isLogin && route.tab === 'home' && (
           <>
             <AccessibilityModal
               isOpen={isAccessibilityOpen}
@@ -240,8 +219,15 @@ function App() {
             />
           </>
         )}
-        </div>
-      </ErrorBoundary>
+      </div>
+    </ErrorBoundary>
+  );
+}
+
+function App() {
+  return (
+    <UiPreferencesProvider>
+      <AppContent />
     </UiPreferencesProvider>
   );
 }

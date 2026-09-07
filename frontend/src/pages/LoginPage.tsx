@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { IndianFlag } from '../components/ui/IndianFlag';
+import { useUiPreferences } from '../contexts/UiPreferencesContext';
 
 export interface DemoOfficer {
   id: string;
@@ -61,6 +62,7 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
+  const { t } = useUiPreferences();
   const [method, setMethod] = useState<'parichay-id' | 'mobile-otp'>('parichay-id');
   const [officersList, setOfficersList] = useState<DemoOfficer[]>(DEMO_OFFICERS);
   const [selectedOfficer, setSelectedOfficer] = useState<DemoOfficer>(DEMO_OFFICERS[0]);
@@ -157,7 +159,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
 
     const activeDesignation = isCustomRole ? (customRoleInput.trim() || 'Statistical Officer') : quickRole;
     if (isCustomRole && !customRoleInput.trim()) {
-      setError('Please enter your custom role designation.');
+      setError(t('loginErrorCustomRole'));
       setIsSubmitting(false);
       return;
     }
@@ -203,7 +205,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
       try {
         await onAuthenticate?.(quickOfficer, method);
       } catch (innerCause) {
-        setError(innerCause instanceof Error ? innerCause.message : 'Quick role start encountered an issue.');
+        setError(innerCause instanceof Error ? innerCause.message : t('loginErrorQuick'));
         setIsSubmitting(false);
       }
     }
@@ -215,7 +217,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
     try {
       await onAuthenticate?.(selectedOfficer, method);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Demo sign-in failed. Please try again.');
+      setError(cause instanceof Error ? cause.message : t('loginErrorDemo'));
       setIsSubmitting(false);
     }
   };
@@ -223,7 +225,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
   const handleRegisterOfficer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regName.trim()) {
-      setError('Please enter the officer name to register.');
+      setError(t('loginErrorName'));
       return;
     }
 
@@ -275,7 +277,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
       try {
         await onAuthenticate?.(newOfficerPayload, method);
       } catch (innerCause) {
-        setError(innerCause instanceof Error ? innerCause.message : 'Officer registration completed, but auto-login encountered an issue.');
+        setError(innerCause instanceof Error ? innerCause.message : t('loginErrorRegister'));
         setIsSubmitting(false);
       }
     }
@@ -288,13 +290,13 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
           <div className="flex min-w-0 items-center gap-3">
             <IndianFlag variant="circular" width={38} height={38} />
             <div className="min-w-0">
-              <p>Government of India</p>
-              <h1>MeriPehchan · Jan Parichay</h1>
+              <p>{t('governmentOfIndia')}</p>
+              <h1>{t('loginPortalTitle')}</h1>
             </div>
           </div>
           {onBack && (
-            <Button variant="ghost" size="sm" onClick={onBack} aria-label="Back to StatSkill Portal">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to portal
+            <Button variant="ghost" size="sm" onClick={onBack} aria-label={t('backToPortal')}>
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> {t('backToPortal')}
             </Button>
           )}
         </div>
@@ -302,19 +304,17 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
 
       <div className="login-layout">
         <section className="login-intro" aria-labelledby="login-title">
-          <Badge variant="saffron">National Statistical SSO Gateway</Badge>
-          <h2 id="login-title">Access your statistical learning workspace</h2>
-          <p>
-            Authenticate using your official Jan Parichay credentials or register a dynamic officer profile to access your individualized FRAC competency matrix, diagnostic exam records, and 4-tier learning pathway.
-          </p>
+          <Badge variant="saffron">{t('loginBadgeSso')}</Badge>
+          <h2 id="login-title">{t('loginTitle')}</h2>
+          <p>{t('loginDescription')}</p>
           <dl>
-            <div><dt>Identity pattern</dt><dd>Jan Parichay & Mobile OTP verification</dd></div>
-            <div><dt>Dynamic Database</dt><dd>In-memory persistent user profiles with isolated competency history</dd></div>
-            <div><dt>Session Security</dt><dd>Server-signed JWT with 8-hour cryptographic validity</dd></div>
+            <div><dt>{t('loginMetaIdentity')}</dt><dd>{t('loginMetaIdentityValue')}</dd></div>
+            <div><dt>{t('loginMetaDatabase')}</dt><dd>{t('loginMetaDatabaseValue')}</dd></div>
+            <div><dt>{t('loginMetaSecurity')}</dt><dd>{t('loginMetaSecurityValue')}</dd></div>
           </dl>
           <p className="login-disclosure">
             <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-            StatSkill AI complies with the Digital Personal Data Protection (DPDP) Act 2023. All officer competencies and test records are securely isolated.
+            {t('loginDpdpNotice')}
           </p>
         </section>
 
@@ -322,8 +322,8 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
           <div className="login-panel-header">
             <Landmark className="h-5 w-5" aria-hidden="true" />
             <div>
-              <h2 id="access-title">Officer Authentication</h2>
-              <p>Select your registered profile or onboard a new officer.</p>
+              <h2 id="access-title">{t('loginAuthTitle')}</h2>
+              <p>{t('loginAuthSubtitle')}</p>
             </div>
           </div>
 
@@ -341,7 +341,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               }`}
             >
               <UserRound className="h-3.5 w-3.5" />
-              <span>Officer Directory</span>
+              <span>{t('loginTabDirectory')}</span>
             </button>
             <button
               type="button"
@@ -355,7 +355,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               }`}
             >
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              <span>Select Role & Start</span>
+              <span>{t('loginTabQuickRole')}</span>
             </button>
             <button
               type="button"
@@ -369,7 +369,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               }`}
             >
               <UserPlus className="h-3.5 w-3.5" />
-              <span>Register New Officer</span>
+              <span>{t('loginTabRegister')}</span>
             </button>
           </div>
 
@@ -380,14 +380,14 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               aria-pressed={method === 'parichay-id'}
               onClick={() => setMethod('parichay-id')}
             >
-              <UserRound className="h-4 w-4" aria-hidden="true" /> Parichay ID
+              <UserRound className="h-4 w-4" aria-hidden="true" /> {t('loginMethodParichay')}
             </button>
             <button
               type="button"
               aria-pressed={method === 'mobile-otp'}
               onClick={() => setMethod('mobile-otp')}
             >
-              <Smartphone className="h-4 w-4" aria-hidden="true" /> Mobile OTP
+              <Smartphone className="h-4 w-4" aria-hidden="true" /> {t('loginMethodOtp')}
             </button>
           </div>
 
@@ -395,7 +395,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             <form onSubmit={handleQuickRoleStart} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Select Official Cadre / Role <span className="text-red-500">*</span>
+                  {t('loginSelectRole')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={isCustomRole ? 'Custom Role / Other Designation...' : quickRole}
@@ -419,7 +419,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               {isCustomRole && (
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Enter Custom Designation / Specialization <span className="text-red-500">*</span>
+                    {t('loginCustomRole')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -431,18 +431,18 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                     aria-label="Custom role designation"
                   />
                   <p className="text-[11px] text-amber-700 mt-1">
-                    StatSkill AI will dynamically synthesize 4-pillar FRAC competencies tailored to this role.
+                    {t('loginCustomRoleHint')}
                   </p>
                 </div>
               )}
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Officer Name (Optional)
+                  {t('loginOfficerName')}
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., Officer Sunthankar (defaults if left blank)"
+                  placeholder={t('loginOfficerNamePlaceholder')}
                   value={quickName}
                   onChange={(e) => setQuickName(e.target.value)}
                   className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0B2E63]"
@@ -453,11 +453,9 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold text-[#0B2E63]">
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Instant 4-Pillar Dynamic Evaluation Engine</span>
+                  <span>{t('loginDynamicEngine')}</span>
                 </div>
-                <p>
-                  Your dynamic workspace synthesizes Statistical, Technical, Digital Governance, and Behavioural competencies without requiring pre-saved profiles.
-                </p>
+                <p>{t('loginDynamicEngineDesc')}</p>
               </div>
 
               {error && <p role="alert" className="login-error">{error}</p>}
@@ -470,7 +468,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                 className="w-full mt-1"
               >
                 <Sparkles className="h-4 w-4 mr-1.5 text-amber-300" />
-                Launch Dynamic Assessment Workspace
+                {t('loginLaunchDynamic')}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </form>
@@ -483,7 +481,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                     <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
                     <input
                       type="text"
-                      placeholder="Search officer name, designation, Parichay ID..."
+                      placeholder={t('loginSearchPlaceholder')}
                       value={searchFilter}
                       onChange={(e) => setSearchFilter(e.target.value)}
                       className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0B2E63]"
@@ -522,7 +520,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                 <legend className="sr-only">Choose a registered officer profile</legend>
                 {filteredOfficers.length === 0 ? (
                   <div className="p-4 text-center bg-slate-50 border border-dashed border-slate-200 rounded-lg text-xs text-slate-500">
-                    No registered officers found matching the filter.
+                    {t('loginNoOfficers')}
                   </div>
                 ) : (
                   filteredOfficers.map((officer) => (
@@ -565,7 +563,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                 className="w-full mt-2"
                 onClick={authenticate}
               >
-                Continue as {selectedOfficer.designation}
+                {t('loginContinueAs')} {selectedOfficer.designation}
                 <ChevronRight className="h-4 w-4 ml-1" aria-hidden="true" />
               </Button>
             </>
@@ -574,7 +572,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             <form onSubmit={handleRegisterOfficer} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Full Officer Name <span className="text-red-500">*</span>
+                  {t('loginFullName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -589,7 +587,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Designation <span className="text-red-500">*</span>
+                    {t('loginDesignation')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={regDesignation}
@@ -612,7 +610,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Cadre
+                    {t('loginCadre')}
                   </label>
                   <select
                     value={regCadre}
@@ -627,7 +625,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Assigned Division
+                  {t('loginDivision')}
                 </label>
                 <select
                   value={regDivision}
@@ -643,7 +641,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Station / Location
+                    {t('loginLocation')}
                   </label>
                   <input
                     type="text"
@@ -655,11 +653,11 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Parichay ID (Optional)
+                    {t('loginParichayId')}
                   </label>
                   <input
                     type="text"
-                    placeholder="Auto-generated if blank"
+                    placeholder={t('loginParichayPlaceholder')}
                     value={regParichayId}
                     onChange={(e) => setRegParichayId(e.target.value)}
                     className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0B2E63]"
@@ -677,7 +675,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                 className="w-full mt-2"
               >
                 <ShieldCheck className="h-4 w-4 mr-1.5" />
-                Register Officer & Launch Workspace
+                {t('loginRegisterLaunch')}
               </Button>
             </form>
           )}

@@ -1,41 +1,44 @@
 import React from 'react';
 import { IndianFlag } from '../ui/IndianFlag';
 import { InfoModalType } from './LandingInfoModal';
+import { useUiPreferences } from '../../contexts/UiPreferencesContext';
 
 export function LandingFooter({
   onOpenInfo,
 }: {
   onOpenInfo?: (type: InfoModalType) => void;
 }) {
+  const { t } = useUiPreferences();
+
   const COLUMNS = [
     {
-      heading: 'Quick Links',
+      heading: t('footerColQuickLinks'),
       items: [
-        { label: 'About StatSkill AI', modalKey: 'about' as const },
-        { label: 'MoSPI Newsroom', modalKey: 'newsroom' as const },
-        { label: 'Help Centre & Helpline', modalKey: 'help' as const },
-        { label: 'Active Tenders (CPPP)', modalKey: 'tenders' as const },
-        { label: 'Right to Information (RTI)', href: 'https://rti.gov.in' },
+        { label: t('footerAbout'), modalKey: 'about' as const },
+        { label: t('footerNewsroom'), modalKey: 'newsroom' as const },
+        { label: t('footerHelp'), modalKey: 'help' as const },
+        { label: t('footerTenders'), modalKey: 'tenders' as const },
+        { label: t('footerRti'), href: 'https://rti.gov.in' },
       ],
     },
     {
-      heading: 'Statistical Cadres',
+      heading: t('footerColCadres'),
       items: [
-        { label: 'ISS & SSS Career Pathways', modalKey: 'career' as const },
-        { label: 'Gazette Notifications', modalKey: 'notifications' as const },
-        { label: 'NSSTA Training Calendar', href: 'https://mospi.gov.in/training' },
-        { label: 'CAPI Field Protocols', href: 'https://mospi.gov.in/surveys' },
-        { label: 'Nodal Officers Directory', href: 'https://mospi.gov.in/whos-who' },
+        { label: t('footerCareer'), modalKey: 'career' as const },
+        { label: t('footerGazette'), modalKey: 'notifications' as const },
+        { label: t('footerNssta'), href: 'https://mospi.gov.in/training' },
+        { label: t('footerCapi'), href: 'https://mospi.gov.in/surveys' },
+        { label: t('footerNodal'), href: 'https://mospi.gov.in/whos-who' },
       ],
     },
     {
-      heading: 'The Mission',
+      heading: t('footerColMission'),
       items: [
-        { label: 'Mission Karmayogi (NPCSCB)', href: 'https://karmayogibharat.gov.in' },
-        { label: 'Ministry of Statistics (MoSPI)', href: 'https://mospi.gov.in' },
-        { label: 'Capacity Building Commission', href: 'https://cbc.gov.in' },
-        { label: 'Department of Personnel & Training', href: 'https://dopt.gov.in' },
-        { label: 'Privacy & Data Governance Policy', href: 'https://www.meity.gov.in/national-data-governance-framework-policy' },
+        { label: t('footerKarmayogi'), href: 'https://karmayogibharat.gov.in' },
+        { label: t('footerMospi'), href: 'https://mospi.gov.in' },
+        { label: t('footerCbc'), href: 'https://cbc.gov.in' },
+        { label: t('footerDopt'), href: 'https://dopt.gov.in' },
+        { label: t('footerPrivacy'), href: 'https://www.meity.gov.in/national-data-governance-framework-policy' },
       ],
     },
   ];
@@ -54,13 +57,12 @@ export function LandingFooter({
                   StatSkill AI
                 </span>
                 <span className="block text-xs text-amber-400 font-mono">
-                  SIH prototype · Mission Karmayogi use case
+                  {t('footerBrandTagline')}
                 </span>
               </div>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-300">
-              A Smart India Hackathon prototype for role-aligned statistical learning, competency diagnostics,
-              and government-course discovery.
+              {t('footerDescription')}
             </p>
           </div>
 
@@ -102,10 +104,8 @@ export function LandingFooter({
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-slate-400 sm:flex-row">
-          <p>
-            &copy; 2026 StatSkill AI · Smart India Hackathon prototype. Government names and marks identify the intended use case.
-          </p>
-          <p>Designed toward GIGW and WCAG accessibility guidance; formal conformance has not been certified.</p>
+          <p>{t('footerCopyright')}</p>
+          <p>{t('footerA11yDisclaimer')}</p>
         </div>
       </div>
     </footer>

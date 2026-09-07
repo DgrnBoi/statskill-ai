@@ -15,8 +15,9 @@ import {
 import { cn } from '../../lib/utils';
 import { IndianFlag } from '../ui/IndianFlag';
 import { useUiPreferences } from '../../contexts/UiPreferencesContext';
+import type { PortalTab } from '../../lib/routing';
 
-export type PortalTab = 'home' | 'overview' | 'dashboard' | 'discover' | 'competency' | 'analytics' | 'admin';
+export type { PortalTab };
 
 interface NavbarProps {
   activeTab: PortalTab;
@@ -63,7 +64,7 @@ export function Navbar({
   const { adjustFontScale, fontScale, t, toggleLanguage } = useUiPreferences();
   const [emblemClicks, setEmblemClicks] = useState(0);
   const tabs = isAdminUnlocked || activeTab === 'admin'
-    ? [...baseTabs, { id: 'admin' as const, label: 'Admin Command Center', icon: Building2 }]
+    ? [...baseTabs, { id: 'admin' as const, label: t('navAdminTab'), icon: Building2 }]
     : baseTabs;
 
   const handleEmblemClick = () => {
@@ -93,18 +94,18 @@ export function Navbar({
             <div className="min-w-0 leading-tight">
               <div className="flex items-center gap-2">
                 <span className="truncate text-base font-bold text-[#172b3a]">StatSkill AI</span>
-                <span className="hidden rounded-sm bg-[#eaf0f5] px-1.5 py-0.5 text-[10px] font-semibold text-[#183b56] sm:inline">MoSPI learning workspace</span>
+                <span className="hidden rounded-sm bg-[#eaf0f5] px-1.5 py-0.5 text-[10px] font-semibold text-[#183b56] sm:inline">{t('navBrandSubtitle')}</span>
               </div>
-              <p className="truncate text-xs text-[#617280]">Mission Karmayogi · Statistical capacity building</p>
+              <p className="truncate text-xs text-[#617280]">{t('navMissionCaption')}</p>
             </div>
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
-            <button type="button" onClick={toggleLanguage} aria-label="Toggle language preference" className="hidden rounded-md px-2 py-1 text-xs font-semibold text-[#183b56] hover:bg-[#eaf0f5] sm:inline-flex">{t('languageToggle')}</button>
-            <div className="hidden items-center rounded-md border border-slate-200 sm:flex" role="group" aria-label={`Text size ${Math.round(fontScale * 100)} percent`}>
-              <button type="button" aria-label="Decrease text size" disabled={fontScale <= 0.9} onClick={() => adjustFontScale('decrease')} className="px-1.5 py-1 text-xs text-[#183b56] disabled:opacity-40">A−</button>
-              <button type="button" aria-label="Reset text size" onClick={() => adjustFontScale('reset')} className="px-1.5 py-1 text-xs text-[#183b56]">A</button>
-              <button type="button" aria-label="Increase text size" disabled={fontScale >= 1.4} onClick={() => adjustFontScale('increase')} className="px-1.5 py-1 text-xs text-[#183b56] disabled:opacity-40">A+</button>
+            <button type="button" onClick={toggleLanguage} aria-label={t('toggleLanguageAria')} className="hidden rounded-md px-2 py-1 text-xs font-semibold text-[#183b56] hover:bg-[#eaf0f5] sm:inline-flex">{t('languageToggle')}</button>
+            <div className="hidden items-center rounded-md border border-slate-200 sm:flex" role="group" aria-label={`${t('textSizeGroup')} ${Math.round(fontScale * 100)}%`}>
+              <button type="button" aria-label={t('decreaseTextSize')} disabled={fontScale <= 0.9} onClick={() => adjustFontScale('decrease')} className="px-1.5 py-1 text-xs text-[#183b56] disabled:opacity-40">A−</button>
+              <button type="button" aria-label={t('resetTextSize')} onClick={() => adjustFontScale('reset')} className="px-1.5 py-1 text-xs text-[#183b56]">A</button>
+              <button type="button" aria-label={t('increaseTextSize')} disabled={fontScale >= 1.4} onClick={() => adjustFontScale('increase')} className="px-1.5 py-1 text-xs text-[#183b56] disabled:opacity-40">A+</button>
             </div>
             {onOpenAiModel && (
               <button
@@ -121,8 +122,8 @@ export function Navbar({
               <Eye className="h-4 w-4" aria-hidden="true" />
             </button>
             {isLoggedIn ? (
-              <button type="button" onClick={() => setIsLoggedIn(false)} className="nav-session" aria-label={`Log out ${officerName || 'officer'}`}>
-                <span className="hidden max-w-[170px] truncate sm:block">{officerName || officerCadreId || 'Officer session'}</span>
+              <button type="button" onClick={() => setIsLoggedIn(false)} className="nav-session" aria-label={`${t('navLogout')} ${officerName || 'officer'}`}>
+                <span className="hidden max-w-[170px] truncate sm:block">{officerName || officerCadreId || t('navSessionOfficer')}</span>
                 <LogOut className="h-4 w-4" aria-hidden="true" />
               </button>
             ) : (
@@ -160,7 +161,7 @@ export function Navbar({
           {canGoBack && onGoBack && (
             <button type="button" onClick={onGoBack} aria-label={`Back to ${previousTabTitle || 'Previous Menu'}`} className="portal-back">
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden lg:inline">{previousTabTitle || 'Back'}</span>
+              <span className="hidden lg:inline">{previousTabTitle || t('navBack')}</span>
             </button>
           )}
         </div>

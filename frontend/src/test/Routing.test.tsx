@@ -8,6 +8,7 @@ describe('App Routing and Browser History Navigation', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     window.localStorage.clear();
+    window.localStorage.setItem('statskill_onboarding_complete', 'true');
     document.documentElement.lang = '';
     document.documentElement.style.fontSize = '';
   });
@@ -21,7 +22,7 @@ describe('App Routing and Browser History Navigation', () => {
     window.history.pushState({}, '', '/');
     render(<App />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Toggle language preference/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Toggle language preference|भाषा वरीयता बदलें/i }));
 
     expect(document.documentElement.lang).toBe('hi');
     expect(screen.getByRole('heading', { name: /अपनी भूमिका के लिए आवश्यक कौशल विकसित करें/i })).toBeDefined();
@@ -54,7 +55,7 @@ describe('App Routing and Browser History Navigation', () => {
     expect(screen.getByText(/Access your statistical learning workspace/i)).toBeDefined();
 
     // Click "Back to Portal"
-    const backToPortalBtn = screen.getByRole('button', { name: /Back to StatSkill Portal/i });
+    const backToPortalBtn = screen.getByRole('button', { name: /Back to portal|पोर्टल पर वापस/i });
     expect(backToPortalBtn).toBeDefined();
 
     await act(async () => {

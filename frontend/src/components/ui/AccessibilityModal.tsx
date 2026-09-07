@@ -23,6 +23,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
+import { useUiPreferences } from '../../contexts/UiPreferencesContext';
 
 export interface AccessibilitySettings {
   highContrast: boolean;
@@ -79,6 +80,7 @@ export function AccessibilityModal({
   onUpdateSettings,
   onResetSettings,
 }: AccessibilityModalProps) {
+  const { t } = useUiPreferences();
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -231,7 +233,7 @@ export function AccessibilityModal({
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Accessibility Menu (CTRL+U)"
+      aria-label={t('a11yMenuTitle')}
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in"
       onKeyDown={(e) => {
         if (e.key === 'Escape') onClose();
@@ -246,7 +248,7 @@ export function AccessibilityModal({
         <div className="bg-[#1E3A8A] text-white px-5 py-3.5 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-sm tracking-tight text-white font-display">
-              Accessibility Menu (CTRL+U)
+              {t('a11yMenuTitle')}
             </h3>
           </div>
 
@@ -273,7 +275,7 @@ export function AccessibilityModal({
                 {isPlayingAudio ? <Volume2 className="w-4 h-4 animate-pulse" /> : <Play className="w-4 h-4 fill-white ml-0.5" />}
               </div>
               <span className="font-bold text-xs tracking-wide">
-                {isPlayingAudio ? 'Speaking Accessibility Guide...' : 'How Karmayogi Accessibility Works'}
+                {isPlayingAudio ? t('a11ySpeakingGuide') : t('a11yHowItWorks')}
               </span>
             </button>
           </div>
@@ -653,7 +655,7 @@ export function AccessibilityModal({
             className="w-full py-3 px-4 bg-[#1E3A8A] hover:bg-[#1A3478] text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer active:translate-y-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Reset All Accessibility Settings</span>
+            <span>{t('a11yResetAll')}</span>
           </button>
 
           {/* Move/Hide Widget & Cheatsheet Toggle */}
@@ -665,7 +667,7 @@ export function AccessibilityModal({
             >
               <span className="flex items-center gap-2">
                 <Keyboard className="w-3.5 h-3.5 text-[#1E3A8A]" />
-                Keyboard Shortcuts Cheatsheet
+                {t('a11yShortcutsTitle')}
               </span>
               <ChevronRight className={`w-4 h-4 transition-transform ${showShortcuts ? 'rotate-90' : ''}`} />
             </button>

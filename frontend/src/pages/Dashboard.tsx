@@ -23,6 +23,7 @@ import { SourceCitationDrawer, SourceCitationData } from '../components/assessme
 import { AiModelModal } from '../components/ui/AiModelModal';
 import { KnowledgeLibrary, CircularItem } from '../components/knowledge/KnowledgeLibrary';
 import { AssessmentCertificateModal } from '../components/assessment/AssessmentCertificateModal';
+import { useUiPreferences } from '../contexts/UiPreferencesContext';
 
 import {
   FileText,
@@ -460,6 +461,7 @@ export default function Dashboard({
   onTabChange,
   initialCourseTopic,
 }: DashboardProps = {}) {
+  const { t } = useUiPreferences();
   // Check if an officer is authenticated via Jan Parichay SSO
   const savedOfficerInfo = useMemo(() => {
     try {
@@ -1224,14 +1226,14 @@ export default function Dashboard({
                     <span className="p-1.5 bg-[#0B2E63]/10 text-[#0B2E63] rounded-md">
                       <Cpu className="w-4 h-4" />
                     </span>
-                    <Badge variant="default">Prototype assessment module</Badge>
+                    <Badge variant="default">{t('dashboardAssessmentBadge')}</Badge>
                     {selectedCourseContext && (
                       <Badge variant="saffron">{selectedCourseContext}</Badge>
                     )}
                   </div>
-                  <CardTitle>Competency assessment generator</CardTitle>
+                  <CardTitle>{t('dashboardAssessmentTitle')}</CardTitle>
                   <CardDescription>
-                    Generate structured active-recall assessments mapped to MoSPI FRAC competency benchmarks.
+                    {t('dashboardAssessmentDescription')}
                   </CardDescription>
                 </div>
 
@@ -1622,17 +1624,17 @@ export default function Dashboard({
                     <span className="p-1.5 bg-primary-100 text-primary-900 rounded-md">
                       <Award className="w-4 h-4" />
                     </span>
-                    <Badge variant="default">MoSPI FRAC Taxonomy</Badge>
+                    <Badge variant="default">{t('dashboardFracBadge')}</Badge>
                   </div>
-                  <CardTitle>Officer Competency Profile</CardTitle>
+                  <CardTitle>{t('dashboardCompetencyTitle')}</CardTitle>
                   <CardDescription>
-                    Framework for Roles, Activities and Competencies (FRAC) benchmarked across 4 official domains.
+                    {t('dashboardCompetencyDescription')}
                   </CardDescription>
                 </div>
 
                 <div className="w-full md:w-auto">
                   <label htmlFor="cadre-select" className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                    Official Cadre / Designation:
+                    {t('dashboardCadreLabel')}
                   </label>
                   <select
                     id="cadre-select"

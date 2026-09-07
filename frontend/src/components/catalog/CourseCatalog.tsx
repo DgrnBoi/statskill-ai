@@ -4,6 +4,7 @@ import type { CourseItem } from '../../pages/Dashboard';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { EmptyState, PageHeader } from '../ui/PageHeader';
+import { useUiPreferences } from '../../contexts/UiPreferencesContext';
 
 const domains = [
   'All',
@@ -34,6 +35,7 @@ export function CourseCatalog({
   isActionLocked,
   onSelectCourse,
 }: CourseCatalogProps) {
+  const { t } = useUiPreferences();
   const [visibleCount, setVisibleCount] = useState(9);
 
   useEffect(() => setVisibleCount(9), [searchQuery, selectedDomain]);
@@ -42,9 +44,9 @@ export function CourseCatalog({
   return (
     <section aria-label="Government course discovery" className="space-y-5">
       <PageHeader
-        title="Government of India Course Discovery"
-        description="Search the government learning catalog by statistical domain, provider, or topic, then create a diagnostic assessment from a course."
-        actions={<Badge variant="neutral">{courses.length.toLocaleString('en-IN')} matching courses</Badge>}
+        title={t('catalogTitle')}
+        description={t('catalogDescription')}
+        actions={<Badge variant="neutral">{courses.length.toLocaleString('en-IN')} {t('catalogMatchingCount')}</Badge>}
       />
 
       <div className="catalog-toolbar">
@@ -57,7 +59,7 @@ export function CourseCatalog({
             autoComplete="off"
             value={searchQuery}
             onChange={(event) => onSearchQueryChange(event.target.value)}
-            placeholder="Search by course, provider, or topic…"
+            placeholder={t('catalogSearchPlaceholder')}
           />
         </label>
         <div className="catalog-filters" aria-label="Course domain filter">

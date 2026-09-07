@@ -2,8 +2,9 @@
 /* states: open · collapsed · typing · keyword matching · action triggers */
 /* contrast: pass (WCAG AA 4.5:1+) */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
+import { useUiPreferences } from '../../contexts/UiPreferencesContext';
 import { PortalTab } from '../layout/Navbar';
 import {
   MessageSquare,
@@ -53,66 +54,72 @@ export function KarmayogiSahayakModal({
   onOpenAccessibility,
   onOpenSecretAdmin,
 }: KarmayogiSahayakModalProps) {
+  const { t } = useUiPreferences();
   const dialogRef = useDialogAccessibility(isOpen, onClose);
   const [inputQuery, setInputQuery] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    {
-      id: 'welcome-1',
-      sender: 'bot',
-      text: 'Namaste! I am the StatSkill prototype guide. I can help you find assessments, courses, competency views, and accessibility controls. Where would you like to go?',
-      timestamp: 'Just now',
-      actions: [
-        {
-          label: 'Public Gateway (Landing Page)',
-          icon: Home,
-          onClick: () => {
-            onNavigateTab('home');
-            onClose();
-          },
+
+  const buildWelcomeMessage = useCallback((): ChatMessage => ({
+    id: 'welcome-1',
+    sender: 'bot',
+    text: t('sahayakWelcome'),
+    timestamp: t('sahayakTimestampNow'),
+    actions: [
+      {
+        label: t('sahayakActionGateway'),
+        icon: Home,
+        onClick: () => {
+          onNavigateTab('home');
+          onClose();
         },
-        {
-          label: 'Take Diagnostic Assessment',
-          icon: Cpu,
-          onClick: () => {
-            onNavigateTab('dashboard');
-            onClose();
-          },
+      },
+      {
+        label: t('sahayakActionAssessment'),
+        icon: Cpu,
+        onClick: () => {
+          onNavigateTab('dashboard');
+          onClose();
         },
-        {
-          label: 'Search 880+ Government Courses',
-          icon: BookOpen,
-          onClick: () => {
-            onNavigateTab('discover');
-            onClose();
-          },
+      },
+      {
+        label: t('sahayakActionCourses'),
+        icon: BookOpen,
+        onClick: () => {
+          onNavigateTab('discover');
+          onClose();
         },
-        {
-          label: 'View Competency Spider Radar',
-          icon: Award,
-          onClick: () => {
-            onNavigateTab('overview');
-            onClose();
-          },
+      },
+      {
+        label: t('sahayakActionOverview'),
+        icon: Award,
+        onClick: () => {
+          onNavigateTab('overview');
+          onClose();
         },
-        {
-          label: 'Login with Jan Parichay (SSO)',
-          icon: UserCheck,
-          onClick: () => {
-            onOpenLogin();
-            onClose();
-          },
+      },
+      {
+        label: t('sahayakActionLogin'),
+        icon: UserCheck,
+        onClick: () => {
+          onOpenLogin();
+          onClose();
         },
-        {
-          label: 'Accessibility Controls',
-          icon: Eye,
-          onClick: () => {
-            onOpenAccessibility();
-            onClose();
-          },
+      },
+      {
+        label: t('sahayakActionAccessibility'),
+        icon: Eye,
+        onClick: () => {
+          onOpenAccessibility();
+          onClose();
         },
-      ],
-    },
-  ]);
+      },
+    ],
+  }), [onClose, onNavigateTab, onOpenAccessibility, onOpenLogin, t]);
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [buildWelcomeMessage()]);
+
+  useEffect(() => {
+    setMessages([buildWelcomeMessage()]);
+  }, [buildWelcomeMessage]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -136,7 +143,7 @@ export function KarmayogiSahayakModal({
       id: `user-${Date.now()}`,
       sender: 'user',
       text: query,
-      timestamp: 'Just now',
+      timestamp: t('sahayakTimestampNow'),
     };
 
     const lower = query.toLowerCase();
@@ -286,7 +293,7 @@ export function KarmayogiSahayakModal({
       id: `bot-${Date.now()}`,
       sender: 'bot',
       text: botReplyText,
-      timestamp: 'Just now',
+      timestamp: t('sahayakTimestampNow'),
       actions: botActions,
     };
 
@@ -310,19 +317,19 @@ export function KarmayogiSahayakModal({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm tracking-tight font-display text-white">Karmayogi Sahayak</h3>
+              <h3 className="font-bold text-sm tracking-tight font-display text-white">{t('sahayakTitle')}</h3>
               <span className="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-bold font-mono">
-                PROTOTYPE GUIDE
+                {t('sahayakBadge')}
               </span>
             </div>
-            <p className="text-[11px] text-slate-300">Keyword-based navigation and learning help</p>
+            <p className="text-[11px] text-slate-300">{t('sahayakSubtitle')}</p>
           </div>
         </div>
 
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close Karmayogi Sahayak dialog"
+          aria-label={t('sahayakClose')}
           className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           <X className="w-5 h-5" />
@@ -373,27 +380,27 @@ export function KarmayogiSahayakModal({
 
       {/* Quick Prompt Chips */}
       <div className="px-3 py-2 bg-white border-t border-slate-200/80 flex items-center gap-1.5 overflow-x-auto text-[11px]">
-        <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px] shrink-0">Try:</span>
+        <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px] shrink-0">{t('sahayakTryLabel')}</span>
         <button
           type="button"
           onClick={() => handleSendMessage('How do I take a quiz?')}
           className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 whitespace-nowrap transition cursor-pointer"
         >
-          Take a quiz
+          {t('sahayakChipQuiz')}
         </button>
         <button
           type="button"
           onClick={() => handleSendMessage('Where do I search courses?')}
           className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 whitespace-nowrap transition cursor-pointer"
         >
-          Search courses
+          {t('sahayakChipCourses')}
         </button>
         <button
           type="button"
           onClick={() => handleSendMessage('How do I open admin?')}
           className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 whitespace-nowrap transition cursor-pointer"
         >
-          Admin entrance
+          {t('sahayakChipAdmin')}
         </button>
       </div>
 
@@ -410,8 +417,8 @@ export function KarmayogiSahayakModal({
           type="text"
           value={inputQuery}
           onChange={(e) => setInputQuery(e.target.value)}
-          placeholder="Ask where to go or how to use StatSkill..."
-          aria-label="Message Karmayogi Sahayak guide"
+          placeholder={t('sahayakInputPlaceholder')}
+          aria-label={t('sahayakInputAria')}
           className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-900 bg-white placeholder:text-slate-400 focus:outline-none focus:border-[#0B2E63] focus:ring-2 focus:ring-[#0B2E63]/20"
         />
         <button

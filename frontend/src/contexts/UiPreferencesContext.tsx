@@ -1,89 +1,17 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { translations, type SiteLanguage, type TranslationKey } from '../i18n/translations';
+import { buildPath, parseRoute } from '../lib/routing';
 
-export type SiteLanguage = 'en' | 'hi';
+export type { SiteLanguage, TranslationKey };
 
 const LANGUAGE_STORAGE_KEY = 'statskill_site_language';
 const FONT_SCALE_STORAGE_KEY = 'statskill_site_font_scale';
 const MIN_FONT_SCALE = 0.9;
 const MAX_FONT_SCALE = 1.4;
 
-const translations = {
-  en: {
-    languageToggle: 'English / हिंदी',
-    governmentOfIndia: 'Government of India',
-    accessibility: 'Accessibility',
-    register: 'Register',
-    login: 'Log in (SSO)',
-    launchPortal: 'Launch portal',
-    about: 'About us',
-    newsroom: 'Newsroom',
-    career: 'Career',
-    tenders: 'Tenders',
-    notifications: 'Notifications',
-    helpCentre: 'Help centre',
-    heroEyebrow: "For India's statistical services",
-    heroTitle: 'Build the skills your role calls for.',
-    heroDescription: 'Assess your statistical competencies, understand the gaps, and find learning that fits your work.',
-    heroContext: 'Role-aligned diagnostics and continuous learning for Indian Statistical Service, Subordinate Statistical Service, and State DES officers.',
-    startAssessment: 'Start an assessment',
-    exploreCourses: 'Explore courses',
-    learningPath: 'Your learning path',
-    learningPathTitle: 'From assessment to progress',
-    assessCompetencies: 'Assess your competencies',
-    assessCompetenciesDescription: 'Choose your cadre and complete a diagnostic in a relevant statistical domain.',
-    findLearning: 'Find the right learning',
-    findLearningDescription: 'Explore government courses matched to your role and competency gaps.',
-    seeProgress: 'See your progress',
-    seeProgressDescription: 'Review assessment results and proficiency across your learning domains.',
-    publicGateway: 'Public Gateway',
-    officerDashboard: 'Officer Dashboard',
-    assessmentEngine: 'Assessment Engine',
-    discoverCatalog: 'Discover (880+ Catalog)',
-    competencyProfile: 'FRAC Competency Profile',
-    analytics: 'MoSPI Analytics',
-    demoSignIn: 'Demo sign in',
-  },
-  hi: {
-    languageToggle: 'हिंदी / English',
-    governmentOfIndia: 'भारत सरकार',
-    accessibility: 'सुगम्यता',
-    register: 'पंजीकरण',
-    login: 'लॉग इन (SSO)',
-    launchPortal: 'पोर्टल खोलें',
-    about: 'हमारे बारे में',
-    newsroom: 'समाचार कक्ष',
-    career: 'करियर',
-    tenders: 'निविदाएँ',
-    notifications: 'सूचनाएँ',
-    helpCentre: 'सहायता केंद्र',
-    heroEyebrow: 'भारत की सांख्यिकीय सेवाओं के लिए',
-    heroTitle: 'अपनी भूमिका के लिए आवश्यक कौशल विकसित करें',
-    heroDescription: 'अपनी सांख्यिकीय दक्षताओं का आकलन करें, अंतर समझें और अपने कार्य के अनुरूप सीखने के अवसर खोजें।',
-    heroContext: 'भारतीय सांख्यिकी सेवा, अधीनस्थ सांख्यिकी सेवा और राज्य DES अधिकारियों के लिए भूमिका-अनुरूप निदान और सतत अधिगम।',
-    startAssessment: 'आकलन शुरू करें',
-    exploreCourses: 'पाठ्यक्रम देखें',
-    learningPath: 'आपका सीखने का पथ',
-    learningPathTitle: 'आकलन से प्रगति तक',
-    assessCompetencies: 'अपनी दक्षताओं का आकलन करें',
-    assessCompetenciesDescription: 'अपना संवर्ग चुनें और प्रासंगिक सांख्यिकीय क्षेत्र में निदान पूरा करें।',
-    findLearning: 'सही सीखने का अवसर खोजें',
-    findLearningDescription: 'अपनी भूमिका और दक्षता-अंतर के अनुरूप सरकारी पाठ्यक्रम देखें।',
-    seeProgress: 'अपनी प्रगति देखें',
-    seeProgressDescription: 'अपने सीखने के क्षेत्रों में आकलन परिणाम और दक्षता की समीक्षा करें।',
-    publicGateway: 'सार्वजनिक प्रवेश द्वार',
-    officerDashboard: 'अधिकारी डैशबोर्ड',
-    assessmentEngine: 'आकलन इंजन',
-    discoverCatalog: 'पाठ्यक्रम खोजें (880+)',
-    competencyProfile: 'FRAC दक्षता प्रोफ़ाइल',
-    analytics: 'MoSPI विश्लेषण',
-    demoSignIn: 'डेमो साइन इन',
-  },
-} as const;
-
-type TranslationKey = keyof typeof translations.en;
-
 interface UiPreferencesValue {
   language: SiteLanguage;
+  setLanguage: (lang: SiteLanguage) => void;
   toggleLanguage: () => void;
   fontScale: number;
   adjustFontScale: (change: 'increase' | 'decrease' | 'reset') => void;
@@ -92,6 +20,7 @@ interface UiPreferencesValue {
 
 const defaultValue: UiPreferencesValue = {
   language: 'en',
+  setLanguage: () => undefined,
   toggleLanguage: () => undefined,
   fontScale: 1,
   adjustFontScale: () => undefined,
@@ -102,7 +31,10 @@ const UiPreferencesContext = createContext<UiPreferencesValue>(defaultValue);
 
 function readLanguage(): SiteLanguage {
   try {
-    return window.localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'hi' ? 'hi' : 'en';
+    const fromUrl = parseRoute(window.location.pathname).locale;
+    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (stored === 'hi' || stored === 'en') return stored;
+    return fromUrl;
   } catch {
     return 'en';
   }
@@ -120,9 +52,22 @@ function readFontScale(): number {
   return 1;
 }
 
+function syncLanguageToUrl(lang: SiteLanguage) {
+  const route = parseRoute(window.location.pathname);
+  const newPath = buildPath({ tab: route.isLogin ? 'home' : route.tab, locale: lang, isLogin: route.isLogin });
+  if (window.location.pathname !== newPath) {
+    window.history.replaceState({}, '', newPath);
+  }
+}
+
 export function UiPreferencesProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<SiteLanguage>(readLanguage);
+  const [language, setLanguageState] = useState<SiteLanguage>(readLanguage);
   const [fontScale, setFontScale] = useState(readFontScale);
+
+  const setLanguage = useCallback((lang: SiteLanguage) => {
+    setLanguageState(lang);
+    syncLanguageToUrl(lang);
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -132,6 +77,15 @@ export function UiPreferencesProvider({ children }: { children: React.ReactNode 
       // The language still applies for this session if storage is unavailable.
     }
   }, [language]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseRoute(window.location.pathname);
+      setLanguageState(route.locale);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     document.documentElement.style.fontSize = fontScale === 1 ? '' : `${Math.round(fontScale * 100)}%`;
@@ -144,7 +98,8 @@ export function UiPreferencesProvider({ children }: { children: React.ReactNode 
 
   const value = useMemo<UiPreferencesValue>(() => ({
     language,
-    toggleLanguage: () => setLanguage((current) => current === 'en' ? 'hi' : 'en'),
+    setLanguage,
+    toggleLanguage: () => setLanguage(language === 'en' ? 'hi' : 'en'),
     fontScale,
     adjustFontScale: (change) => setFontScale((current) => {
       if (change === 'reset') return 1;
@@ -152,7 +107,7 @@ export function UiPreferencesProvider({ children }: { children: React.ReactNode 
       return Math.min(MAX_FONT_SCALE, Math.max(MIN_FONT_SCALE, Number((current + delta).toFixed(2))));
     }),
     t: (key) => translations[language][key],
-  }), [fontScale, language]);
+  }), [fontScale, language, setLanguage]);
 
   return <UiPreferencesContext.Provider value={value}>{children}</UiPreferencesContext.Provider>;
 }

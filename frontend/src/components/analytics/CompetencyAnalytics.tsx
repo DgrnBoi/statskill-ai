@@ -1,6 +1,7 @@
 import type { Competency } from '../../pages/Dashboard';
 import { Badge } from '../ui/Badge';
 import { EmptyState, PageHeader } from '../ui/PageHeader';
+import { useUiPreferences } from '../../contexts/UiPreferencesContext';
 
 interface CompetencyAnalyticsProps {
   skills: Competency[];
@@ -20,6 +21,7 @@ function boundedLevel(value: number | undefined) {
 }
 
 export function CompetencyAnalytics({ skills, proficiency, assessmentsTaken, averageLevel, topGapSkill }: CompetencyAnalyticsProps) {
+  const { t } = useUiPreferences();
   const center = 150;
   const radius = 105;
   const targetPoints = skills.map((skill, index) => pointFor(index, skill.targetLevel / 5, skills.length, radius, center)).join(' ');
@@ -29,19 +31,19 @@ export function CompetencyAnalytics({ skills, proficiency, assessmentsTaken, ave
   return (
     <section aria-label="Competency analytics" className="space-y-5">
       <PageHeader
-        title="Competency Analytics"
-        description="Compare this officer’s assessed proficiency with the current cadre’s FRAC target levels. Data is stored on this device for the prototype."
-        actions={<Badge variant="neutral">Officer view</Badge>}
+        title={t('analyticsTitle')}
+        description={t('analyticsDescription')}
+        actions={<Badge variant="neutral">{t('analyticsOfficerView')}</Badge>}
       />
 
       <div className="metric-strip" aria-label="Assessment summary">
-        <div><span>Completed assessments</span><strong>{assessmentsTaken}</strong></div>
-        <div><span>Average proficiency</span><strong>{averageLevel}<small> / 5</small></strong></div>
-        <div><span>Priority learning need</span><strong className="metric-strip-text">{topGapSkill}</strong></div>
+        <div><span>{t('analyticsCompleted')}</span><strong>{assessmentsTaken}</strong></div>
+        <div><span>{t('analyticsAverage')}</span><strong>{averageLevel}<small> / 5</small></strong></div>
+        <div><span>{t('analyticsPriority')}</span><strong className="metric-strip-text">{topGapSkill}</strong></div>
       </div>
 
       {!hasAssessment ? (
-        <EmptyState title="No assessment data yet" description="Complete a diagnostic assessment or set current proficiency levels to populate the comparison chart." />
+        <EmptyState title={t('analyticsEmptyTitle')} description={t('analyticsEmptyDescription')} />
       ) : (
         <div className="analytics-layout">
           <figure className="competency-chart">
