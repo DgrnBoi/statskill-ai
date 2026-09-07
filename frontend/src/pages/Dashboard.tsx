@@ -18,6 +18,12 @@ import { SecretAdminGatewayModal } from '../components/admin/SecretAdminGatewayM
 import { CourseCatalog } from '../components/catalog/CourseCatalog';
 import { CompetencyAnalytics } from '../components/analytics/CompetencyAnalytics';
 import { SahayakLauncher } from '../components/ui/SahayakLauncher';
+import { DocumentIngestionStudio } from '../components/assessment/DocumentIngestionStudio';
+import { SourceCitationDrawer, SourceCitationData } from '../components/assessment/SourceCitationDrawer';
+import { AiModelModal } from '../components/ui/AiModelModal';
+import { KnowledgeLibrary, CircularItem } from '../components/knowledge/KnowledgeLibrary';
+import { AssessmentCertificateModal } from '../components/assessment/AssessmentCertificateModal';
+
 import {
   FileText,
   UploadCloud,
@@ -416,6 +422,14 @@ export default function Dashboard({
   const [reshufflesLeft, setReshufflesLeft] = useState<number>(3);
   const [deviceMode, setDeviceMode] = useState<DeviceCapability | 'LOADING'>('POTATO_DEVICE');
   const [selectedCourseContext, setSelectedCourseContext] = useState<string | null>(null);
+  // Advanced RAG, Knowledge Hub & Certificate States
+  const [isAiModelOpen, setIsAiModelOpen] = useState(false);
+  const [isCitationDrawerOpen, setIsCitationDrawerOpen] = useState(false);
+  const [selectedCitation, setSelectedCitation] = useState<SourceCitationData | null>(null);
+  const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+  const [selectedIngestionFile, setSelectedIngestionFile] = useState<File | null>(null);
+  const [assessmentSubTab, setAssessmentSubTab] = useState<'upload' | 'gyaan_kosh'>('upload');
+
 
   // Assessment Timer & Anti-Cheat State (2 min 30 sec = 150s)
   const [timeLeft, setTimeLeft] = useState<number>(150);
@@ -775,6 +789,11 @@ export default function Dashboard({
     return () => controller.abort();
   }, [designation, generatedQuiz, proficiency, savedOfficerInfo, selectedCourseContext, skills, timeLeft, userExamAnswers]);
 
+  const handleOpenCitation = useCallback((record: { title?: string; chapter?: string; excerpt: string; pageNumber?: number; documentName?: string; topic?: string; misconception?: string; remedialSkill?: string }) => {
+    setSelectedCitation(record);
+    setIsCitationDrawerOpen(true);
+  }, []);
+
   const handleReshuffle = useCallback(() => {
     if (reshufflesLeft <= 0 || generatedQuiz.length === 0 || isExamCompleted) return;
 
@@ -804,7 +823,11 @@ export default function Dashboard({
     hasFinalizedExamRef.current = false;
   }, [reshufflesLeft, generatedQuiz, paperSet, isExamCompleted]);
 
-  const handleGenerateQuiz = async (file?: File, courseIdOverride?: string) => {
+  const handleGenerateQuiz = async (
+    file?: File,
+    courseIdOverride?: string,
+    blueprintParams?: { chapter?: string; numQuestions?: number; bloomLevel?: string; difficulty?: string }
+  ) => {
     // Clear any active poll before starting new generation
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
@@ -827,8 +850,11 @@ export default function Dashboard({
     if (courseContext) {
       formData.append('courseId', courseContext);
     }
-    formData.append('numQuestions', '5');
-    formData.append('difficulty', 'intermediate');
+    if (blueprintParams?.chapter) {
+      formData.append('chapter', blueprintParams.chapter);
+    }
+    formData.append('numQuestions', blueprintParams?.numQuestions ? String(blueprintParams.numQuestions) : '5');
+    formData.append('difficulty', blueprintParams?.difficulty || 'intermediate');
     const localApiKey = localStorage.getItem('statskill_api_key');
     if (localApiKey) {
       formData.append('apiKey', localApiKey);
@@ -984,6 +1010,7 @@ export default function Dashboard({
         isAdminUnlocked={isAdminUnlocked}
         onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
         onOpenAccessibility={() => setIsAccessibilityOpen(true)}
+        onOpenAiModel={() => setIsAiModelOpen(true)}
         canGoBack={navigationHistory.length > 0}
         previousTabTitle={previousTabTitle}
         onGoBack={handleGoBack}
@@ -1094,95 +1121,159 @@ export default function Dashboard({
               </CardHeader>
 
               <CardContent className="p-6 sm:p-8">
-                {/* Upload & Direct Practice Container */}
-                <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                    isUploading
-                      ? 'border-[#0B2E63] bg-blue-50/40'
-                      : 'border-slate-300 hover:border-[#0B2E63]/60 bg-slate-50/50 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="w-14 h-14 mx-auto rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-[#0B2E63]">
-                    {isUploading ? (
-                      <RotateCw className="w-6 h-6 animate-spin text-[#0B2E63]" />
-                    ) : (
-                      <UploadCloud className="w-6 h-6 text-[#0B2E63]" />
-                    )}
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900 mb-1 font-display">
-                    {isUploading
-                      ? 'Synthesizing Dynamic Examination Paper...'
-                      : 'Upload MoSPI Manual or Custom Training Document'}
-                  </h3>
-                  <p className="text-xs text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed font-body">
-                    Upload official manuals (PDF, TXT, MD) to extract dynamic, non-hardcoded questions from the text, or practise with the verified question bank.
-                  </p>
-
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    <input
-                      type="file"
-                      accept=".pdf,.txt,.md,application/pdf,text/plain"
-                      className="sr-only"
-                      id="pdf-upload"
-                      aria-label="Upload official training circular or manual in PDF or TXT format"
-                      disabled={isUploading || isAntiSpamLocked}
-                      onChange={(e) => {
-                        if (!e.target.files || e.target.files.length === 0) return;
-                        antiSpamGuardAction(() => handleGenerateQuiz(e.target.files![0]))();
-                      }}
-                    />
-                    <label
-                      htmlFor="pdf-upload"
-                      tabIndex={isUploading || isAntiSpamLocked ? -1 : 0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          if (!isAntiSpamLocked) {
-                            document.getElementById('pdf-upload')?.click();
-                          }
-                        }
-                      }}
-                      className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-xs inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63] focus-visible:ring-offset-2 active:translate-y-[1px] ${
-                        isUploading || isAntiSpamLocked
-                          ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                          : 'bg-[#0B2E63] text-white hover:bg-[#123E82] cursor-pointer'
-                      }`}
-                    >
-                      <FileText className="w-4 h-4" aria-hidden="true" />
-                      {isUploading ? 'Extracting Questions...' : 'Browse Document (PDF, TXT)'}
-                    </label>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={isUploading || isAntiSpamLocked}
-                      onClick={antiSpamGuardAction(() => handleGenerateQuiz())}
-                      className="text-xs font-semibold border-slate-300 text-slate-800 hover:bg-white"
-                    >
-                      <BookOpen className="w-4 h-4 text-amber-700" aria-hidden="true" />
-                      Practise with Question Bank
-                    </Button>
-                  </div>
-
-                  {/* Inline Assessment Error Banner */}
-                  {assessmentError && (
-                    <div role="alert" className="mt-4 p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between text-xs text-red-900 animate-fade-in">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-red-700 flex-shrink-0" aria-hidden="true" />
-                        <span className="font-medium">{assessmentError}</span>
-                      </div>
+                {/* Upload & Direct Practice Container / Ingestion Studio */}
+                {selectedIngestionFile && generatedQuiz.length === 0 ? (
+                  <DocumentIngestionStudio
+                    file={selectedIngestionFile}
+                    isGenerating={isUploading}
+                    isAntiSpamLocked={isAntiSpamLocked}
+                    onCancel={() => setSelectedIngestionFile(null)}
+                    onGenerate={(params) => {
+                      antiSpamGuardAction(() =>
+                        handleGenerateQuiz(selectedIngestionFile, undefined, params)
+                      )();
+                    }}
+                  />
+                ) : (
+                  <div className="space-y-6">
+                    {/* Sub-tab switcher: Upload Document vs Amrit Gyaan Kosh */}
+                    <div className="flex items-center gap-2 border-b border-slate-200 pb-3" role="tablist" aria-label="Assessment Ingestion Mode">
                       <button
                         type="button"
-                        onClick={() => setAssessmentError(null)}
-                        className="text-xs font-bold text-red-800 hover:underline cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                        aria-label="Dismiss error notice"
+                        role="tab"
+                        aria-selected={assessmentSubTab === 'upload'}
+                        onClick={() => setAssessmentSubTab('upload')}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                          assessmentSubTab === 'upload'
+                            ? 'bg-[#0B2E63] text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
                       >
-                        Dismiss
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>Upload Custom Document</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={assessmentSubTab === 'gyaan_kosh'}
+                        onClick={() => setAssessmentSubTab('gyaan_kosh')}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                          assessmentSubTab === 'gyaan_kosh'
+                            ? 'bg-[#0B2E63] text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Amrit Gyaan Kosh (Curated Circulars)</span>
                       </button>
                     </div>
-                  )}
-                </div>
+
+                    {assessmentSubTab === 'gyaan_kosh' && generatedQuiz.length === 0 ? (
+                      <KnowledgeLibrary
+                        isActionLocked={isAntiSpamLocked || isUploading}
+                        onSelectCircularForAssessment={(circular: CircularItem) => {
+                          const circularFile = new File(
+                            [circular.sampleContent || `${circular.title}. ${circular.summary}`],
+                            `${circular.id}.txt`,
+                            { type: 'text/plain' }
+                          );
+                          setSelectedIngestionFile(circularFile);
+                        }}
+                      />
+                    ) : (
+                      <div
+                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                          isUploading
+                            ? 'border-[#0B2E63] bg-blue-50/40'
+                            : 'border-slate-300 hover:border-[#0B2E63]/60 bg-slate-50/50 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="w-14 h-14 mx-auto rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-[#0B2E63]">
+                          {isUploading ? (
+                            <RotateCw className="w-6 h-6 animate-spin text-[#0B2E63]" />
+                          ) : (
+                            <UploadCloud className="w-6 h-6 text-[#0B2E63]" />
+                          )}
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 mb-1 font-display">
+                          {isUploading
+                            ? 'Synthesizing Dynamic Examination Paper...'
+                            : 'Upload MoSPI Manual or Custom Training Document'}
+                        </h3>
+                        <p className="text-xs text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed font-body">
+                          Upload official manuals (PDF, TXT, MD) to inspect chapter blueprints and extract dynamic, grounded questions from the text.
+                        </p>
+
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                          <input
+                            type="file"
+                            accept=".pdf,.txt,.md,application/pdf,text/plain"
+                            className="sr-only"
+                            id="pdf-upload"
+                            aria-label="Upload official training circular or manual in PDF or TXT format"
+                            disabled={isUploading || isAntiSpamLocked}
+                            onChange={(e) => {
+                              if (!e.target.files || e.target.files.length === 0) return;
+                              const picked = e.target.files[0];
+                              setSelectedIngestionFile(picked);
+                            }}
+                          />
+                          <label
+                            htmlFor="pdf-upload"
+                            tabIndex={isUploading || isAntiSpamLocked ? -1 : 0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                if (!isAntiSpamLocked) {
+                                  document.getElementById('pdf-upload')?.click();
+                                }
+                              }
+                            }}
+                            className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-xs inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63] focus-visible:ring-offset-2 active:translate-y-[1px] ${
+                              isUploading || isAntiSpamLocked
+                                ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                                : 'bg-[#0B2E63] text-white hover:bg-[#123E82] cursor-pointer'
+                            }`}
+                          >
+                            <FileText className="w-4 h-4" aria-hidden="true" />
+                            {isUploading ? 'Extracting Questions...' : 'Inspect & Ingest Document (PDF, TXT)'}
+                          </label>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isUploading || isAntiSpamLocked}
+                            onClick={antiSpamGuardAction(() => handleGenerateQuiz())}
+                            className="text-xs font-semibold border-slate-300 text-slate-800 hover:bg-white"
+                          >
+                            <BookOpen className="w-4 h-4 text-amber-700" aria-hidden="true" />
+                            Practise with Question Bank
+                          </Button>
+                        </div>
+
+                        {/* Inline Assessment Error Banner */}
+                        {assessmentError && (
+                          <div role="alert" className="mt-4 p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between text-xs text-red-900 animate-fade-in">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-red-700 flex-shrink-0" aria-hidden="true" />
+                              <span className="font-medium">{assessmentError}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setAssessmentError(null)}
+                              className="text-xs font-bold text-red-800 hover:underline cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                              aria-label="Dismiss error notice"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Generated Assessment Paper Output */}
                 {generatedQuiz.length > 0 && (
@@ -1318,6 +1409,16 @@ export default function Dashboard({
                           handleGenerateQuiz();
                         }}
                         onOpenTelemetry={() => setIsTelemetryDrawerOpen(true)}
+                        onOpenCertificate={() => setIsCertificateModalOpen(true)}
+                        onOpenCitation={(rec) => {
+                          handleOpenCitation({
+                            title: rec.topic,
+                            excerpt: rec.sourceCitation || rec.explanation || 'Official reference document citation',
+                            topic: rec.topic,
+                            misconception: rec.distractorAnalysis?.[rec.selectedOption]?.misconception,
+                            remedialSkill: rec.distractorAnalysis?.[rec.selectedOption]?.remedialSkill,
+                          });
+                        }}
                       />
                     )}
 
@@ -1332,6 +1433,7 @@ export default function Dashboard({
                           onTelemetryStatement={setLatestTelemetryStatement}
                           onQuestionAnswered={(record) => handleQuestionAnswered(index, record)}
                           isTimedOut={isTimedOut}
+                          onOpenCitation={handleOpenCitation}
                         />
                       ))}
                     </div>
@@ -1593,6 +1695,39 @@ export default function Dashboard({
           handleTabChange('admin');
         }}
       />
+
+      {/* AI Inference Engine Switcher Modal */}
+      <AiModelModal
+        isOpen={isAiModelOpen}
+        onClose={() => setIsAiModelOpen(false)}
+      />
+
+      {/* Grounded Source Citation Slide-Over Drawer */}
+      <SourceCitationDrawer
+        isOpen={isCitationDrawerOpen}
+        onClose={() => setIsCitationDrawerOpen(false)}
+        citation={selectedCitation}
+      />
+
+      {/* Official MoSPI Competency Assessment Certificate & Dossier Modal */}
+      <AssessmentCertificateModal
+        isOpen={isCertificateModalOpen}
+        onClose={() => setIsCertificateModalOpen(false)}
+        officerName={savedOfficerInfo?.officer?.name || 'Statistical Investigator'}
+        cadre={designation}
+        division={MOSPI_CADRES_DATA[designation]?.division || 'Field Operations Division (FOD), NSSO'}
+        scorePercentage={
+          generatedQuiz.length > 0
+            ? Math.round(
+                (Object.values(userExamAnswers).filter((a) => a.isCorrect).length /
+                  generatedQuiz.length) *
+                  100
+              )
+            : 0
+        }
+        paperSet={paperSet}
+        timeTakenSeconds={examTimeTaken}
+      />
     </div>
   );
 }
@@ -1605,6 +1740,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
   onTelemetryStatement,
   onQuestionAnswered,
   isTimedOut,
+  onOpenCitation,
 }: {
   q: QuizQuestionItem;
   index: number;
@@ -1613,6 +1749,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
   onTelemetryStatement?: (statement: XApiStatementPayload) => void;
   onQuestionAnswered?: (record: QuestionAnswerRecord) => void;
   isTimedOut?: boolean;
+  onOpenCitation?: (record: { title?: string; chapter?: string; excerpt: string; topic?: string; misconception?: string; remedialSkill?: string }) => void;
 }) {
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [recommendation, setRecommendation] = React.useState<RecommendationItem | null>(null);
@@ -1775,6 +1912,24 @@ const QuizQuestion = React.memo(function QuizQuestion({
                   <p className="mt-1 text-slate-800 font-body">
                     <strong>Explanation:</strong> {q.explanation}
                   </p>
+                )}
+                {onOpenCitation && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onOpenCitation({
+                        title: q.topic || skillToUpdate,
+                        excerpt: q.sourceCitation || q.explanation || 'Official reference document citation',
+                        topic: q.topic,
+                        misconception: q.distractorAnalysis?.[selectedOption]?.misconception,
+                        remedialSkill: q.distractorAnalysis?.[selectedOption]?.remedialSkill,
+                      })
+                    }
+                    className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0B2E63] hover:underline cursor-pointer"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Inspect Grounded Source Citation Drawer</span>
+                  </button>
                 )}
               </div>
             </div>

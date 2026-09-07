@@ -46,6 +46,8 @@ export interface AssessmentAnalysisReportProps {
   onNavigateToPathway: () => void;
   onRetakeQuiz: () => void;
   onOpenTelemetry: () => void;
+  onOpenCertificate?: () => void;
+  onOpenCitation?: (record: QuestionAnswerRecord) => void;
 }
 
 export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> = ({
@@ -58,6 +60,8 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
   onNavigateToPathway,
   onRetakeQuiz,
   onOpenTelemetry,
+  onOpenCertificate,
+  onOpenCitation,
 }) => {
   const correctCount = answers.filter((a) => a.isCorrect).length;
   const incorrectCount = answers.length - correctCount;
@@ -225,6 +229,19 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
                       Context: {ans.explanation}
                     </p>
                   )}
+
+                  {onOpenCitation && (ans.sourceCitation || ans.explanation) && (
+                    <div className="pt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onOpenCitation(ans)}
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0B2E63] hover:text-[#123E82] hover:underline cursor-pointer"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Inspect Grounded Source Citation</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="shrink-0 flex items-center gap-2 self-end sm:self-center">
@@ -241,11 +258,23 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
 
         {/* Action Buttons Bar */}
         <div className="pt-4 border-t border-slate-200/90 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpenCertificate && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onOpenCertificate}
+                className="text-xs font-bold border-[#0B2E63]/40 text-[#0B2E63] bg-blue-50/50 hover:bg-blue-100/70 flex items-center gap-1.5 shadow-xs"
+              >
+                <Award className="w-4 h-4 text-[#0B2E63]" />
+                <span>Export Official Certificate</span>
+              </Button>
+            )}
             <button
               type="button"
               onClick={onOpenTelemetry}
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:translate-y-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63]"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:translate-y-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63]"
             >
               <Terminal className="w-3.5 h-3.5 text-slate-600" />
               <span>Inspect xAPI payload</span>
@@ -253,7 +282,7 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
             <button
               type="button"
               onClick={onRetakeQuiz}
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:translate-y-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63]"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:translate-y-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63]"
             >
               <RotateCw className="w-3.5 h-3.5 text-slate-600" />
               <span>Practice New Set</span>

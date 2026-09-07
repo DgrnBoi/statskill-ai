@@ -29,6 +29,7 @@ interface NavbarProps {
   isAdminUnlocked?: boolean;
   onOpenSecretAdmin?: () => void;
   onOpenAccessibility?: () => void;
+  onOpenAiModel?: () => void;
   canGoBack?: boolean;
   previousTabTitle?: string;
   onGoBack?: () => void;
@@ -54,6 +55,7 @@ export function Navbar({
   isAdminUnlocked = false,
   onOpenSecretAdmin,
   onOpenAccessibility,
+  onOpenAiModel,
   canGoBack = false,
   previousTabTitle,
   onGoBack,
@@ -104,6 +106,17 @@ export function Navbar({
               <button type="button" aria-label="Reset text size" onClick={() => adjustFontScale('reset')} className="px-1.5 py-1 text-xs text-[#183b56]">A</button>
               <button type="button" aria-label="Increase text size" disabled={fontScale >= 1.4} onClick={() => adjustFontScale('increase')} className="px-1.5 py-1 text-xs text-[#183b56] disabled:opacity-40">A+</button>
             </div>
+            {onOpenAiModel && (
+              <button
+                type="button"
+                onClick={onOpenAiModel}
+                aria-label="Open AI Engine & Inference Gateway Settings"
+                title="AI Engine Gateway"
+                className="nav-icon-button flex items-center gap-1 text-[#0B2E63] hover:bg-blue-50"
+              >
+                <Cpu className="h-4 w-4 text-[#0B2E63]" aria-hidden="true" />
+              </button>
+            )}
             <button type="button" onClick={onOpenAccessibility} aria-label="Open accessibility settings (Alt+A)" title="Accessibility (Alt+A)" className="nav-icon-button">
               <Eye className="h-4 w-4" aria-hidden="true" />
             </button>
