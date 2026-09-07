@@ -36,6 +36,14 @@ const DEMO_OFFICERS = {
     division: 'Data Informatics & Innovation Division (DIID)',
     cadre: 'Indian Statistical Service (ISS)',
   },
+  'joint-director': {
+    parichayId: 'PARICHAY_5914_ISS',
+    name: 'Dr. Rajeshwari Nair',
+    email: 'rajeshwari.nair@mospi.gov.in',
+    designation: 'Joint Director [SDRD] (ISS)',
+    division: 'Survey Design & Research Division (SDRD), NSSO',
+    cadre: 'Indian Statistical Service (ISS)',
+  },
 } as const;
 
 router.post('/demo-login', (req, res) => {

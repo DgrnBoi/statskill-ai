@@ -11,4 +11,5 @@ landing pg/node_modules/
 landing pg/.next/
 .next/
 graphify-out/
+.agents/
 

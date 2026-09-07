@@ -113,28 +113,28 @@
     },
     {
       "id": "director",
-      "designation": "Director / Joint Director",
+      "designation": "Director [DIID] (ISS)",
       "cadre": "Indian Statistical Service (ISS)",
       "division": "Data Informatics & Innovation Division (DIID)",
       "description": "Senior leadership driving digital transformation, AI/ML adoption, big data integration, and national statistical governance.",
       "competencies": [
         {
           "id": "stat-03",
-          "skillName": "SDG Indicators & Macro Statistical Governance",
+          "skillName": "Official Statistics Architecture",
           "domain": "Statistical Competencies",
           "targetLevel": 5,
           "description": "Formulating national indicator frameworks for UN Sustainable Development Goals (SDGs)."
         },
         {
           "id": "tech-03",
-          "skillName": "Big Data & AI/ML in Official Statistics",
+          "skillName": "Big Data, Cloud & AI/ML Architecture",
           "domain": "Technical Competencies",
-          "targetLevel": 4,
+          "targetLevel": 5,
           "description": "Leveraging satellite imagery, web scraping, and administrative tax data for real-time economic tracking."
         },
         {
           "id": "gov-01",
-          "skillName": "Data Privacy & DPDPA 2023",
+          "skillName": "Digital Personal Data Protection & Sovereign Clouds",
           "domain": "Digital Governance",
           "targetLevel": 5,
           "description": "Institutional compliance under Collection of Statistics Act 2008 and DPDPA 2023."
@@ -145,6 +145,43 @@
           "domain": "Behavioural and Managerial Competencies",
           "targetLevel": 5,
           "description": "Driving civil service modernization under Mission Karmayogi and Capacity Building Commission guidelines."
+        }
+      ]
+    },
+    {
+      "id": "joint_director_sdrd",
+      "designation": "Joint Director [SDRD] (ISS)",
+      "cadre": "Indian Statistical Service (ISS)",
+      "division": "Survey Design & Research Division (SDRD), NSSO",
+      "description": "Senior research leadership responsible for national survey sampling design, questionnaire formulation, variance estimation, and total survey error modeling.",
+      "competencies": [
+        {
+          "id": "stat-sdrd-01",
+          "skillName": "Survey Design & Sampling Theory",
+          "domain": "Statistical Competencies",
+          "targetLevel": 5,
+          "description": "Advanced probability sampling, multi-stage stratification, and optimal allocation across national domains."
+        },
+        {
+          "id": "tech-sdrd-02",
+          "skillName": "Questionnaire & Instrument Design",
+          "domain": "Technical Competencies",
+          "targetLevel": 4,
+          "description": "Cognitive pre-testing of survey schedules, recall period calibration, and measurement error mitigation."
+        },
+        {
+          "id": "stat-sdrd-03",
+          "skillName": "Non-Sampling Error & Variance Estimation",
+          "domain": "Statistical Competencies",
+          "targetLevel": 5,
+          "description": "Jackknife and bootstrap replication methods, sub-sample variance estimation, and imputation protocols."
+        },
+        {
+          "id": "behav-sdrd-04",
+          "skillName": "Methodological Research & Policy Direction",
+          "domain": "Behavioural and Managerial Competencies",
+          "targetLevel": 5,
+          "description": "Authoring NSS survey methodology manuals, presenting to National Statistical Commission, and international harmonisation."
         }
       ]
     }

@@ -126,6 +126,34 @@
           "duration": "4 Hours"
         }
       ]
+    },
+    {
+      "id": "sdrd",
+      "code": "SDRD-NSSO",
+      "name": "Survey Design & Research Division (SDRD), NSSO",
+      "mandate": "Formulation of sample design, development of survey concepts, questionnaire schedules, estimation procedures, and methodological research.",
+      "headquarters": "Mahalanobis Bhavan, 164 Gopal Lal Tagore Road, Kolkata",
+      "totalOfficers": 280,
+      "readinessScore": 86.5,
+      "domainScores": {
+        "Statistical Competencies": 94.0,
+        "Technical Competencies": 82.0,
+        "Digital Governance": 76.5,
+        "Behavioural & Managerial": 85.0
+      },
+      "criticalBottlenecks": [
+        "Small Area Estimation (SAE) models for district-level Sustainable Development Goal (SDG) tracking",
+        "Total Survey Error (TSE) quantification across mixed-mode digital CAPI rounds"
+      ],
+      "priorityCourses": [
+        {
+          "courseId": "nssta-stat-01",
+          "title": "Advanced Sampling Theory & Small Area Estimation",
+          "provider": "NSSTA TPAC",
+          "targetOfficers": 110,
+          "duration": "14 Hours"
+        }
+      ]
     }
   ],
   "regionalCircles": [

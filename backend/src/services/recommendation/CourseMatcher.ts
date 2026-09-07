@@ -109,6 +109,16 @@ const CADRE_BENCHMARKS: Record<string, { division: string; defaultTargetLevel: n
     defaultTargetLevel: 5,
     focusDomains: ['Statistical Competencies', 'Technical Competencies', 'Digital Governance', 'Behavioural and Managerial'],
   },
+  'Director (ISS)': {
+    division: 'Data Informatics & Innovation Division (DIID)',
+    defaultTargetLevel: 5,
+    focusDomains: ['Statistical Competencies', 'Technical Competencies', 'Digital Governance', 'Behavioural and Managerial'],
+  },
+  'Joint Director [SDRD] (ISS)': {
+    division: 'Survey Design & Research Division (SDRD), NSSO',
+    defaultTargetLevel: 5,
+    focusDomains: ['Statistical Competencies', 'Technical Competencies', 'Digital Governance', 'Behavioural and Managerial'],
+  },
 };
 
 

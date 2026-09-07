@@ -18,6 +18,7 @@ export const DEMO_OFFICERS: DemoOfficer[] = [
   { id: 'sso', name: 'Ananya Mehta', designation: 'Senior Statistical Officer (SSO)', division: 'Data Processing Division (DPD), NSSO', cadre: 'Subordinate Statistical Service (SSS)', parichayId: 'PARICHAY_2088_NSSO' },
   { id: 'assistant-director', name: 'Rohan Iyer', designation: 'Assistant Director (ISS)', division: 'National Accounts Division (NAD)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_3612_ISS' },
   { id: 'director', name: 'Kavita Rao', designation: 'Director (ISS)', division: 'Data Informatics & Innovation Division (DIID)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_4820_ISS' },
+  { id: 'joint-director', name: 'Dr. Rajeshwari Nair', designation: 'Joint Director [SDRD] (ISS)', division: 'Survey Design & Research Division (SDRD), NSSO', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_5914_ISS' },
 ];
 
 interface LoginPageProps {

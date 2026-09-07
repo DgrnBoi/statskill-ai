@@ -141,6 +141,16 @@ const MOSPI_CADRES_DATA: Record<string, { division: string; description: string;
       { id: 'dir-4', skillName: 'Strategic Leadership & Change Management', targetLevel: 5, category: 'Behavioural and Managerial', description: 'Driving organizational transformation, cross-departmental coordination, and institutional capacity building.' },
     ],
   },
+  'Joint Director [SDRD] (ISS)': {
+    division: 'Survey Design & Research Division (SDRD), NSSO',
+    description: 'Senior research leadership responsible for national survey sampling design, questionnaire formulation, variance estimation, and total survey error modeling.',
+    competencies: [
+      { id: 'sdrd-1', skillName: 'Survey Design & Sampling Theory', targetLevel: 5, category: 'Statistical Competencies', description: 'Advanced probability sampling, multi-stage stratification, and optimal allocation across national domains.' },
+      { id: 'sdrd-2', skillName: 'Questionnaire & Instrument Design', targetLevel: 4, category: 'Technical Competencies', description: 'Cognitive pre-testing of survey schedules, recall period calibration, and measurement error mitigation.' },
+      { id: 'sdrd-3', skillName: 'Non-Sampling Error & Variance Estimation', targetLevel: 5, category: 'Statistical Competencies', description: 'Jackknife and bootstrap replication methods, sub-sample variance estimation, and imputation protocols.' },
+      { id: 'sdrd-4', skillName: 'Methodological Research & Policy Direction', targetLevel: 5, category: 'Behavioural and Managerial', description: 'Authoring NSS survey methodology manuals, presenting to National Statistical Commission, and international harmonisation.' },
+    ],
+  },
 };
 
 /**

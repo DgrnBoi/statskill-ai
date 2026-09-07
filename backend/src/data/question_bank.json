@@ -715,5 +715,77 @@
         "recommendedCourseTitle": "test_asi_doc.txt"
       }
     }
+  },
+  {
+    "id": "qb-sdrd-001",
+    "courseId": "Survey Design & Sampling Theory",
+    "topic": "Survey Design & Sampling Theory",
+    "bloomLevel": "Analysis",
+    "question": "In multi-stage stratified survey sampling for NSS rounds, under what condition does Neyman Optimal Allocation allocate more sample units to a stratum?",
+    "options": [
+      "When the stratum has a larger population and higher intra-stratum standard deviation",
+      "When the sampling cost per unit in the stratum is exceptionally high",
+      "When the stratum is completely homogeneous with zero variance",
+      "When the sampling frame consists solely of urban enterprises"
+    ],
+    "correctAnswer": "When the stratum has a larger population and higher intra-stratum standard deviation",
+    "explanation": "Neyman optimal allocation dictates that sample size n_h is proportional to N_h * S_h (stratum population size multiplied by stratum standard deviation), allocating more units to larger and more variable strata.",
+    "sourceCitation": "SDRD Sampling Methodology Handbook, Chapter 5: Optimal Allocation",
+    "distractorAnalysis": {
+      "When the sampling cost per unit in the stratum is exceptionally high": {
+        "misconception": "Confusing Neyman allocation (which ignores unit cost) with Optimum Cost Allocation (which allocates fewer units when cost is high).",
+        "remedialSkill": "Survey Design & Sampling Theory",
+        "recommendedCourseId": "nssta-stat-01",
+        "recommendedCourseTitle": "Advanced Sampling Theory & Small Area Estimation"
+      },
+      "When the stratum is completely homogeneous with zero variance": {
+        "misconception": "Failing to recognize that zero stratum variance requires only 1 sample unit, not more sample allocation.",
+        "remedialSkill": "Survey Design & Sampling Theory",
+        "recommendedCourseId": "nssta-stat-01",
+        "recommendedCourseTitle": "Advanced Sampling Theory & Small Area Estimation"
+      },
+      "When the sampling frame consists solely of urban enterprises": {
+        "misconception": "Assuming geographic or enterprise categorization alone dictates mathematical sample allocation without variance weighting.",
+        "remedialSkill": "Survey Design & Sampling Theory",
+        "recommendedCourseId": "nssta-stat-01",
+        "recommendedCourseTitle": "Advanced Sampling Theory & Small Area Estimation"
+      }
+    }
+  },
+  {
+    "id": "qb-sdrd-002",
+    "courseId": "Survey Design & Sampling Theory",
+    "topic": "Non-Sampling Error & Variance Estimation",
+    "bloomLevel": "Evaluate",
+    "question": "Why is the Jackknife / Linearization replication method preferred over simple random sampling variance formulas in NSS multi-stage designs?",
+    "options": [
+      "Because complex clustering and unequal selection probabilities violate SRS independence assumptions",
+      "Because Jackknife eliminates the need to collect First Stage Unit listing data",
+      "Because simple random sampling variance formulas always produce zero standard error",
+      "Because Jackknife allows combining household data without survey multipliers"
+    ],
+    "correctAnswer": "Because complex clustering and unequal selection probabilities violate SRS independence assumptions",
+    "explanation": "Multi-stage clustered and stratified designs induce intra-cluster correlation and unequal inclusion probabilities, causing standard SRS variance formulas to severely underestimate standard errors.",
+    "sourceCitation": "NSS Survey Design Guidelines, Section 7: Variance Estimation in Complex Surveys",
+    "distractorAnalysis": {
+      "Because Jackknife eliminates the need to collect First Stage Unit listing data": {
+        "misconception": "Confusing post-survey variance estimation techniques with primary sampling frame listing requirements.",
+        "remedialSkill": "Non-Sampling Error & Variance Estimation",
+        "recommendedCourseId": "nssta-stat-02",
+        "recommendedCourseTitle": "NSSO Multistage Stratified Sampling & Listing Masterclass"
+      },
+      "Because simple random sampling variance formulas always produce zero standard error": {
+        "misconception": "Believing SRS formulas produce zero error rather than negatively biased (underestimated) variance.",
+        "remedialSkill": "Non-Sampling Error & Variance Estimation",
+        "recommendedCourseId": "nssta-stat-02",
+        "recommendedCourseTitle": "NSSO Multistage Stratified Sampling & Listing Masterclass"
+      },
+      "Because Jackknife allows combining household data without survey multipliers": {
+        "misconception": "Incorrectly assuming resampling variance methods remove the requirement for inflation factors.",
+        "remedialSkill": "Non-Sampling Error & Variance Estimation",
+        "recommendedCourseId": "nssta-stat-02",
+        "recommendedCourseTitle": "NSSO Multistage Stratified Sampling & Listing Masterclass"
+      }
+    }
   }
 ]
