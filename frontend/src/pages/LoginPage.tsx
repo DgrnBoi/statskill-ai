@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, ChevronRight, Landmark, LockKeyhole, Smartphone, UserRound, UserPlus, Search, ShieldCheck, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Building2, ChevronRight, Landmark, LockKeyhole, Smartphone, UserRound, UserPlus, Search, ShieldCheck, RefreshCw, Sparkles } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -47,8 +47,12 @@ const PRESET_DESIGNATIONS = [
   'Joint Director (ISS)',
   'Director (ISS)',
   'Director [DIID] (ISS)',
-  'Director [Training] (ISS)',
-  'Chief Statistician of India',
+  'Agricultural Statistics Specialist',
+  'Price Statistics & CPI Modeler',
+  'National Accounts & Macro Modeler',
+  'GIS & Spatial Survey Officer',
+  'Demographic & Social Statistics Officer',
+  'Custom Role / Other Designation...',
 ];
 
 interface LoginPageProps {
@@ -64,11 +68,17 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
-  // Dynamic Filtering & Tab Mode State
-  const [mode, setMode] = useState<'select' | 'register'>('select');
+  // Dynamic Filtering & Tab Mode State (select | quick | register)
+  const [mode, setMode] = useState<'select' | 'quick' | 'register'>('select');
   const [selectedDivision, setSelectedDivision] = useState<string>('All Divisions');
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
+
+  // Quick Role Access Form State
+  const [quickRole, setQuickRole] = useState(PRESET_DESIGNATIONS[0]);
+  const [isCustomRole, setIsCustomRole] = useState(false);
+  const [customRoleInput, setCustomRoleInput] = useState('');
+  const [quickName, setQuickName] = useState('');
 
   // New Officer Registration Form State
   const [regName, setRegName] = useState('');
@@ -139,6 +149,65 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
       return matchesDivision && matchesSearch;
     });
   }, [officersList, selectedDivision, searchFilter]);
+
+  const handleQuickRoleStart = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    const activeDesignation = isCustomRole ? (customRoleInput.trim() || 'Statistical Officer') : quickRole;
+    if (isCustomRole && !customRoleInput.trim()) {
+      setError('Please enter your custom role designation.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const activeName = quickName.trim() || `Officer (${activeDesignation})`;
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const isIss = activeDesignation.toLowerCase().includes('iss') || activeDesignation.toLowerCase().includes('director');
+    const cadre = isIss ? 'Indian Statistical Service (ISS)' : 'Subordinate Statistical Service (SSS)';
+    const parichayId = `PARICHAY_${randomSuffix}_${isIss ? 'ISS' : 'NSSO'}`;
+
+    const quickOfficer: DemoOfficer = {
+      id: `dyn_${randomSuffix}`,
+      name: activeName,
+      designation: activeDesignation,
+      division: 'Official Statistics Division, MoSPI',
+      cadre,
+      parichayId,
+      email: `${activeName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@mospi.gov.in`,
+      mobile: `98${Math.floor(10000000 + Math.random() * 90000000)}`,
+      location: 'New Delhi',
+      experienceYears: activeDesignation.toLowerCase().includes('director') ? 8 : 4,
+    };
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/custom-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ officer: quickOfficer, method }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) {
+          window.localStorage.setItem('auth_token', data.token);
+        }
+      }
+
+      setOfficersList((prev) => [quickOfficer, ...prev]);
+      setSelectedOfficer(quickOfficer);
+      await onAuthenticate?.(quickOfficer, method);
+    } catch (cause) {
+      setSelectedOfficer(quickOfficer);
+      try {
+        await onAuthenticate?.(quickOfficer, method);
+      } catch (innerCause) {
+        setError(innerCause instanceof Error ? innerCause.message : 'Quick role start encountered an issue.');
+        setIsSubmitting(false);
+      }
+    }
+  };
 
   const authenticate = async () => {
     setIsSubmitting(true);
@@ -258,14 +327,14 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             </div>
           </div>
 
-          {/* Mode Switcher: Directory vs New Officer Registration */}
+          {/* Mode Switcher: Directory vs Quick Role Access vs Full Registration */}
           <div className="flex rounded-lg bg-slate-100 p-1 mb-4 border border-slate-200" role="tablist">
             <button
               type="button"
               role="tab"
               aria-selected={mode === 'select'}
               onClick={() => { setMode('select'); setError(null); }}
-              className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 mode === 'select'
                   ? 'bg-white text-[#0B2E63] shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -277,9 +346,23 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             <button
               type="button"
               role="tab"
+              aria-selected={mode === 'quick'}
+              onClick={() => { setMode('quick'); setError(null); }}
+              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                mode === 'quick'
+                  ? 'bg-white text-[#0B2E63] shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+              <span>Select Role & Start</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={mode === 'register'}
               onClick={() => { setMode('register'); setError(null); }}
-              className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 mode === 'register'
                   ? 'bg-white text-[#0B2E63] shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -308,7 +391,90 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             </button>
           </div>
 
-          {mode === 'select' ? (
+          {mode === 'quick' ? (
+            <form onSubmit={handleQuickRoleStart} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Select Official Cadre / Role <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={isCustomRole ? 'Custom Role / Other Designation...' : quickRole}
+                  onChange={(e) => {
+                    if (e.target.value === 'Custom Role / Other Designation...') {
+                      setIsCustomRole(true);
+                    } else {
+                      setIsCustomRole(false);
+                      setQuickRole(e.target.value);
+                    }
+                  }}
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0B2E63]"
+                  aria-label="Select official role"
+                >
+                  {PRESET_DESIGNATIONS.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+
+              {isCustomRole && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Enter Custom Designation / Specialization <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., Agricultural Statistics Specialist, Macro Nowcasting Modeler..."
+                    value={customRoleInput}
+                    onChange={(e) => setCustomRoleInput(e.target.value)}
+                    className="w-full px-3 py-2 bg-amber-50/50 border border-amber-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    aria-label="Custom role designation"
+                  />
+                  <p className="text-[11px] text-amber-700 mt-1">
+                    StatSkill AI will dynamically synthesize 4-pillar FRAC competencies tailored to this role.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Officer Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Officer Sunthankar (defaults if left blank)"
+                  value={quickName}
+                  onChange={(e) => setQuickName(e.target.value)}
+                  className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0B2E63]"
+                  aria-label="Officer name"
+                />
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600 space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-[#0B2E63]">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Instant 4-Pillar Dynamic Evaluation Engine</span>
+                </div>
+                <p>
+                  Your dynamic workspace synthesizes Statistical, Technical, Digital Governance, and Behavioural competencies without requiring pre-saved profiles.
+                </p>
+              </div>
+
+              {error && <p role="alert" className="login-error">{error}</p>}
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                isLoading={isSubmitting}
+                className="w-full mt-1"
+              >
+                <Sparkles className="h-4 w-4 mr-1.5 text-amber-300" />
+                Launch Dynamic Assessment Workspace
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </form>
+          ) : mode === 'select' ? (
             <>
               {/* Filter and Search Controls */}
               <div className="space-y-2 mb-3">

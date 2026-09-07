@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { userDb } from '../../db/UserDatabase';
+import { CompetencyEngine } from '../CompetencyEngine';
 
 export interface CatalogCourse {
   id: string;
@@ -185,6 +186,7 @@ export interface AssessmentAnalysisResult {
 
 export class CourseMatcherService {
   private courses: CatalogCourse[] = [];
+  private competencyEngine: CompetencyEngine = new CompetencyEngine();
   private progressionData: {
     version: string;
     totalMapped: number;
@@ -374,35 +376,31 @@ export class CourseMatcherService {
     };
     const assignedDivision = cadreInfo.division;
 
+    // Derive dynamic 4-pillar competencies for this designation
+    const competencies = await this.competencyEngine.getRequiredSkillsForRole(designation);
+
     // Identify competency gaps
     const identifiedGaps: CompetencyGapInfo[] = [];
     let totalTarget = 0;
     let totalCurrent = 0;
 
-    const defaultSkills = [
-      { name: 'Survey Design & Sampling', category: 'Statistical Competencies', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 4 : 3 },
-      { name: 'CAPI & Digital Field Enumeration', category: 'Technical Competencies', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 3 : 4 },
-      { name: 'Data Privacy & DPDPA 2023', category: 'Digital Governance', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 3 : 2 },
-      { name: 'Public Ethics & Field Communication', category: 'Behavioural and Managerial', target: (designation.includes('Deputy') || designation.includes('Assistant')) ? 4 : designation.includes('Director') ? 5 : designation.includes('Senior') ? 4 : 3 },
-    ];
-
-    defaultSkills.forEach((skill) => {
-      const current = proficiencies[skill.name] ?? Math.max(1, skill.target - 1);
-      totalTarget += skill.target;
+    competencies.forEach((comp) => {
+      const current = proficiencies[comp.skillName] ?? Math.max(1, comp.targetLevel - 1);
+      totalTarget += comp.targetLevel;
       totalCurrent += current;
 
-      if (current < skill.target) {
+      if (current < comp.targetLevel) {
         identifiedGaps.push({
-          skillName: skill.name,
-          category: skill.category,
+          skillName: comp.skillName,
+          category: comp.category,
           currentLevel: current,
-          targetLevel: skill.target,
-          gap: skill.target - current,
+          targetLevel: comp.targetLevel,
+          gap: comp.targetLevel - current,
         });
       }
     });
 
-    const overallReadiness = Math.min(100, Math.round((totalCurrent / totalTarget) * 100));
+    const overallReadiness = Math.min(100, Math.round((totalCurrent / Math.max(1, totalTarget)) * 100));
 
     // Used course IDs to ensure deduplication across tiers
     const usedCourseIds = new Set<string>();
@@ -587,6 +585,14 @@ export class CourseMatcherService {
     const updatedProficiency: Record<string, number> = { ...currentProficiency };
     const misconceptionsFound: MisconceptionDiagnosticRecord[] = [];
 
+    // Derive 4-pillar competencies for this cadre and ensure baseline initialization
+    const cadreCompetencies = await this.competencyEngine.getRequiredSkillsForRole(cadre);
+    cadreCompetencies.forEach((comp) => {
+      if (typeof updatedProficiency[comp.skillName] !== 'number') {
+        updatedProficiency[comp.skillName] = Math.max(1, comp.targetLevel - 1);
+      }
+    });
+
     // Load question bank for fallback distractor search if needed
     let bankQuestions: any[] = [];
     try {
@@ -598,14 +604,29 @@ export class CourseMatcherService {
 
     // 1. Process each question answer
     for (const ans of answers) {
-      const topicKey = ans.topic || 'Survey Design & Sampling';
+      const topicKey = ans.topic || cadreCompetencies[0]?.skillName || 'Survey Design & Sampling';
+
+      // Find matching cadre competency if exists
+      const matchedComp = cadreCompetencies.find(
+        (c) =>
+          c.skillName.toLowerCase() === topicKey.toLowerCase() ||
+          topicKey.toLowerCase().includes(c.skillName.toLowerCase()) ||
+          c.skillName.toLowerCase().includes(topicKey.toLowerCase())
+      );
+      const targetSkillKey = matchedComp ? matchedComp.skillName : topicKey;
 
       if (ans.isCorrect) {
         // Increment proficiency on demonstrated mastery
-        updatedProficiency[topicKey] = Math.min(5, (updatedProficiency[topicKey] || 3) + 1);
+        updatedProficiency[targetSkillKey] = Math.min(5, (updatedProficiency[targetSkillKey] || 3) + 1);
+        if (targetSkillKey !== topicKey) {
+          updatedProficiency[topicKey] = Math.min(5, (updatedProficiency[topicKey] || 3) + 1);
+        }
       } else {
         // Decrement proficiency on identified gap
-        updatedProficiency[topicKey] = Math.max(1, (updatedProficiency[topicKey] || 3) - 1);
+        updatedProficiency[targetSkillKey] = Math.max(1, (updatedProficiency[targetSkillKey] || 3) - 1);
+        if (targetSkillKey !== topicKey) {
+          updatedProficiency[topicKey] = Math.max(1, (updatedProficiency[topicKey] || 3) - 1);
+        }
 
         // Find distractor diagnostic info
         let diag = ans.distractorAnalysis?.[ans.selectedOption];
@@ -619,8 +640,8 @@ export class CourseMatcherService {
         }
 
         const misconception = diag?.misconception || ("Misconception identified in " + topicKey + " enumeration protocols.");
-        const remedialSkill = diag?.remedialSkill || topicKey;
-        const remedialCourseTitle = diag?.recommendedCourseTitle || ("Remedial Module: " + topicKey);
+        const remedialSkill = diag?.remedialSkill || targetSkillKey;
+        const remedialCourseTitle = diag?.recommendedCourseTitle || ("Remedial Module: " + targetSkillKey);
         const remedialCourseId = diag?.recommendedCourseId || 'nsso-sampling-201';
 
         misconceptionsFound.push({

@@ -244,10 +244,10 @@ describe('StatSkill AI - Zero-Mock Algorithmic Dynamism & Custom User Proof Suit
   describe('6. Dynamic 4-Tier ZPD Structured Learning Pathway Generation', () => {
     it('dynamically computes gaps, readiness, and tier distribution for Dr. Vikram Seth', async () => {
       const lowProficiency = {
-        'Survey Design & Sampling': 1,
-        'CAPI & Digital Field Enumeration': 2,
-        'Data Privacy & DPDPA 2023': 2,
-        'Public Ethics & Field Communication': 2,
+        'Price Statistics & Index Number Theory': 1,
+        'High-Frequency Econometric Modeling': 1,
+        'Official Dissemination & Data Governance': 2,
+        'Inter-Ministerial Stakeholder Consultation': 2,
       };
 
       const pathwayLow = await matcher.generatePersonalisedPathway('Deputy Director [Price Statistics] (ISS)', lowProficiency);
@@ -271,10 +271,10 @@ describe('StatSkill AI - Zero-Mock Algorithmic Dynamism & Custom User Proof Suit
 
       // Compare readiness when proficiency increases
       const highProficiency = {
-        'Survey Design & Sampling': 4,
-        'CAPI & Digital Field Enumeration': 4,
-        'Data Privacy & DPDPA 2023': 4,
-        'Public Ethics & Field Communication': 4,
+        'Price Statistics & Index Number Theory': 4,
+        'High-Frequency Econometric Modeling': 4,
+        'Official Dissemination & Data Governance': 4,
+        'Inter-Ministerial Stakeholder Consultation': 4,
       };
 
       const pathwayHigh = await matcher.generatePersonalisedPathway('Deputy Director [Price Statistics] (ISS)', highProficiency);
@@ -313,9 +313,123 @@ describe('StatSkill AI - Zero-Mock Algorithmic Dynamism & Custom User Proof Suit
     it('dynamically resolves competencies for an arbitrary non-listed role via fallback', async () => {
       const competencies = await competencyEngine.getRequiredSkillsForRole('Chief Statistical Strategist (NITI Aayog)');
 
-      expect(competencies.length).toBeGreaterThan(0);
+      expect(competencies.length).toBe(4);
       expect(competencies[0].skillName).toBeDefined();
-      expect(competencies[0].targetLevel).toBeDefined();
+      expect(competencies[0].targetLevel).toBe(5); // Chief -> Level 5
+    });
+  });
+
+  describe('8. Dynamic 4-Pillar FRAC Synthesis for Arbitrary & Novel Roles', () => {
+    it('dynamically synthesizes 4 distinct pillars for Agricultural Statistics Specialist', async () => {
+      const competencies = await competencyEngine.getRequiredSkillsForRole('Agricultural Statistics Specialist');
+
+      expect(competencies).toHaveLength(4);
+      const categories = competencies.map((c) => c.category);
+      expect(categories).toContain('Statistical Competencies');
+      expect(categories).toContain('Technical Competencies');
+      expect(categories).toContain('Digital Governance');
+      expect(categories).toContain('Behavioural and Managerial');
+
+      const statComp = competencies.find((c) => c.category === 'Statistical Competencies');
+      expect(statComp?.skillName).toContain('Agricultural');
+      expect(statComp?.targetLevel).toBe(4); // Specialist -> Level 4
+    });
+
+    it('dynamically synthesizes 4 distinct pillars for GIS & Spatial Survey Analyst', async () => {
+      const competencies = await competencyEngine.getRequiredSkillsForRole('GIS & Spatial Survey Analyst');
+
+      expect(competencies).toHaveLength(4);
+      const statComp = competencies.find((c) => c.category === 'Statistical Competencies');
+      expect(statComp?.skillName).toContain('Spatial');
+
+      const techComp = competencies.find((c) => c.category === 'Technical Competencies');
+      expect(techComp?.skillName).toContain('GIS');
+    });
+
+    it('dynamically synthesizes 4 distinct pillars for Director of Macro Nowcasting', async () => {
+      const competencies = await competencyEngine.getRequiredSkillsForRole('Director of Macro Nowcasting');
+
+      expect(competencies).toHaveLength(4);
+      const statComp = competencies.find((c) => c.category === 'Statistical Competencies');
+      expect(statComp?.skillName).toContain('National Accounts');
+      expect(statComp?.targetLevel).toBe(5); // Director -> Level 5
+
+      const behavComp = competencies.find((c) => c.category === 'Behavioural and Managerial');
+      expect(behavComp?.skillName).toContain('Strategic Leadership');
+      expect(behavComp?.targetLevel).toBe(5);
+    });
+  });
+
+  describe('9. Dynamic 4-Pillar Assessment Evaluation & Individual Isolation', () => {
+    it('dynamically evaluates 4 questions across all 4 pillars and updates proficiencies independently', async () => {
+      const novelRole = 'Agricultural Statistics Specialist';
+      const answers: AssessmentAnswerSubmission[] = [
+        {
+          questionText: 'How is area enumeration conducted in crop cutting experiments?',
+          selectedOption: 'Stratified multi-stage cluster sampling with random field plots',
+          correctAnswer: 'Stratified multi-stage cluster sampling with random field plots',
+          isCorrect: true,
+          topic: 'Agricultural Statistics & Crop Yield Estimation',
+        },
+        {
+          questionText: 'Which CAPI mobile validation rule flags impossible crop yields?',
+          selectedOption: 'Range bounding and historical outlier thresholds',
+          correctAnswer: 'Range bounding and historical outlier thresholds',
+          isCorrect: true,
+          topic: 'Statistical Data Analytics (R & Python)',
+        },
+        {
+          questionText: 'Under DPDPA 2023, how must farmer landholding identifiers be anonymized?',
+          selectedOption: 'Store in plain text on local tablets',
+          correctAnswer: 'Pseudonymize with cryptographic hash prior to cloud ingestion',
+          isCorrect: false,
+          topic: 'Data Privacy & DPDPA 2023 Compliance',
+          distractorAnalysis: {
+            'Store in plain text on local tablets': {
+              misconception: 'Confusing unencrypted local storage with statutory data fiduciary requirements under DPDPA 2023.',
+              remedialSkill: 'Data Privacy & DPDPA 2023 Compliance',
+              recommendedCourseId: 'dpdpa-field-101',
+              recommendedCourseTitle: 'DPDPA 2023 Compliance for Field Officers',
+            },
+          },
+        },
+        {
+          questionText: 'When presenting crop yield estimates to agricultural policy teams, what is required?',
+          selectedOption: 'Transparent confidence intervals and objective standard errors',
+          correctAnswer: 'Transparent confidence intervals and objective standard errors',
+          isCorrect: true,
+          topic: 'Evidence-Based Policy Writing & Cabinet Briefs',
+        },
+      ];
+
+      const initialProficiency = {
+        'Agricultural Statistics & Crop Yield Estimation': 3,
+        'Statistical Data Analytics (R & Python)': 3,
+        'Data Privacy & DPDPA 2023 Compliance': 3,
+        'Evidence-Based Policy Writing & Cabinet Briefs': 3,
+      };
+
+      const result = await matcher.analyzeAssessmentResults(
+        'AGRI_SPEC_882',
+        novelRole,
+        answers,
+        initialProficiency
+      );
+
+      expect(result.scorePercentage).toBe(75); // 3 out of 4 correct = 75%
+      expect(result.status).toBe('passed');
+      // Demonstrated mastery on correct answers -> incremented to 4
+      expect(result.updatedProficiency['Agricultural Statistics & Crop Yield Estimation']).toBe(4);
+      expect(result.updatedProficiency['Statistical Data Analytics (R & Python)']).toBe(4);
+      expect(result.updatedProficiency['Evidence-Based Policy Writing & Cabinet Briefs']).toBe(4);
+      // Gap on wrong answer -> decremented to 2
+      expect(result.updatedProficiency['Data Privacy & DPDPA 2023 Compliance']).toBe(2);
+
+      // Misconception correctly diagnosed with targeted remediation
+      expect(result.misconceptionsFound).toHaveLength(1);
+      expect(result.misconceptionsFound[0].misconception).toContain('DPDPA 2023');
+      expect(result.misconceptionsFound[0].remedialSkill).toBe('Data Privacy & DPDPA 2023 Compliance');
     });
   });
 });
+
