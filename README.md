@@ -10,7 +10,7 @@ StatSkill AI is an edge-first, sovereign competency evaluation and micro-learnin
 
 ## Key System Capabilities
 
-- **Hybrid Cloud-Edge AI Architecture**: We combine Google Gemini 1.5 Flash and Groq Qwen 2.5 for deep document RAG against technical statistical manuals, backed by a local 200+ question verified bank with Fisher-Yates anti-copy shuffling that executes 100% offline in low-connectivity field environments.
+- **Hybrid Cloud-Edge AI Architecture**: We combine Google Gemini 1.5 Flash and Groq Qwen 2.5 for deep document RAG against technical statistical manuals, utilizing structure-aware semantic chunking and BM25 relevance scoring (`DocumentChunker.ts`), backed by a local 200+ question verified bank with Fisher-Yates anti-copy shuffling that executes 100% offline in low-connectivity field environments.
 - **Competency-to-Curriculum Alignment (FRAC)**: We map cadre designations (Junior Statistical Officer, Senior Statistical Officer, Field Investigator, Deputy Director) directly to required proficiency benchmarks across survey design, sampling weights, national accounts, and price indices.
 - **Misconception-Level Distractor Analysis**: Rather than scoring answers as a binary pass/fail, our diagnostic engine identifies specific conceptual errors (such as confusing SRSWOR with PPS, or conflating CPI-U with CFPI) and presents actionable pedagogical guidance.
 - **Multilingual Course Discovery (Bhashini-Ready)**: We indexed 884 authentic government statistical courses with a phonetic Indic search lexicon supporting English, Hindi, and regional script transliterations.
@@ -60,13 +60,13 @@ The backend connects to PostgreSQL via Prisma ORM for persistent competency trac
 
 ## Verification & Automated Test Suites
 
-We enforce rigorous test coverage across both frontend and backend layers. The monorepo contains **86 automated tests with a 100% pass rate**.
+We enforce rigorous test coverage across both frontend and backend layers. The monorepo contains **94 automated tests with a 100% pass rate**.
 
 | Test Suite | Framework | Total Tests | Status | Coverage Areas |
 |:---|:---|:---:|:---:|:---|
 | **Frontend Unit & Integration** | Vitest + RTL | 57 | Passing | Tab switching, Cadre benchmarks, Shuffling, Radar math, Telemetry drawer, Modals, Audio synthesis |
-| **Backend Integration & APIs** | Jest + Supertest | 29 | Passing | xAPI formatting, Course recommendation math, Search transliteration, Security sanitization, RAG fallback |
-| **Total Automated Tests** | — | **86** | **100% Pass** | Full end-to-end regression verification |
+| **Backend Integration & APIs** | Jest + Supertest | 37 | Passing | Semantic chunking, BM25 ranking, xAPI formatting, Course recommendation math, Search transliteration, Security sanitization, RAG fallback |
+| **Total Automated Tests** | — | **94** | **100% Pass** | Full end-to-end regression verification |
 
 ---
 

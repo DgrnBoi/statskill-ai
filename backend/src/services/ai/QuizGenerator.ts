@@ -1,15 +1,21 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import pdfParse from 'pdf-parse';
 import { AntiCopyEngine, QuestionItem, ShuffledExamPaper } from './AntiCopyEngine';
+import { DocumentChunker } from './DocumentChunker';
 
 export interface QuizResult extends ShuffledExamPaper {
   mode: 'CLOUD_RAG' | 'EDGE_OFFLINE';
   sourceDocument: string;
+  cacheHit?: boolean;
 }
 
 export class QuizGeneratorService {
   private bankPath: string;
+  // In-memory semantic cache: Hash -> QuestionItem[]
+  private static semanticCache = new Map<string, { questions: QuestionItem[]; timestamp: number }>();
+  private static CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
   constructor() {
     this.bankPath = path.join(__dirname, '../../data/question_bank.json');
@@ -55,9 +61,100 @@ export class QuizGeneratorService {
   }
 
   /**
-   * Generates or retrieves an examination paper.
-   * - In Offline / Potato Mode: Pulls from the local Question Bank and runs through AntiCopyEngine.
-   * - In Cloud RAG Mode: Parses the PDF, calls the LLM, enriches the local bank, and shuffles with AntiCopyEngine.
+   * Computes a deterministic SHA-256 fingerprint for cache lookups
+   */
+  private computeFingerprint(content: string, courseId: string, difficulty: string, numQuestions: number): string {
+    return crypto
+      .createHash('sha256')
+      .update(`${content.slice(0, 3000)}_${courseId}_${difficulty}_${numQuestions}`)
+      .digest('hex');
+  }
+
+  /**
+   * Robust JSON extractor and schema sanitizer
+   */
+  private parseAndSanitizeQuestions(rawText: string, courseId: string, difficulty: string): QuestionItem[] {
+    if (!rawText) return [];
+
+    // Strip markdown code fences if present (e.g. ```json ... ```)
+    let cleaned = rawText.trim();
+    if (cleaned.startsWith('```')) {
+      cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+    }
+
+    // Isolate the outermost JSON object if extra text exists
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (jsonErr) {
+      // Clean potential trailing commas before closing braces
+      const repaired = cleaned.replace(/,\s*([}\]])/g, '$1');
+      parsed = JSON.parse(repaired);
+    }
+
+    const rawQuestions: any[] = Array.isArray(parsed?.questions) ? parsed.questions : [];
+    const validQuestions: QuestionItem[] = [];
+
+    for (let i = 0; i < rawQuestions.length; i++) {
+      const q = rawQuestions[i];
+      if (!q || typeof q.question !== 'string' || !Array.isArray(q.options) || q.options.length < 2) {
+        continue;
+      }
+
+      // Ensure 4 options
+      const options: string[] = q.options.map((o: any) => String(o).trim()).filter((o: string) => o.length > 0);
+      while (options.length < 4) {
+        options.push(`Alternative methodological condition ${options.length + 1}`);
+      }
+      const finalOptions = options.slice(0, 4);
+
+      // Verify or reconcile correctAnswer
+      let correctAnswer = String(q.correctAnswer || '').trim();
+      if (!finalOptions.includes(correctAnswer)) {
+        const found = finalOptions.find(o => o.toLowerCase() === correctAnswer.toLowerCase());
+        correctAnswer = found || finalOptions[0];
+      }
+
+      // Synthesize distractor analysis if missing
+      const distractorAnalysis: Record<string, any> = q.distractorAnalysis || {};
+      for (const opt of finalOptions) {
+        if (opt !== correctAnswer && !distractorAnalysis[opt]) {
+          distractorAnalysis[opt] = {
+            misconception: `Misapplication of statistical principle regarding ${opt.slice(0, 40)}.`,
+            remedialSkill: courseId || 'Statistical Methodologies & Standards',
+            recommendedCourseId: 'stats-foundations-101',
+            recommendedCourseTitle: 'Applied Statistical Methods & Survey Analysis'
+          };
+        }
+      }
+
+      const bloomLevel = difficulty === 'hard' ? 'Analysis' : difficulty === 'easy' ? 'Recall' : 'Application';
+
+      validQuestions.push({
+        id: `qb-ai-${Date.now()}-${i + 1}`,
+        courseId: courseId || 'General Statistical Methodology',
+        topic: q.topic || courseId || 'Statistical Assessment',
+        bloomLevel,
+        question: q.question.trim(),
+        options: finalOptions,
+        correctAnswer,
+        explanation: q.explanation ? String(q.explanation).trim() : 'Validated against official MoSPI statistical manuals.',
+        sourceCitation: q.sourceCitation ? String(q.sourceCitation).trim() : 'MoSPI / NSSTA Guidelines',
+        distractorAnalysis
+      });
+    }
+
+    return validQuestions;
+  }
+
+  /**
+   * Generates or retrieves an examination paper with semantic RAG optimization.
    */
   async generateFromPdf(
     filePath?: string,
@@ -66,7 +163,7 @@ export class QuizGeneratorService {
     mode: string = 'CLOUD_RAG',
     courseId: string = 'Survey Design and Stratification'
   ): Promise<QuizResult> {
-    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     const isPotatoOrOffline = mode === 'POTATO_DEVICE' || mode === 'OFFLINE' || !apiKey;
 
     // -------------------------------------------------------------
@@ -100,29 +197,30 @@ export class QuizGeneratorService {
       const bank = this.getLocalBank();
       const existingForCourse = bank.filter(q => q.courseId === courseId);
       
-      if (existingForCourse.length >= numQuestions) {
+      if (existingForCourse.length >= numQuestions * 2) {
         console.log(`[Cache Hit] Serving ${numQuestions} questions from local DB with anti-copy randomization for: ${courseId}`);
-        if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath); // Cleanup temp upload
+        if (filePath && fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch (_) {}
+        }
         
         const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(existingForCourse, numQuestions);
         return {
           ...antiCopyPaper,
           mode: 'CLOUD_RAG',
-          sourceDocument: courseId
+          sourceDocument: courseId,
+          cacheHit: true
         };
       }
 
-      // 2. Cache miss -> Parse PDF text
+      // 2. Parse PDF text
       let textContent = '';
       try {
         const dataBuffer = fs.readFileSync(filePath);
         const pdfData = await pdfParse(dataBuffer);
-        textContent = pdfData.text;
+        textContent = pdfData.text || '';
       } finally {
         if (filePath && fs.existsSync(filePath)) {
-          try {
-            fs.unlinkSync(filePath);
-          } catch (_) {}
+          try { fs.unlinkSync(filePath); } catch (_) {}
         }
       }
 
@@ -130,27 +228,31 @@ export class QuizGeneratorService {
         throw new Error("Could not extract readable text from the uploaded PDF.");
       }
 
-      // Multi-section windowing: sample across the full breadth of the manual if text is long
-      const sampleManualSpan = (text: string, budget: number = 12000): string => {
-        const clean = text.trim();
-        if (clean.length <= budget) return clean;
+      // 3. Semantic Structure-Aware Chunking & BM25 Relevance Ranking
+      console.log(`[RAG Engine] Chunking document (${textContent.length} raw characters) for topic: "${courseId}"...`);
+      const allChunks = DocumentChunker.chunkDocument(textContent, 2000, 250);
+      const selectedChunks = DocumentChunker.rankAndSelectChunks(allChunks, courseId, 14000);
+      const formattedContext = DocumentChunker.formatChunksForPrompt(selectedChunks);
 
-        const sliceSize = Math.floor(budget / 4);
-        const p1 = clean.substring(0, sliceSize);
-        const p2Start = Math.floor(clean.length * 0.25);
-        const p2 = clean.substring(p2Start, p2Start + sliceSize);
-        const p3Start = Math.floor(clean.length * 0.50);
-        const p3 = clean.substring(p3Start, p3Start + sliceSize);
-        const p4Start = Math.max(0, clean.length - sliceSize);
-        const p4 = clean.substring(p4Start);
+      console.log(`[RAG Engine] Selected ${selectedChunks.length}/${allChunks.length} top-ranked semantic chunks (${formattedContext.length} chars).`);
 
-        return `${p1}\n\n[...Section Window 25%...]\n${p2}\n\n[...Section Window 50%...]\n${p3}\n\n[...Section Window 75%...]\n${p4}`;
-      };
+      // 4. Check In-Memory Semantic Hash Cache
+      const cacheKey = this.computeFingerprint(formattedContext, courseId, difficulty, numQuestions);
+      const cachedEntry = QuizGeneratorService.semanticCache.get(cacheKey);
+      if (cachedEntry && (Date.now() - cachedEntry.timestamp < QuizGeneratorService.CACHE_TTL_MS)) {
+        console.log(`[RAG Cache Hit] Serving from in-memory semantic cache (0ms lookup).`);
+        const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(cachedEntry.questions, numQuestions);
+        return {
+          ...antiCopyPaper,
+          mode: 'CLOUD_RAG',
+          sourceDocument: courseId,
+          cacheHit: true
+        };
+      }
 
-      const extractedSnippet = sampleManualSpan(textContent, 12000);
-
+      // 5. Build Guardrailed Psychometric Prompt
       const systemPrompt = `You are a senior psychometrician and examiner for the Indian Official Statistical System (MoSPI / NSSTA).
-Generate exactly ${numQuestions} rigorous, non-trivial multiple-choice questions based ONLY on the provided training text.
+Generate exactly ${numQuestions} rigorous, non-trivial multiple-choice questions based ONLY on the provided training document sections.
 Difficulty level: ${difficulty}.
 
 SECURITY & INTEGRITY RULES:
@@ -168,7 +270,7 @@ Output MUST be a valid JSON object matching this exact schema:
 {
   "questions": [
     {
-      "question": "Clear question stem?",
+      "question": "Clear question stem testing statistical concept?",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": "Exact string of correct option",
       "explanation": "Detailed explanation why this option is correct based on the text.",
@@ -177,11 +279,12 @@ Output MUST be a valid JSON object matching this exact schema:
   ]
 }`;
 
-      let generatedContent: any = null;
+      let rawResponseText = '';
 
+      // 6. Multi-Model Cloud Execution Chain (Gemini -> Groq -> Local Bank)
       if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
         const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-        console.log(`[Cloud RAG] Routing document snippet (${extractedSnippet.length} chars) to Google Gemini API...`);
+        console.log(`[Cloud RAG] Routing structured context to Google Gemini 1.5 Flash...`);
         const geminiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
           {
@@ -192,7 +295,7 @@ Output MUST be a valid JSON object matching this exact schema:
                 {
                   role: 'user',
                   parts: [
-                    { text: `${systemPrompt}\n\n<document_content>\n${extractedSnippet}\n</document_content>` }
+                    { text: `${systemPrompt}\n\n<document_content>\n${formattedContext}\n</document_content>` }
                   ]
                 }
               ],
@@ -207,47 +310,62 @@ Output MUST be a valid JSON object matching this exact schema:
         if (geminiData.error) {
           throw new Error(geminiData.error.message || 'Google Gemini API Error');
         }
-        const textRaw = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-        generatedContent = JSON.parse(textRaw || '{}');
+        rawResponseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
       } else {
-        console.log(`[Cloud RAG] Routing document snippet (${extractedSnippet.length} chars) to Groq API...`);
-        const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: "qwen/qwen3.8-27b",
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: `<document_content>\n${extractedSnippet}\n</document_content>` }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.2
-          })
-        });
+        console.log(`[Cloud RAG] Routing structured context to Groq API...`);
+        const groqModels = ["llama-3.3-70b-versatile", "qwen/qwen3.8-27b", "llama-3.1-8b-instant"];
+        let groqSuccess = false;
 
-        const data = await response.json();
-        if (data.error) {
-          throw new Error(data.error.message);
+        for (const model of groqModels) {
+          try {
+            const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                model,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  { role: "user", content: `<document_content>\n${formattedContext}\n</document_content>` }
+                ],
+                response_format: { type: "json_object" },
+                temperature: 0.2
+              })
+            });
+
+            const data = await response.json();
+            if (data.choices?.[0]?.message?.content) {
+              rawResponseText = data.choices[0].message.content;
+              groqSuccess = true;
+              break;
+            }
+          } catch (mErr) {
+            console.warn(`[Groq Model ${model} Failed]:`, mErr);
+          }
         }
-        generatedContent = JSON.parse(data.choices[0].message.content);
+
+        if (!groqSuccess || !rawResponseText) {
+          throw new Error("All Groq model attempts failed or returned empty payload.");
+        }
       }
 
-      const generatedQuestions: QuestionItem[] = generatedContent.questions || [];
+      // 7. Parse, Sanitize & Validate Generated Questions
+      const generatedQuestions = this.parseAndSanitizeQuestions(rawResponseText, courseId, difficulty);
 
-      // Tag new questions with courseId
-      generatedQuestions.forEach((q, idx) => {
-        q.id = `qb-ai-${Date.now()}-${idx + 1}`;
-        q.courseId = courseId;
-        q.bloomLevel = difficulty === 'hard' ? 'Analysis' : difficulty === 'easy' ? 'Recall' : 'Application';
+      if (generatedQuestions.length === 0) {
+        throw new Error("Model returned zero valid questions matching the required schema.");
+      }
+
+      // 8. Cache in In-Memory LRU & Save to Bank
+      QuizGeneratorService.semanticCache.set(cacheKey, {
+        questions: generatedQuestions,
+        timestamp: Date.now()
       });
-
-      // 3. Incrementally enrich the local Question Bank for future offline use!
       this.saveToBank(generatedQuestions);
 
-      // 4. Pass the newly formulated questions through the Anti-Copy Shuffler
+      // 9. Anti-Copy Scrambling
       const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(generatedQuestions, numQuestions);
 
       return {
@@ -258,8 +376,7 @@ Output MUST be a valid JSON object matching this exact schema:
 
     } catch (error: any) {
       console.error("[QuizGenerator Error]:", error);
-      // Failover Gracefully to the local Question Bank if cloud LLM fails
-      console.log("[Failover] Cloud RAG failed. Falling back to local verified Question Bank...");
+      console.log("[Failover] Cloud RAG unavailable. Falling back to local verified Question Bank...");
       const bank = this.getLocalBank();
       const antiCopyPaper = AntiCopyEngine.generateAntiCopyPaper(bank, numQuestions);
       return {

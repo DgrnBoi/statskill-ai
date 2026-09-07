@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "pretest": "prisma generate",
     "test": "jest"
   },
   "type": "commonjs",
