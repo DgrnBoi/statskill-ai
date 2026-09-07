@@ -86,7 +86,7 @@ router.post('/inspect-document', handleSafeUpload, async (req, res) => {
     const lowerText = cleanedText.toLowerCase();
     const keywordDensity: Record<string, number> = {};
     for (const kw of statWords) {
-      const regex = new RegExp(`\\b${kw}\\b`, 'gi');
+      const regex = new RegExp(`\\b${kw}(?:s|es|ing|ed)?\\b`, 'gi');
       const matches = lowerText.match(regex);
       if (matches && matches.length > 0) {
         keywordDensity[kw] = matches.length;
