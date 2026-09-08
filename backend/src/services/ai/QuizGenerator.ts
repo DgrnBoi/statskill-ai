@@ -257,9 +257,9 @@ Section 5: Strategic Civil Service Leadership under Mission Karmayogi Capacity B
     // -------------------------------------------------------------
     if (activeApiKey && !isPotatoOrOffline) {
       try {
-        console.log(`[RAG Engine] Processing uploaded document (${textContent.length} raw characters) with Cloud AI...`);
+        console.log(`[RAG Engine] Processing uploaded document (${textContent.length} raw characters) with Cloud AI (Token Budget: 4500 chars)...`);
         const allChunks = DocumentChunker.chunkDocument(textContent, 2000, 250);
-        const selectedChunks = DocumentChunker.rankAndSelectChunks(allChunks, courseId, 14000);
+        const selectedChunks = DocumentChunker.rankAndSelectChunks(allChunks, courseId, 4500);
         const formattedContext = DocumentChunker.formatChunksForPrompt(selectedChunks);
 
         const cacheKey = this.computeFingerprint(formattedContext, courseId, difficulty, numQuestions);
@@ -342,7 +342,8 @@ Output MUST be a valid JSON object matching this exact schema:
                     ],
                     generationConfig: {
                       responseMimeType: 'application/json',
-                      temperature: 0.2
+                      temperature: 0.2,
+                      maxOutputTokens: 1024
                     }
                   })
                 }
@@ -378,7 +379,8 @@ Output MUST be a valid JSON object matching this exact schema:
                     { role: "user", content: `<document_content>\n${formattedContext}\n</document_content>` }
                   ],
                   response_format: { type: "json_object" },
-                  temperature: 0.2
+                  temperature: 0.2,
+                  max_tokens: 1024
                 })
               });
               const data = await response.json();

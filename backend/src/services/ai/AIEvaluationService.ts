@@ -569,7 +569,7 @@ Return ONLY a valid JSON object matching this schema:
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ role: 'user', parts: [{ text: prompt }] }],
-              generationConfig: { responseMimeType: 'application/json', temperature: 0.2 }
+              generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 1200 }
             })
           });
           const data = await res.json();

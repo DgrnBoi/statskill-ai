@@ -146,7 +146,7 @@ export class DocumentChunker {
   public static rankAndSelectChunks(
     chunks: DocumentChunk[], 
     queryTopic: string = '', 
-    totalBudgetChars: number = 14000
+    totalBudgetChars: number = 4500
   ): DocumentChunk[] {
     if (chunks.length === 0) return [];
 
