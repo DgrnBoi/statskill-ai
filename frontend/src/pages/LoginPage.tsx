@@ -4,6 +4,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { IndianFlag } from '../components/ui/IndianFlag';
 import { useUiPreferences } from '../contexts/UiPreferencesContext';
+import { apiUrl } from '../lib/api';
 
 export interface DemoOfficer {
   id: string;
@@ -19,7 +20,7 @@ export interface DemoOfficer {
 }
 
 export const DEMO_OFFICERS: DemoOfficer[] = [
-  { id: 'jso', name: 'Eshaan Sunthankar', designation: 'Junior Statistical Officer (JSO)', division: 'Field Operations Division (FOD), NSSO', cadre: 'Subordinate Statistical Service (SSS)', parichayId: 'PARICHAY_1042_NSSO' },
+  { id: 'jso', name: 'Rajesh Sharma', designation: 'Junior Statistical Officer (JSO)', division: 'Field Operations Division (FOD), NSSO', cadre: 'Subordinate Statistical Service (SSS)', parichayId: 'PARICHAY_1042_NSSO' },
   { id: 'sso', name: 'Ananya Mehta', designation: 'Senior Statistical Officer (SSO)', division: 'Data Processing Division (DPD), NSSO', cadre: 'Subordinate Statistical Service (SSS)', parichayId: 'PARICHAY_2088_NSSO' },
   { id: 'assistant-director', name: 'Rohan Iyer', designation: 'Assistant Director (ISS)', division: 'National Accounts Division (NAD)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_3612_ISS' },
   { id: 'director', name: 'Kavita Rao', designation: 'Director (ISS)', division: 'Data Informatics & Innovation Division (DIID)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_4820_ISS' },
@@ -96,7 +97,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
   const fetchRegisteredOfficers = async () => {
     setIsLoadingUsers(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/users');
+      const res = await fetch(apiUrl('/api/auth/users'));
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.users) && data.users.length > 0) {
@@ -184,7 +185,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/custom-login', {
+      const res = await fetch(apiUrl('/api/auth/custom-login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ officer: quickOfficer, method }),
@@ -252,7 +253,7 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
 
     try {
       // 1. Register with backend database
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+      const res = await fetch(apiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOfficerPayload),

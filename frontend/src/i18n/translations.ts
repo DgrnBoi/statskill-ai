@@ -98,13 +98,13 @@ export const translations = {
     footerA11yDisclaimer: 'Designed toward GIGW and WCAG accessibility guidance; formal conformance has not been certified.',
 
     // Login
-    loginPortalTitle: 'MeriPehchan · Jan Parichay',
+    loginPortalTitle: 'MeriPehchan · Jan Parichay SSO Adapter',
     backToPortal: 'Back to portal',
-    loginBadgeSso: 'National Statistical SSO Gateway',
+    loginBadgeSso: 'Simulated SSO Adapter (Integration-Ready)',
     loginTitle: 'Access your statistical learning workspace',
-    loginDescription: 'Authenticate using your official Jan Parichay credentials or register a dynamic officer profile to access your individualized FRAC competency matrix, diagnostic exam records, and 4-tier learning pathway.',
+    loginDescription: 'Demonstrates Jan Parichay SSO handoff and dynamic officer registration for individualized FRAC competency evaluations and 4-tier learning pathways.',
     loginMetaIdentity: 'Identity pattern',
-    loginMetaIdentityValue: 'Jan Parichay & Mobile OTP verification',
+    loginMetaIdentityValue: 'Jan Parichay SSO Adapter & Mobile OTP (Simulated)',
     loginMetaDatabase: 'Dynamic Database',
     loginMetaDatabaseValue: 'In-memory persistent user profiles with isolated competency history',
     loginMetaSecurity: 'Session Security',

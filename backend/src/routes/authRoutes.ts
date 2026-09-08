@@ -1,10 +1,16 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { userDb, UserRecord } from '../db/UserDatabase';
+import { getJwtSecret, requireAuth, AuthenticatedRequest } from '../middlewares/authMiddleware';
+import { validateBody, RegisterUserSchema, LoginUserSchema, DemoLoginSchema } from '../middlewares/validateRequest';
 
 const router = express.Router();
 
-// GET /api/auth/users (List all registered officers with optional search & division filter)
+/**
+ * GET /api/auth/users
+ * Returns sanitized directory listing of registered officers.
+ * Sensitive PII (raw mobile numbers and personal emails) is stripped to ensure data minimization (DPDP Act 2023).
+ */
 router.get('/users', (req, res) => {
   const { division, cadre, search } = req.query;
   const users = userDb.getAllUsers({
@@ -12,28 +18,54 @@ router.get('/users', (req, res) => {
     cadre: typeof cadre === 'string' ? cadre : undefined,
     search: typeof search === 'string' ? search : undefined,
   });
-  return res.status(200).json({ success: true, count: users.length, users });
+
+  const sanitizedUsers = users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    designation: u.designation,
+    division: u.division,
+    cadre: u.cadre,
+    location: u.location,
+    parichayId: u.parichayId,
+    experienceYears: u.experienceYears,
+  }));
+
+  return res.status(200).json({ success: true, count: sanitizedUsers.length, users: sanitizedUsers });
 });
 
-// GET /api/auth/user/:id (Get specific officer record)
+/**
+ * GET /api/auth/user/:id
+ * Get specific officer record.
+ */
 router.get('/user/:id', (req, res) => {
   const { id } = req.params;
   const user = userDb.getUserById(id) || userDb.getUserByParichayId(id);
   if (!user) {
     return res.status(404).json({ error: 'Officer profile not found.' });
   }
-  return res.status(200).json({ success: true, user });
+
+  const sanitized = {
+    id: user.id,
+    name: user.name,
+    designation: user.designation,
+    division: user.division,
+    cadre: user.cadre,
+    location: user.location,
+    parichayId: user.parichayId,
+    experienceYears: user.experienceYears,
+    proficiency: user.proficiency,
+  };
+
+  return res.status(200).json({ success: true, user: sanitized });
 });
 
-// POST /api/auth/register (Create new officer on the fly)
-router.post('/register', (req, res) => {
-  const { name, designation, division, cadre, parichayId, email, mobile, location, experienceYears } = req.body ?? {};
+/**
+ * POST /api/auth/register
+ * Registers a new officer with Zod validation & JWT issuance.
+ */
+router.post('/register', validateBody(RegisterUserSchema), (req, res) => {
+  const { name, designation, division, cadre, parichayId, email, mobile, location, experienceYears } = req.body;
 
-  if (!name || !designation) {
-    return res.status(400).json({ error: 'Officer name and designation are required for registration.' });
-  }
-
-  // Check if Parichay ID or email already exists
   if (parichayId && userDb.getUserByParichayId(parichayId)) {
     return res.status(409).json({ error: `Officer with Parichay ID ${parichayId} is already registered.` });
   }
@@ -53,22 +85,18 @@ router.post('/register', (req, res) => {
     experienceYears,
   });
 
-  const signingSecret = process.env.JWT_SECRET;
-  if (!signingSecret) {
-    return res.status(503).json({ error: 'Authentication signing secret is not configured.' });
-  }
+  const secret = getJwtSecret();
+  const token = jwt.sign({ id: newUser.id, parichayId: newUser.parichayId, name: newUser.name, designation: newUser.designation, division: newUser.division, cadre: newUser.cadre, authMethod: 'parichay-id' }, secret, { expiresIn: '8h' });
 
-  const token = jwt.sign({ ...newUser, authMethod: 'parichay-id' }, signingSecret, { expiresIn: '8h' });
   return res.status(201).json({ success: true, token, officer: newUser, expiresIn: 28800 });
 });
 
-// POST /api/auth/login (Login by Parichay ID or Mobile OTP)
-router.post('/login', (req, res) => {
-  const { identifier, method = 'parichay-id' } = req.body ?? {};
-
-  if (!identifier) {
-    return res.status(400).json({ error: 'Parichay ID, email, or mobile number is required to sign in.' });
-  }
+/**
+ * POST /api/auth/login
+ * Simulates Jan Parichay SSO authentication (parichay-id or mobile-otp).
+ */
+router.post('/login', validateBody(LoginUserSchema), (req, res) => {
+  const { identifier, method } = req.body;
 
   const user = userDb.getUserByParichayId(identifier) || userDb.getUserByEmail(identifier) || userDb.getUserByMobile(identifier) || userDb.getUserById(identifier);
 
@@ -76,24 +104,19 @@ router.post('/login', (req, res) => {
     return res.status(404).json({ error: 'No registered officer found with the provided credentials.' });
   }
 
-  const signingSecret = process.env.JWT_SECRET;
-  if (!signingSecret) {
-    return res.status(503).json({ error: 'Authentication signing secret is not configured.' });
-  }
+  const secret = getJwtSecret();
+  const token = jwt.sign({ id: user.id, parichayId: user.parichayId, name: user.name, designation: user.designation, division: user.division, cadre: user.cadre, authMethod: method }, secret, { expiresIn: '8h' });
 
-  const token = jwt.sign({ ...user, authMethod: method }, signingSecret, { expiresIn: '8h' });
   return res.status(200).json({ success: true, token, officer: user, expiresIn: 28800 });
 });
 
-// POST /api/auth/demo-login (Backwards-compatible demo login lookup from DB)
-router.post('/demo-login', (req, res) => {
-  const { officerId, method = 'parichay-id' } = req.body ?? {};
+/**
+ * POST /api/auth/demo-login
+ * Fast demo login lookup supporting Jan Parichay SSO simulated presets.
+ */
+router.post('/demo-login', validateBody(DemoLoginSchema), (req, res) => {
+  const { officerId, method } = req.body;
 
-  if (!officerId || !['parichay-id', 'mobile-otp'].includes(method)) {
-    return res.status(400).json({ error: 'A valid demo officer and authentication method are required.' });
-  }
-
-  // Lookup by role shortcut or id in DB
   const roleMapping: Record<string, string> = {
     jso: 'PARICHAY_1042_NSSO',
     sso: 'PARICHAY_2088_NSSO',
@@ -106,7 +129,6 @@ router.post('/demo-login', (req, res) => {
   const targetParichayId = roleMapping[officerId] || officerId;
   let user = userDb.getUserByParichayId(targetParichayId) || userDb.getUserById(officerId);
 
-  // If not a known role shortcut and not an existing user in DB, reject invalid ID
   if (!user && !roleMapping[officerId]) {
     return res.status(400).json({ error: 'A valid demo officer and authentication method are required.' });
   }
@@ -119,12 +141,16 @@ router.post('/demo-login', (req, res) => {
     });
   }
 
-  const signingSecret = process.env.JWT_SECRET || 'statskill_default_jwt_secret_dev_2026';
-  const token = jwt.sign({ ...user, authMethod: method }, signingSecret, { expiresIn: '8h' });
+  const secret = getJwtSecret();
+  const token = jwt.sign({ id: user.id, parichayId: user.parichayId, name: user.name, designation: user.designation, division: user.division, cadre: user.cadre, authMethod: method }, secret, { expiresIn: '8h' });
+
   return res.status(200).json({ success: true, token, officer: user, expiresIn: 28800 });
 });
 
-// POST /api/auth/custom-login (Direct dynamic profile login)
+/**
+ * POST /api/auth/custom-login
+ * Dynamic profile custom login for testing multi-role scenarios.
+ */
 router.post('/custom-login', (req, res) => {
   const { officer, method = 'parichay-id' } = req.body ?? {};
 
@@ -132,11 +158,6 @@ router.post('/custom-login', (req, res) => {
     return res.status(400).json({ error: 'A valid officer profile containing at least name and designation is required.' });
   }
 
-  if (!['parichay-id', 'mobile-otp'].includes(method)) {
-    return res.status(400).json({ error: 'A valid authentication method (parichay-id or mobile-otp) is required.' });
-  }
-
-  // Check if already in DB or register
   let user = officer.parichayId ? userDb.getUserByParichayId(officer.parichayId) : undefined;
   if (!user) {
     user = userDb.registerUser(officer);
@@ -144,19 +165,27 @@ router.post('/custom-login', (req, res) => {
     user = userDb.updateUser(user.id, officer) || user;
   }
 
-  const signingSecret = process.env.JWT_SECRET;
-  if (!signingSecret) {
-    return res.status(503).json({ error: 'Authentication signing secret is not configured.' });
-  }
+  const secret = getJwtSecret();
+  const token = jwt.sign({ id: user.id, parichayId: user.parichayId, name: user.name, designation: user.designation, division: user.division, cadre: user.cadre, authMethod: method }, secret, { expiresIn: '8h' });
 
-  const token = jwt.sign({ ...user, authMethod: method }, signingSecret, { expiresIn: '8h' });
   return res.status(200).json({ success: true, token, officer: user, expiresIn: 28800 });
 });
 
-// PUT /api/auth/profile/:id (Update officer proficiencies or metadata)
-router.put('/profile/:id', (req, res) => {
+/**
+ * PUT /api/auth/profile/:id
+ * Protected endpoint: updates officer profile or proficiencies.
+ */
+router.put('/profile/:id', requireAuth, (req: AuthenticatedRequest, res) => {
   const { id } = req.params;
   const updates = req.body ?? {};
+
+  // Verify that authenticated user matches profile ID or is authorized
+  if (req.user?.id !== id && req.user?.parichayId !== id) {
+    const isRoleMatch = req.user?.cadre?.toLowerCase().includes('director') || req.user?.designation?.toLowerCase().includes('director');
+    if (!isRoleMatch) {
+      return res.status(403).json({ error: 'Forbidden. You may only update your own officer profile.' });
+    }
+  }
 
   const updated = userDb.updateUser(id, updates);
   if (!updated) {

@@ -9,6 +9,7 @@ import { OfflineStatusBar } from './components/ui/OfflineStatusBar';
 import { OnboardingModal, hasCompletedOnboarding } from './components/ui/OnboardingModal';
 import { UiPreferencesProvider, useUiPreferences } from './contexts/UiPreferencesContext';
 import { AppRouteState, navigateTo, parseRoute, PortalTab } from './lib/routing';
+import { apiUrl } from './lib/api';
 
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
@@ -88,7 +89,7 @@ function AppContent() {
   }, [language]);
 
   const handleDemoLogin = useCallback(async (officer: DemoOfficer, method: 'parichay-id' | 'mobile-otp') => {
-    const response = await fetch('http://localhost:5000/api/auth/demo-login', {
+    const response = await fetch(apiUrl('/api/auth/demo-login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ officerId: officer.id, method }),

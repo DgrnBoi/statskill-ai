@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { apiUrl } from '../../lib/api';
 import {
   BookOpen,
   Search,
@@ -44,7 +45,7 @@ export const KnowledgeLibrary: React.FC<KnowledgeLibraryProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/knowledge')
+    fetch(apiUrl('/api/knowledge'))
       .then((res) => res.json())
       .then((data) => {
         setCirculars(data);

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
+import { resolveDataPath } from '../utils/dataPath';
 
 const prisma = new PrismaClient();
 
@@ -182,7 +183,7 @@ export class CompetencyEngine {
 
     // 2. Sovereign Local Fallback: Load from mospi_frac_matrix.json
     try {
-      const matrixPath = path.join(__dirname, '../data/mospi_frac_matrix.json');
+      const matrixPath = resolveDataPath('mospi_frac_matrix.json');
       if (fs.existsSync(matrixPath)) {
         const raw = fs.readFileSync(matrixPath, 'utf-8');
         const data = JSON.parse(raw);

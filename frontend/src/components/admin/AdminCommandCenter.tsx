@@ -17,6 +17,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/Card';
+import { IndianFlag } from '../ui/IndianFlag';
+import { apiUrl } from '../../lib/api';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { AcbpDossierModal } from './AcbpDossierModal';
@@ -73,7 +75,7 @@ export function AdminCommandCenter({ onBackToLearner }: AdminCommandCenterProps)
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/divisions');
+      const res = await fetch(apiUrl('/api/admin/divisions'));
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (json.success) {

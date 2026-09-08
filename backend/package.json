@@ -5,6 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/index.ts",
+    "prisma:generate": "prisma generate",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && tsc && node scripts/copy-data.js",
+    "start": "node dist/src/index.js",
     "test": "jest"
   },
   "type": "commonjs",

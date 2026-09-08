@@ -96,14 +96,14 @@ describe('App Routing and Browser History Navigation', () => {
     window.history.pushState({}, '', '/');
     render(<App />);
 
-    const launchCta = screen.getByRole('button', { name: /Start an assessment/i });
+    const launchCta = screen.getByRole('button', { name: /Start an assessment|आकलन शुरू करें/i });
     
     await act(async () => {
       fireEvent.click(launchCta);
     });
 
     expect(window.location.pathname).toBe('/dashboard');
-    expect(await screen.findByText(/Competency assessment generator/i)).toBeDefined();
+    expect(await screen.findByRole('heading', { name: /Competency assessment generator|दक्षता आकलन जनरेटर/i }, { timeout: 3000 })).toBeDefined();
   });
 
   it('navigates between Portal tabs and updates history when in portal view', async () => {

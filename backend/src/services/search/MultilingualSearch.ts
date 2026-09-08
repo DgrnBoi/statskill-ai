@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { resolveDataPath } from '../../utils/dataPath';
 
 export interface Course {
   id: string;
@@ -22,7 +23,7 @@ export class MultilingualSearchService {
 
   private loadCatalog() {
     try {
-      const dataPath = path.join(__dirname, '../../data/courses_catalog.json');
+      const dataPath = resolveDataPath('courses_catalog.json');
       const data = fs.readFileSync(dataPath, 'utf-8');
       this.courses = JSON.parse(data);
       console.log(`[Search Engine] Loaded ${this.courses.length} courses into memory.`);

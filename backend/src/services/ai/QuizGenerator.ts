@@ -5,6 +5,7 @@ import pdfParse from 'pdf-parse';
 import { AntiCopyEngine, QuestionItem, ShuffledExamPaper, DistractorDiagnostic } from './AntiCopyEngine';
 import { DocumentChunker } from './DocumentChunker';
 import { LocalQuestionExtractor } from './LocalQuestionExtractor';
+import { resolveDataPath } from '../../utils/dataPath';
 
 export interface QuizResult extends ShuffledExamPaper {
   mode: 'CLOUD_RAG' | 'EDGE_OFFLINE';
@@ -19,7 +20,7 @@ export class QuizGeneratorService {
   private static CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
   constructor() {
-    this.bankPath = path.join(__dirname, '../../data/question_bank.json');
+    this.bankPath = resolveDataPath('question_bank.json');
   }
 
   /**

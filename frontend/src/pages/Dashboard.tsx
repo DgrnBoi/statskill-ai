@@ -23,6 +23,7 @@ import { SourceCitationDrawer, SourceCitationData } from '../components/assessme
 import { AiModelModal } from '../components/ui/AiModelModal';
 import { KnowledgeLibrary, CircularItem } from '../components/knowledge/KnowledgeLibrary';
 import { AssessmentCertificateModal } from '../components/assessment/AssessmentCertificateModal';
+import { apiUrl } from '../lib/api';
 import { useUiPreferences } from '../contexts/UiPreferencesContext';
 
 import {
@@ -793,7 +794,7 @@ export default function Dashboard({
     const domainQuery = selectedDomain !== 'All' ? `&domain=${encodeURIComponent(selectedDomain)}` : '';
     setCourseError(null);
 
-    fetch(`http://localhost:5000/api/courses/search?q=${encodeURIComponent(debouncedSearchQuery)}${domainQuery}`, {
+    fetch(apiUrl(`/api/courses/search?q=${encodeURIComponent(debouncedSearchQuery)}${domainQuery}`), {
       signal: controller.signal,
     })
       .then((res) => {
@@ -884,7 +885,7 @@ export default function Dashboard({
 
     const controller = new AbortController();
     const localApiKey = typeof window !== 'undefined' ? window.localStorage.getItem('statskill_api_key') : null;
-    fetch('http://localhost:5000/api/recommend/analyze-assessment', {
+    fetch(apiUrl('/api/recommend/analyze-assessment'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1011,7 +1012,7 @@ export default function Dashboard({
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/quiz/generate-async?mode=${deviceMode}`, {
+      const response = await fetch(apiUrl(`/api/quiz/generate-async?mode=${deviceMode}`), {
         method: 'POST',
         body: formData,
       });
@@ -1044,7 +1045,7 @@ export default function Dashboard({
         }
 
         try {
-          const statusRes = await fetch(`http://localhost:5000/api/quiz/status/${initData.jobId}`);
+          const statusRes = await fetch(apiUrl(`/api/quiz/status/${initData.jobId}`));
           if (!statusRes.ok) {
             throw new Error(`HTTP ${statusRes.status}`);
           }
@@ -1930,7 +1931,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
     }
 
     // Send the xAPI-formatted statement to the configured prototype telemetry endpoint.
-    fetch('http://localhost:5000/api/telemetry/quiz', {
+    fetch(apiUrl('/api/telemetry/quiz'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1957,7 +1958,7 @@ const QuizQuestion = React.memo(function QuizQuestion({
 
       setLoadingRec(true);
       try {
-        const res = await fetch('http://localhost:5000/api/recommend/course', {
+        const res = await fetch(apiUrl('/api/recommend/course'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

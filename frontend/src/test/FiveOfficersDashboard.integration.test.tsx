@@ -50,13 +50,13 @@ describe('StatSkill AI - 5 MoSPI Officers Multi-Persona Dashboard Verification S
     window.localStorage.clear();
   });
 
-  it('Person 1 [FOD]: Eshaan Sunthankar (JSO) renders FOD cadre and identity', async () => {
+  it('Person 1 [FOD]: Rajesh Sharma (JSO) renders FOD cadre and identity', async () => {
     window.localStorage.setItem(
       'statskill_demo_login',
       JSON.stringify({
         officer: {
           id: 'jso',
-          name: 'Eshaan Sunthankar',
+          name: 'Rajesh Sharma',
           designation: 'Junior Statistical Officer (JSO)',
           division: 'Field Operations Division (FOD), NSSO',
           cadre: 'Subordinate Statistical Service (SSS)',
@@ -67,7 +67,7 @@ describe('StatSkill AI - 5 MoSPI Officers Multi-Persona Dashboard Verification S
 
     render(<Dashboard activeTab="overview" />);
 
-    expect(screen.getAllByText(/Eshaan Sunthankar/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Rajesh Sharma/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Field Operations Division/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Junior Statistical Officer/i).length).toBeGreaterThan(0);
   });

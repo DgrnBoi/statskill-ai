@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import express from 'express';
+import { resolveDataPath } from '../utils/dataPath';
 
 const router = express.Router();
 
 function getCircularsData(): any[] {
   try {
-    const filePath = path.join(__dirname, '../data/amrit_gyaan_kosh.json');
+    const filePath = resolveDataPath('amrit_gyaan_kosh.json');
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, 'utf-8');
       return JSON.parse(raw);

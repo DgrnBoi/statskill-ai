@@ -74,11 +74,11 @@ describe('StatSkill AI - Dynamic Multi-User & Individualized Experience Frontend
     const searchInput = screen.getByLabelText(/Search registered officers/i);
     expect(searchInput).toBeInTheDocument();
 
-    // Type "Eshaan" in search
-    fireEvent.change(searchInput, { target: { value: 'Eshaan' } });
+    // Type "Rajesh" in search
+    fireEvent.change(searchInput, { target: { value: 'Rajesh' } });
 
-    // Expect Eshaan to be visible
-    expect(screen.getByText('Eshaan Sunthankar')).toBeInTheDocument();
+    // Expect Rajesh to be visible
+    expect(screen.getByText('Rajesh Sharma')).toBeInTheDocument();
   });
 
   it('2. Division Filtering: Filters officers strictly by selected MoSPI division', async () => {

@@ -45,8 +45,8 @@ const INITIAL_SEEDED_USERS: UserRecord[] = [
   {
     id: 'usr_1042',
     parichayId: 'PARICHAY_1042_NSSO',
-    name: 'Eshaan Sunthankar',
-    email: 'eshaan.sunthankar@mospi.gov.in',
+    name: 'Rajesh Sharma',
+    email: 'rajesh.sharma@mospi.gov.in',
     mobile: '9876543210',
     designation: 'Junior Statistical Officer (JSO)',
     division: 'Field Operations Division (FOD), NSSO',

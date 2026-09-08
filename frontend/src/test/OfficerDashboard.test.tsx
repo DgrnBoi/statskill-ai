@@ -27,7 +27,7 @@ const baseProps = {
   skills,
   proficiency,
   onNavigateTab: vi.fn(),
-  officerName: 'Eshaan Sunthankar',
+  officerName: 'Rajesh Sharma',
   officerCadreId: 'JSO_1042',
 };
 
@@ -43,7 +43,7 @@ describe('OfficerDashboard', () => {
   it('renders the signed-in officer, cadre and division', () => {
     render(<OfficerDashboard {...baseProps} />);
     expect(screen.getByRole('heading', { name: /Officer Competency & Diagnostic Hub/i })).toBeDefined();
-    expect(screen.getByText('Eshaan Sunthankar')).toBeDefined();
+    expect(screen.getByText('Rajesh Sharma')).toBeDefined();
     expect(screen.getByText(/Junior Statistical Officer.*Field Operations Division/i)).toBeDefined();
     expect(screen.getByText(/ID: JSO_1042/i)).toBeDefined();
   });

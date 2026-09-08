@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { apiUrl } from '../../lib/api';
 import {
   FileText,
   Sparkles,
@@ -66,7 +67,7 @@ export const DocumentIngestionStudio: React.FC<DocumentIngestionStudioProps> = (
     const formData = new FormData();
     formData.append('document', file);
 
-    fetch('http://localhost:5000/api/quiz/inspect-document', {
+    fetch(apiUrl('/api/quiz/inspect-document'), {
       method: 'POST',
       body: formData,
     })

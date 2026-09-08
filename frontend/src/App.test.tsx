@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
+import { apiUrl } from './lib/api';
 
 describe('App login handoff', () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -24,7 +25,7 @@ describe('App login handoff', () => {
     });
 
     await waitFor(() => expect(stored.get('auth_token')).toBe('signed-demo-token'));
-    expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api/auth/demo-login', expect.objectContaining({
+    expect(fetch).toHaveBeenCalledWith(apiUrl('/api/auth/demo-login'), expect.objectContaining({
       method: 'POST',
     }));
   });

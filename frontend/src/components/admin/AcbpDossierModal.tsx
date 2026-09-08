@@ -8,6 +8,7 @@ import { IndianFlag } from '../ui/IndianFlag';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
+import { apiUrl } from '../../lib/api';
 
 export interface AcbpDossierData {
   documentId: string;
@@ -61,7 +62,7 @@ export function AcbpDossierModal({ isOpen, onClose }: AcbpDossierModalProps) {
     setLoading(true);
     setError(null);
 
-    fetch('http://localhost:5000/api/admin/acbp-dossier', { signal: controller.signal })
+    fetch(apiUrl('/api/admin/acbp-dossier'), { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();

@@ -7,6 +7,12 @@
     "backend",
     "shared"
   ],
+  "scripts": {
+    "postinstall": "npm --workspace backend run prisma:generate",
+    "setup": "npm install && npm --workspace backend run prisma:generate && npm run build",
+    "build": "npm --workspace backend run build && npm --workspace frontend run build",
+    "test": "npm --workspace backend test && npm --workspace frontend test"
+  },
   "devDependencies": {
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.26",

@@ -22,32 +22,35 @@ StatSkill AI is an edge-first, sovereign competency evaluation and micro-learnin
 ## Architectural Reality & System Design
 
 ```
-+-----------------------------------------------------------------------------------+
-|                                 USER INTERFACE                                    |
-|  React 19 + TypeScript + Vite | Tailwind CSS | Radix UI | Service Worker CAPI     |
-+-----------------------------------------+-----------------------------------------+
-                                          |
-                        REST APIs / JSON-LD Payloads
-                                          |
-+-----------------------------------------v-----------------------------------------+
-|                                EXPRESS BACKEND                                    |
-|   Rate Limiters | Input Sanitizer | JWT Auth | Telemetry & Competency Controllers |
-+-------------------+-------------------------------------+-------------------------+
-                    |                                     |
-       +------------v------------+           +------------v------------+
-       |     AI RAG PIPELINE     |           |   DATA & PERSISTENCE    |
-       |  Google Gemini 1.5      |           |  PostgreSQL via Prisma  |
-       |  Groq Qwen 2.5          |           |  Zero-Downtime Fallback |
-       |  Multi-Span Windowing   |           |  (mospi_frac_matrix &   |
-       |  Prompt-Injection XML   |           |   question_bank.json)   |
-       +------------+------------+           +-------------------------+
-                    |
-       +------------v------------+
-       |   ANTI-COPY & EDGE BANK |
-       |  Fisher-Yates Shuffler  |
-       |  200+ Verified Items    |
-       |  Store-and-Forward LRS  |
-       +-------------------------+
+Officer
+  |
+React SPA (Single-Page Application - Client) [Implemented]
+  |
+API Layer (Express REST / JSON API) [Implemented]
+  |
+  |-- Authentication Adapter [Implemented]
+  |     |-- Demo SSO now (Simulated / Integration-Ready Adapter)
+  |     |-- Jan Parichay adapter later (Future Production Component)
+  |
+  |-- Competency Assessment Service [Implemented]
+  |     |-- FRAC Matrix [Embedded Fallback / Database] [Implemented]
+  |     |-- Assessment Attempts & Mistake Ledger [Implemented]
+  |
+  |-- Document Ingestion Service [Implemented]
+  |     |-- PDF/Text Extraction (pdf-parse) [Implemented]
+  |     |-- Chunking and Retrieval (DocumentChunker / BM25) [Implemented]
+  |     |-- AI MCQ Generation (Gemini / Groq LLMs) [Implemented]
+  |     |-- JSON Validation & Schema Guard [Implemented]
+  |     |-- Offline Question Bank Fallback [Prototype Fallback]
+  |
+  |-- Recommendation Service [Implemented]
+  |     |-- Identify Skill Gaps [Implemented]
+  |     |-- Rank Courses (Multi-Factor Formula) [Implemented]
+  |     |-- Generate 4-Tier Learning Pathway [Implemented]
+  |
+  |-- Telemetry Outbox [Implemented]
+        |-- xAPI / CMI-5 Statement Export [Implemented]
+        |-- National LRS Adapter [Integration-Ready Adapter]
 ```
 
 ### 1. Document Ingestion & Anti-Prompt-Injection Security
@@ -58,15 +61,30 @@ The backend connects to PostgreSQL via Prisma ORM for persistent competency trac
 
 ---
 
+## Feature Status Matrix (Honest Capability Disclosure)
+
+| Feature / Subsystem | Status Tag | Architecture Note / Fallback Mechanism |
+|---|---|---|
+| **Competency Diagnostic Engine** | `[Implemented]` | Polar coordinate radar, gap scoring against MoSPI FRAC matrix |
+| **Offline Question Bank Fallback** | `[Implemented]` | 100+ grounded MCQs served on potato devices / network drop |
+| **AI MCQ Generation (Gemini/Groq)** | `[Implemented]` | Async polling queue, JSON fence parser, zero-blank retry |
+| **iGOT Course Catalog** | `[Prototype Catalog]` | 884 authentic government courses indexed locally |
+| **Jan Parichay SSO** | `[Integration-Ready Adapter]` | Simulated token handshake with cadre identity presets |
+| **xAPI / CMI-5 Telemetry** | `[Prototype Adapter]` | Formats ADL xAPI v1.0.3 statements; ready for LRS POST |
+| **PostgreSQL / Prisma DB** | `[Configurable]` | SQLite default for zero-config hackathon demo; Prisma ready |
+| **Production Deployment** | `[Prototype Ready]` | Verified local build & dockerizable single-command setup |
+
+---
+
 ## Verification & Automated Test Suites
 
-We enforce rigorous test coverage across both frontend and backend layers. The monorepo contains **94 automated tests with a 100% pass rate**.
+We enforce rigorous test coverage across both frontend and backend layers. The monorepo contains **213 automated tests with a 100% pass rate** across 33 test files.
 
 | Test Suite | Framework | Total Tests | Status | Coverage Areas |
 |:---|:---|:---:|:---:|:---|
-| **Frontend Unit & Integration** | Vitest + RTL | 57 | Passing | Tab switching, Cadre benchmarks, Shuffling, Radar math, Telemetry drawer, Modals, Audio synthesis |
-| **Backend Integration & APIs** | Jest + Supertest | 37 | Passing | Semantic chunking, BM25 ranking, xAPI formatting, Course recommendation math, Search transliteration, Security sanitization, RAG fallback |
-| **Total Automated Tests** | — | **94** | **100% Pass** | Full end-to-end regression verification |
+| **Frontend Unit & Integration** | Vitest + RTL | 88 | Passing | Tab switching, Cadre benchmarks, Shuffling, Radar math, Telemetry drawer, Modals, Security & Env |
+| **Backend Integration & Security** | Jest + Supertest | 125 | Passing | System hardening, Zod validation, Semantic chunking, BM25 ranking, xAPI formatting, Course recommendation math, Search transliteration |
+| **Total Automated Tests** | — | **213** | **100% Pass** | Full end-to-end regression verification |
 
 ---
 
@@ -76,24 +94,29 @@ We enforce rigorous test coverage across both frontend and backend layers. The m
 - Node.js (v18.0.0 or higher)
 - npm (v9.0.0 or higher)
 
-### 1. Set Up Backend
+### Option A: Monorepo 1-Command Setup (Recommended for Judges & Quick Start)
 ```bash
+# Installs all dependencies, auto-generates Prisma client, and builds both workspaces
+npm install
+
+# Run backend and frontend dev servers concurrently
+npm run dev
+```
+
+### Option B: Step-by-Step Setup
+```bash
+# 1. Install & Generate Prisma Client (Backend)
 cd backend
 npm install
-npm test
+npm run build
 npm run dev
-```
-*The backend API will start on `http://localhost:5000`. If `DATABASE_URL` is omitted, the server automatically boots with local fallback matrices.*
 
-### 2. Set Up Frontend
-Open a new terminal window:
-```bash
-cd frontend
+# 2. Install & Start Frontend (New Terminal Window)
+cd ../frontend
 npm install
-npx vitest run
 npm run dev
 ```
-*The frontend application will start on `http://localhost:5173`.*
+*The backend API runs on `http://localhost:5000` and the frontend runs on `http://localhost:5173`. If `DATABASE_URL` is omitted, the server automatically boots with embedded fallback matrices.*
 
 ---
 

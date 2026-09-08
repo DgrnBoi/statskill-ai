@@ -65,7 +65,7 @@ describe('Security Vulnerability & Hardening Audit Suite', () => {
         .set('x-bypass-rate-limit', 'true')
         .send({
           userId: 'JSO_1042',
-          userName: 'Eshaan Sunthankar',
+          userName: 'Rajesh Sharma',
           quizId: 'sampling-01',
           quizName: 'Survey Design',
           score: 9999

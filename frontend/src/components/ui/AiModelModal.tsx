@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from './Badge';
 import { Button } from './Button';
+import { apiUrl } from '../../lib/api';
 import {
   Cpu,
   X,
@@ -26,6 +27,7 @@ export interface AiModelModalProps {
 export const AiModelModal: React.FC<AiModelModalProps> = ({ isOpen, onClose }) => {
   const [selectedEngine, setSelectedEngine] = useState<AiInferenceEngine>('GEMINI_FLASH');
   const [apiKeyInput, setApiKeyInput] = useState('');
+  const [rememberKey, setRememberKey] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [healthStatus, setHealthStatus] = useState<{
     status: 'idle' | 'success' | 'warning' | 'error';
@@ -47,12 +49,16 @@ export const AiModelModal: React.FC<AiModelModalProps> = ({ isOpen, onClose }) =
     setIsTesting(true);
     setHealthStatus({ status: 'idle', message: 'Testing inference connection...' });
 
-    // Store in localStorage
-    localStorage.setItem('statskill_api_key', apiKeyInput.trim());
+    // Do NOT persist API keys to localStorage by default
+    if (rememberKey) {
+      localStorage.setItem('statskill_api_key', apiKeyInput.trim());
+    } else {
+      localStorage.removeItem('statskill_api_key');
+    }
     localStorage.setItem('statskill_ai_engine', selectedEngine);
 
     try {
-      const res = await fetch('http://localhost:5000/api/quiz/model-health', {
+      const res = await fetch(apiUrl('/api/quiz/model-health'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: apiKeyInput.trim() }),
@@ -231,21 +237,33 @@ export const AiModelModal: React.FC<AiModelModalProps> = ({ isOpen, onClose }) =
 
           {/* API Key Input */}
           {selectedEngine !== 'SOVEREIGN_OFFLINE' && (
-            <div className="space-y-1.5 animate-fade-in">
-              <label htmlFor="api-key-input" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <Key className="w-3.5 h-3.5 text-slate-500" />
-                Custom API Key (Saved in Local Browser Storage):
-              </label>
+            <div className="space-y-2 animate-fade-in p-3 bg-amber-50/60 rounded-xl border border-amber-200">
+              <div className="flex items-center justify-between">
+                <label htmlFor="api-key-input" className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-amber-700" />
+                  Temporary Demo API Key (Client-Side Testing):
+                </label>
+                <Badge variant="saffron" className="text-[9px]">Local Demo Only</Badge>
+              </div>
               <input
                 id="api-key-input"
                 type="password"
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 placeholder={selectedEngine === 'GEMINI_FLASH' ? 'AIzaSy...' : 'gsk_...'}
-                className="w-full px-3.5 py-2 text-xs font-mono rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0B2E63]"
+                className="w-full px-3.5 py-2 text-xs font-mono rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#0B2E63]"
               />
-              <p className="text-[10px] text-slate-500">
-                Key remains solely in your browser localStorage and is sent via HTTPS headers.
+              <label className="flex items-center gap-2 mt-2 text-[11px] text-amber-950 font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberKey}
+                  onChange={(e) => setRememberKey(e.target.checked)}
+                  className="rounded border-amber-300 text-[#0B2E63] focus:ring-[#0B2E63]"
+                />
+                Remember key in local storage for future sessions
+              </label>
+              <p className="text-[10px] text-amber-900/80 leading-normal">
+                ⚠️ <strong>Security Notice:</strong> Server-side environment secrets (GEMINI_API_KEY / GROQ_API_KEY) are preferred for production. User-supplied keys entered here are strictly for local testing and are not persisted by default.
               </p>
             </div>
           )}

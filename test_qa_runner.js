@@ -77,7 +77,7 @@ async function runEndToEndQAAudit() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId: 'JSO_1042',
-        userName: 'Eshaan Sunthankar',
+        userName: 'Rajesh Sharma',
         quizId: 'eval-sampling-01',
         quizName: 'NSSO Multi-Stage Sampling Evaluation',
         score: 100,
@@ -85,7 +85,7 @@ async function runEndToEndQAAudit() {
     }).then((r) => r.json());
 
     assert(telemetryRes.success === true, '4.1 xAPI Telemetry submission succeeds');
-    assert(telemetryRes.statement?.actor?.name === 'Eshaan Sunthankar', '4.2 xAPI Actor matches authenticated officer identity');
+    assert(telemetryRes.statement?.actor?.name === 'Rajesh Sharma', '4.2 xAPI Actor matches authenticated officer identity');
     assert(telemetryRes.statement?.verb?.id === 'http://adlnet.gov/expapi/verbs/completed', '4.3 xAPI Verb strictly adheres to ADL completed specification');
     assert(telemetryRes.statement?.result?.score?.scaled === 1, '4.4 xAPI Scaled Score matches 100% calculation (1.0)');
   } catch (e) {

@@ -27,7 +27,7 @@ describe('Telemetry xAPI Integration', () => {
       .post('/api/telemetry/quiz')
       .send({
         userId: 'JSO_1042',
-        userName: 'Eshaan Sunthankar',
+        userName: 'Rajesh Sharma',
         quizId: 'sampling-01',
         quizName: 'Survey Design & Sampling',
         score: 100,
@@ -35,7 +35,7 @@ describe('Telemetry xAPI Integration', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.statement.actor.name).toBe('Eshaan Sunthankar');
+    expect(res.body.statement.actor.name).toBe('Rajesh Sharma');
     expect(res.body.statement.actor.account.name).toBe('JSO_1042');
     expect(res.body.statement.object.definition.name['en-US']).toBe('Survey Design & Sampling');
     expect(res.body.statement.result.score.scaled).toBe(1.0);

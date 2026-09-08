@@ -3,6 +3,7 @@ import path from 'path';
 import { userDb } from '../../db/UserDatabase';
 import { CompetencyEngine } from '../CompetencyEngine';
 import { AIEvaluationService, AIEvaluationResult } from '../ai/AIEvaluationService';
+import { resolveDataPath } from '../../utils/dataPath';
 
 export interface CatalogCourse {
   id: string;
@@ -204,7 +205,7 @@ export class CourseMatcherService {
 
   private loadCatalog() {
     try {
-      const dataPath = path.join(__dirname, '../../data/courses_catalog.json');
+      const dataPath = resolveDataPath('courses_catalog.json');
       if (fs.existsSync(dataPath)) {
         const raw = fs.readFileSync(dataPath, 'utf-8');
         this.courses = JSON.parse(raw);
@@ -221,7 +222,7 @@ export class CourseMatcherService {
 
   private loadProgressionData() {
     try {
-      const progressionPath = path.join(__dirname, '../../data/course_clusters_progression.json');
+      const progressionPath = resolveDataPath('course_clusters_progression.json');
       if (fs.existsSync(progressionPath)) {
         const raw = fs.readFileSync(progressionPath, 'utf-8');
         this.progressionData = JSON.parse(raw);

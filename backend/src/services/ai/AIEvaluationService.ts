@@ -584,7 +584,37 @@ Return ONLY a valid JSON object matching this schema:
       const data = await res.json();
       if (data.error) throw new Error(data.error.message || 'Groq API Error');
       const raw = data.choices?.[0]?.message?.content || '{}';
-      return { feedback: JSON.parse(raw) };
+      return { feedback: extractCleanJson(raw) };
     }
   }
 }
+
+/**
+ * Robustly parses AI responses by stripping markdown code blocks and conversational text wrappers.
+ */
+export function extractCleanJson(rawText: string): any {
+  if (!rawText || typeof rawText !== 'string') return {};
+  let cleaned = rawText.trim();
+
+  // Strip markdown code fences (```json ... ``` or ``` ...)
+  if (cleaned.includes('```')) {
+    const match = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (match && match[1]) {
+      cleaned = match[1].trim();
+    }
+  }
+
+  // If there's conversational prefix, find the first '{' or '[' and last '}' or ']'
+  const firstBrace = cleaned.search(/[\{\[]/);
+  const lastBrace = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    return { raw: rawText, error: 'JSON parse error' };
+  }
+}
+

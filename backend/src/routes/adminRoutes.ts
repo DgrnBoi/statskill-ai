@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { resolveDataPath } from '../utils/dataPath';
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ interface DivisionData {
 }
 
 function loadDivisionsData(): DivisionData {
-  const filePath = path.join(__dirname, '../data/mospi_divisions.json');
+  const filePath = resolveDataPath('mospi_divisions.json');
   if (fs.existsSync(filePath)) {
     const raw = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(raw);

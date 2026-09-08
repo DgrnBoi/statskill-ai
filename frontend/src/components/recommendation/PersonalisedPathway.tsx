@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { apiUrl } from '../../lib/api';
 import {
   BookOpen,
   Clock,
@@ -130,7 +131,7 @@ export const PersonalisedPathway: React.FC<PersonalisedPathwayProps> = ({
       setIsLoading(true);
 
       try {
-        const response = await fetch('http://localhost:5000/api/recommend/pathway', {
+        const response = await fetch(apiUrl('/api/recommend/pathway'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

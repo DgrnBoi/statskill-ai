@@ -10,7 +10,7 @@ describe('MoSPI 5-Cadre End-to-End Persona Verification Suite', () => {
   const FIVE_OFFICERS = [
     {
       id: 'jso',
-      name: 'Eshaan Sunthankar',
+      name: 'Rajesh Sharma',
       designation: 'Junior Statistical Officer (JSO)',
       division: 'Field Operations Division (FOD), NSSO',
       cadre: 'Subordinate Statistical Service (SSS)',
@@ -104,7 +104,7 @@ describe('MoSPI 5-Cadre End-to-End Persona Verification Suite', () => {
   });
 
   describe('Step 3: Taking Diagnostic Assessment for all 5 Persons and Verifying Analysis', () => {
-    it('Officer 1 [FOD]: Eshaan Sunthankar completes assessment, receives misconception remediation & updated proficiency', async () => {
+    it('Officer 1 [FOD]: Rajesh Sharma completes assessment, receives misconception remediation & updated proficiency', async () => {
       const answers = [
         {
           questionText: 'In a multi-stage stratified survey design adopted by NSSO, what does FSU represent?',
