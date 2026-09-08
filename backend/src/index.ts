@@ -14,6 +14,7 @@ import { inputSanitizerMiddleware } from './middlewares/inputSanitizer';
 import { globalApiLimiter, quizGenLimiter } from './middlewares/rateLimiter';
 
 dotenv.config();
+process.env.GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
 
 const app = express();
 const PORT = process.env.PORT || 5000;

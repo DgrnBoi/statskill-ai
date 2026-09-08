@@ -476,6 +476,23 @@ export const AssessmentAnalysisReport: React.FC<AssessmentAnalysisReportProps> =
                     </p>
                   )}
 
+                  {!ans.isCorrect && ans.distractorAnalysis?.[ans.selectedOption] && (
+                    <div className="mt-2 p-2.5 bg-amber-50/90 border border-amber-200 rounded-lg text-xs space-y-1 font-body">
+                      <div className="font-bold text-amber-900 flex items-center gap-1.5 font-display">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                        <span>Identified Misconception:</span>
+                      </div>
+                      <p className="text-amber-950 text-[11px] leading-relaxed">
+                        {ans.distractorAnalysis[ans.selectedOption].misconception}
+                      </p>
+                      {ans.distractorAnalysis[ans.selectedOption].recommendedCourseTitle && (
+                        <p className="text-amber-900 text-[11px] font-semibold pt-0.5 font-mono">
+                          Recommended Remedial Course: <span className="underline">{ans.distractorAnalysis[ans.selectedOption].recommendedCourseTitle}</span>
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {onOpenCitation && (ans.sourceCitation || ans.explanation) && (
                     <div className="pt-1.5">
                       <button

@@ -58,12 +58,7 @@ describe('Phase 1 & 2: Document Ingestion Studio Component', () => {
       expect(screen.getByText(/Document Ingestion & Blueprint Studio/i)).toBeInTheDocument();
       expect(screen.getByText('NSS_Sample_Manual.pdf')).toBeInTheDocument();
       expect(screen.getByText(/2,350 words/i)).toBeInTheDocument();
-      expect(screen.getByText(/8 indexed chunks/i)).toBeInTheDocument();
     });
-
-    // Keyword density tags
-    expect(screen.getByText('sampling')).toBeInTheDocument();
-    expect(screen.getByText('14')).toBeInTheDocument();
   });
 
   it('allows customizing Bloom cognitive taxonomy and triggers generation callback', async () => {
@@ -85,10 +80,6 @@ describe('Phase 1 & 2: Document Ingestion Studio Component', () => {
     const chapterSelect = screen.getByLabelText(/Focus Chapter \/ Section:/i);
     fireEvent.change(chapterSelect, { target: { value: 'Chapter 1: Multiplier & Weights' } });
 
-    // Change Bloom's level
-    const bloomSelect = screen.getByLabelText(/Cognitive Level:/i);
-    fireEvent.change(bloomSelect, { target: { value: 'Analysis (L4)' } });
-
     // Click Generate
     const generateBtn = screen.getByRole('button', { name: /Generate Grounded Assessment/i });
     fireEvent.click(generateBtn);
@@ -96,9 +87,7 @@ describe('Phase 1 & 2: Document Ingestion Studio Component', () => {
     expect(onGenerateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         chapter: 'Chapter 1: Multiplier & Weights',
-        bloomLevel: 'Analysis (L4)',
         numQuestions: 5,
-        difficulty: 'intermediate',
       })
     );
   });

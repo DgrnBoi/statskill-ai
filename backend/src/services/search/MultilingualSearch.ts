@@ -25,8 +25,23 @@ export class MultilingualSearchService {
     try {
       const dataPath = resolveDataPath('courses_catalog.json');
       const data = fs.readFileSync(dataPath, 'utf-8');
-      this.courses = JSON.parse(data);
-      console.log(`[Search Engine] Loaded ${this.courses.length} courses into memory.`);
+      const rawCourses: any[] = JSON.parse(data);
+      this.courses = rawCourses.map((c) => {
+        let durationHours = typeof c.durationHours === 'number' ? c.durationHours : 0;
+        if (!durationHours && c.duration && typeof c.duration === 'string') {
+          const hMatch = c.duration.match(/(\d+)\s*h/i);
+          const mMatch = c.duration.match(/(\d+)\s*m/i);
+          let h = hMatch ? parseInt(hMatch[1], 10) : 0;
+          let m = mMatch ? parseInt(mMatch[1], 10) : 0;
+          durationHours = Math.max(1, Math.round(h + m / 60));
+        }
+        return {
+          ...c,
+          duration: c.duration || (durationHours ? `${durationHours}h` : '1h'),
+          durationHours: durationHours || 1,
+        };
+      });
+      console.log(`[Search Engine] Loaded & normalized ${this.courses.length} courses into memory.`);
     } catch (err) {
       console.error("[Search Engine] Failed to load catalog:", err);
     }

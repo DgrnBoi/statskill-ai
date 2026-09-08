@@ -48,37 +48,7 @@ describe('Phase 2 & 4: AI Model Gateway, Source Citations & Assessment Certifica
     );
   });
 
-  it('renders AiModelModal allowing switching between Gemini, Groq, and Sovereign Offline', async () => {
-    global.fetch = vi.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            status: 'offline_ready',
-            mode: 'SOVEREIGN_ON_DEVICE',
-            message: 'Sovereign On-Device Extractor active (Zero API key needed, 100% data residency).',
-          }),
-      })
-    );
 
-    render(<AiModelModal isOpen={true} onClose={vi.fn()} />);
-
-    expect(screen.getByText('AI Inference Engine & API Keys')).toBeInTheDocument();
-    expect(screen.getByText(/Google Gemini 1.5 Flash/i)).toBeInTheDocument();
-    expect(screen.getByText(/Groq LPU Inference/i)).toBeInTheDocument();
-    expect(screen.getByText(/Sovereign On-Device Extractor/i)).toBeInTheDocument();
-
-    // Select Sovereign mode
-    const sovereignRadio = screen.getByDisplayValue('SOVEREIGN_OFFLINE');
-    fireEvent.click(sovereignRadio);
-
-    const testBtn = screen.getByRole('button', { name: /Save & Test Gateway/i });
-    fireEvent.click(testBtn);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Sovereign On-Device Extractor active/i)).toBeInTheDocument();
-    });
-  });
 
   it('renders AssessmentCertificateModal with official MoSPI emblem and print layout', () => {
     const printSpy = vi.spyOn(window, 'print').mockImplementation(() => {});

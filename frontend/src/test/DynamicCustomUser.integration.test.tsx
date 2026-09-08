@@ -30,33 +30,36 @@ describe('StatSkill AI - 6th Officer & Dynamic Custom User Frontend Integration 
     });
   });
 
-  it('Person 6 [ESD]: Renders Dr. Vikram Seth (Deputy Director) in Jan Parichay SSO selector', async () => {
+  it('Person 2 [DPD]: Renders Ananya Mehta (Senior Statistical Officer) in Jan Parichay SSO selector', async () => {
     const handleAuth = vi.fn();
     render(<LoginPage onAuthenticate={handleAuth} />);
 
-    // Check that 6th officer button exists
-    const deputyDirectorOption = screen.getByRole('button', {
-      name: /Deputy Director \[Price Statistics\] \(ISS\)/i,
-    });
-    expect(deputyDirectorOption).toBeInTheDocument();
+    // Load sample officers
+    fireEvent.click(screen.getByRole('button', { name: /Load Sample Demo Officers/i }));
 
-    // Click on 6th officer
-    fireEvent.click(deputyDirectorOption);
+    // Check that SSO officer button exists
+    const ssoOption = await screen.findByRole('button', {
+      name: /Senior Statistical Officer \(SSO\)/i,
+    });
+    expect(ssoOption).toBeInTheDocument();
+
+    // Click on SSO officer
+    fireEvent.click(ssoOption);
 
     // Click Continue
     const continueBtn = screen.getByRole('button', {
-      name: /Continue as Deputy Director \[Price Statistics\] \(ISS\)/i,
+      name: /LOG IN TO WORKSPACE/i,
     });
     expect(continueBtn).toBeInTheDocument();
     fireEvent.click(continueBtn);
 
     expect(handleAuth).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Dr. Vikram Seth',
-        designation: 'Deputy Director [Price Statistics] (ISS)',
-        division: 'Economic Statistics Division (ESD), MoSPI',
-        cadre: 'Indian Statistical Service (ISS)',
-        parichayId: 'PARICHAY_6120_ISS',
+        name: 'Ananya Mehta',
+        designation: 'Senior Statistical Officer (SSO)',
+        division: 'Data Processing Division (DPD), NSSO',
+        cadre: 'Subordinate Statistical Service (SSS)',
+        parichayId: 'PARICHAY_2088_NSSO',
       }),
       'parichay-id'
     );

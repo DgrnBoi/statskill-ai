@@ -1,7 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import LoginPage, { DEMO_OFFICERS } from '../pages/LoginPage';
+import LoginPage from '../pages/LoginPage';
+import { DEMO_OFFICERS } from '../data/demoOfficers';
 import Dashboard from '../pages/Dashboard';
 
 vi.mock('../utils/detectPerformance', () => ({
@@ -67,10 +68,12 @@ describe('StatSkill AI - Dynamic Multi-User & Individualized Experience Frontend
     });
   });
 
-  it('1. Dynamic Directory: Renders registered officers and allows searching by name or Parichay ID', async () => {
+  it('1. Directory Search: Filters officer list dynamically by text query', async () => {
     render(<LoginPage onAuthenticate={vi.fn()} />);
 
-    // Verify search input is present
+    // Load sample officers
+    fireEvent.click(screen.getByRole('button', { name: /Load Sample Demo Officers/i }));
+
     const searchInput = screen.getByLabelText(/Search registered officers/i);
     expect(searchInput).toBeInTheDocument();
 
@@ -78,20 +81,23 @@ describe('StatSkill AI - Dynamic Multi-User & Individualized Experience Frontend
     fireEvent.change(searchInput, { target: { value: 'Rajesh' } });
 
     // Expect Rajesh to be visible
-    expect(screen.getByText('Rajesh Sharma')).toBeInTheDocument();
+    expect(await screen.findByText('Rajesh Sharma')).toBeInTheDocument();
   });
 
   it('2. Division Filtering: Filters officers strictly by selected MoSPI division', async () => {
     render(<LoginPage onAuthenticate={vi.fn()} />);
 
+    // Load sample officers
+    fireEvent.click(screen.getByRole('button', { name: /Load Sample Demo Officers/i }));
+
     const divisionSelect = screen.getByLabelText(/Filter by division/i);
     expect(divisionSelect).toBeInTheDocument();
 
-    // Filter by ESD (Economic Statistics Division)
-    fireEvent.change(divisionSelect, { target: { value: 'Economic Statistics Division (ESD)' } });
+    // Filter by DPD (Data Processing Division)
+    fireEvent.change(divisionSelect, { target: { value: 'Data Processing Division (DPD)' } });
 
-    // Expect Dr. Vikram Seth to be visible
-    expect(screen.getByText('Dr. Vikram Seth')).toBeInTheDocument();
+    // Expect Ananya Mehta to be visible
+    expect(await screen.findByText('Ananya Mehta')).toBeInTheDocument();
   });
 
   it('3. On-the-Fly Officer Registration: Switches to registration form, registers a dynamic officer, and launches workspace', async () => {
@@ -110,7 +116,7 @@ describe('StatSkill AI - Dynamic Multi-User & Individualized Experience Frontend
     fireEvent.change(locationInput, { target: { value: 'Kolkata' } });
 
     // Submit registration
-    const submitBtn = screen.getByRole('button', { name: /Register Officer & Launch Workspace/i });
+    const submitBtn = screen.getByRole('button', { name: /REGISTER & LOG IN TO WORKSPACE/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
@@ -174,66 +180,52 @@ describe('StatSkill AI - Dynamic Multi-User & Individualized Experience Frontend
     expect(screen.queryByText(/Dr\. Meenakshi Sundaram/i)).not.toBeInTheDocument();
   });
 
-  it('6. Quick Role Launch: Selects a role from Quick Role Access and launches instantly', async () => {
+  it('6. Register Officer Launch: Registers a new officer and launches workspace', async () => {
     const handleAuth = vi.fn();
     render(<LoginPage onAuthenticate={handleAuth} />);
 
-    // Click "Select Role & Start" tab
-    const quickTab = screen.getByRole('tab', { name: /Select Role & Start/i });
-    fireEvent.click(quickTab);
-
-    // Select "Agricultural Statistics Specialist"
-    const roleSelect = screen.getByLabelText(/Select official role/i);
-    fireEvent.change(roleSelect, { target: { value: 'Agricultural Statistics Specialist' } });
+    // Click "Register New Officer" tab
+    const registerTab = screen.getByRole('tab', { name: /Register New Officer/i });
+    fireEvent.click(registerTab);
 
     // Type officer name
-    const nameInput = screen.getByLabelText(/Officer name/i);
+    const nameInput = screen.getByPlaceholderText(/e\.g\., Dr\. Meenakshi Sundaram/i);
     fireEvent.change(nameInput, { target: { value: 'Officer Ramanathan' } });
 
-    // Submit Launch
-    const launchBtn = screen.getByRole('button', { name: /Launch Dynamic Assessment Workspace/i });
+    // Submit Registration
+    const launchBtn = screen.getByRole('button', { name: /REGISTER & LOG IN TO WORKSPACE/i });
     fireEvent.click(launchBtn);
 
     await waitFor(() => {
       expect(handleAuth).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Officer Ramanathan',
-          designation: 'Agricultural Statistics Specialist',
         }),
         'parichay-id'
       );
     });
   });
 
-  it('7. Custom Arbitrary Role: Types custom role and launches dynamic workspace without static profile', async () => {
+  it('7. Custom Arbitrary Role: Registers custom officer name and launches dynamic workspace', async () => {
     const handleAuth = vi.fn();
     render(<LoginPage onAuthenticate={handleAuth} />);
 
-    // Click "Select Role & Start" tab
-    const quickTab = screen.getByRole('tab', { name: /Select Role & Start/i });
-    fireEvent.click(quickTab);
-
-    // Select "Custom Role / Other Designation..."
-    const roleSelect = screen.getByLabelText(/Select official role/i);
-    fireEvent.change(roleSelect, { target: { value: 'Custom Role / Other Designation...' } });
-
-    // Enter custom role
-    const customRoleInput = screen.getByLabelText(/Custom role designation/i);
-    fireEvent.change(customRoleInput, { target: { value: 'Lead Macro Nowcasting Specialist' } });
+    // Click "Register New Officer" tab
+    const registerTab = screen.getByRole('tab', { name: /Register New Officer/i });
+    fireEvent.click(registerTab);
 
     // Enter custom officer name
-    const nameInput = screen.getByLabelText(/Officer name/i);
+    const nameInput = screen.getByPlaceholderText(/e\.g\., Dr\. Meenakshi Sundaram/i);
     fireEvent.change(nameInput, { target: { value: 'Dr. Alok Verma' } });
 
-    // Submit Launch
-    const launchBtn = screen.getByRole('button', { name: /Launch Dynamic Assessment Workspace/i });
+    // Submit Registration
+    const launchBtn = screen.getByRole('button', { name: /REGISTER & LOG IN TO WORKSPACE/i });
     fireEvent.click(launchBtn);
 
     await waitFor(() => {
       expect(handleAuth).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Dr. Alok Verma',
-          designation: 'Lead Macro Nowcasting Specialist',
         }),
         'parichay-id'
       );

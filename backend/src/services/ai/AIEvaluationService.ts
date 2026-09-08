@@ -215,9 +215,10 @@ export class AIEvaluationService {
     const skillDeltas: Record<string, { previous: number; updated: number }> = {};
 
     cadreCompetencies.forEach(comp => {
+      const existing = updatedProficiency[comp.skillName] ?? 0;
       skillDeltas[comp.skillName] = {
-        previous: updatedProficiency[comp.skillName] || Math.max(1, comp.targetLevel - 1),
-        updated: updatedProficiency[comp.skillName] || Math.max(1, comp.targetLevel - 1),
+        previous: existing,
+        updated: existing,
       };
     });
 
@@ -233,22 +234,23 @@ export class AIEvaluationService {
       const targetSkillKey = matchedComp ? matchedComp.skillName : topicKey;
 
       if (!skillDeltas[targetSkillKey]) {
+        const existing = updatedProficiency[targetSkillKey] ?? 0;
         skillDeltas[targetSkillKey] = {
-          previous: updatedProficiency[targetSkillKey] || 3,
-          updated: updatedProficiency[targetSkillKey] || 3,
+          previous: existing,
+          updated: existing,
         };
       }
 
       if (ans.isCorrect) {
         // Increment proficiency deterministically
-        const current = updatedProficiency[targetSkillKey] || 3;
+        const current = updatedProficiency[targetSkillKey] ?? 0;
         const next = Math.min(5, current + 1);
         updatedProficiency[targetSkillKey] = next;
         skillDeltas[targetSkillKey].updated = next;
       } else {
-        // Decrement proficiency deterministically
-        const current = updatedProficiency[targetSkillKey] || 3;
-        const next = Math.max(1, current - 1);
+        // Decrement proficiency if already assessed, keeping 0 if unassessed
+        const current = updatedProficiency[targetSkillKey] ?? 0;
+        const next = current > 0 ? Math.max(1, current - 1) : 0;
         updatedProficiency[targetSkillKey] = next;
         skillDeltas[targetSkillKey].updated = next;
 
@@ -377,7 +379,7 @@ export class AIEvaluationService {
         focusArea: 'CAPI & Circular Systematic Sampling',
         badgeVariant: 'saffron',
         imageGradient: 'from-amber-600 to-amber-900',
-        relevanceMatch: (updatedProficiency['Survey Design & Sampling'] || 3) <= 3 ? 96 : 80,
+        relevanceMatch: (updatedProficiency['Survey Design & Sampling'] ?? 0) <= 3 ? 96 : 80,
       },
       {
         id: 'cohort-2',
@@ -387,7 +389,7 @@ export class AIEvaluationService {
         focusArea: 'Supply-Use Tables & GVA Deflators',
         badgeVariant: 'default',
         imageGradient: 'from-blue-700 to-indigo-950',
-        relevanceMatch: (updatedProficiency['National Accounts & Macro Indices'] || 3) <= 3 ? 94 : 75,
+        relevanceMatch: (updatedProficiency['National Accounts & Macro Indices'] ?? 0) <= 3 ? 94 : 75,
       },
       {
         id: 'cohort-3',
@@ -397,7 +399,7 @@ export class AIEvaluationService {
         focusArea: 'Satellite Imagery & Nowcasting',
         badgeVariant: 'success',
         imageGradient: 'from-emerald-700 to-teal-950',
-        relevanceMatch: (updatedProficiency['Statistical Data Analytics (R & Python)'] || 3) <= 3 ? 92 : 78,
+        relevanceMatch: (updatedProficiency['Statistical Data Analytics (R & Python)'] ?? 0) <= 3 ? 92 : 78,
       },
       {
         id: 'cohort-4',
@@ -407,7 +409,7 @@ export class AIEvaluationService {
         focusArea: 'Unit-Level Anonymization & Consent',
         badgeVariant: 'neutral',
         imageGradient: 'from-amber-700 to-stone-900',
-        relevanceMatch: (updatedProficiency['Data Privacy & DPDPA 2023'] || 3) <= 3 ? 98 : 72,
+        relevanceMatch: (updatedProficiency['Data Privacy & DPDPA 2023'] ?? 0) <= 3 ? 98 : 72,
       },
     ];
 
@@ -553,39 +555,75 @@ Return ONLY a valid JSON object matching this schema:
   "actionPlan30Days": ["Complete sentence action step 1", "Complete sentence action step 2", "Complete sentence action step 3"]
 }`;
 
-    if (apiKey.startsWith('AIza') || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
-      const geminiKey = apiKey.startsWith('AIza') ? apiKey : (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.2 }
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message || 'Gemini API Error');
-      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-      return { feedback: JSON.parse(raw) };
-    } else {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'user', content: prompt }],
-          response_format: { type: 'json_object' },
-          temperature: 0.2
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message || 'Groq API Error');
-      const raw = data.choices?.[0]?.message?.content || '{}';
-      return { feedback: extractCleanJson(raw) };
+    const geminiKey = apiKey.startsWith('AIza') ? apiKey : (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '');
+    const isGeminiAvailable = !!geminiKey && geminiKey.startsWith('AIza');
+    const groqKey = apiKey.startsWith('gsk_') ? apiKey : (process.env.GROQ_API_KEY || apiKey);
+    const isGroqAvailable = !!groqKey && (groqKey.startsWith('gsk_') || !!process.env.GROQ_API_KEY);
+
+    if (isGeminiAvailable) {
+      const geminiModels = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash'];
+      for (const model of geminiModels) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: 'application/json', temperature: 0.2 }
+            })
+          });
+          const data = await res.json();
+          const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            return {
+              feedback: {
+                executiveSummary: parsed.executiveSummary || 'Assessment completed.',
+                demonstratedStrengths: Array.isArray(parsed.demonstratedStrengths) ? parsed.demonstratedStrengths : [],
+                priorityGrowthAreas: Array.isArray(parsed.priorityGrowthAreas) ? parsed.priorityGrowthAreas : [],
+                actionPlan30Days: Array.isArray(parsed.actionPlan30Days) ? parsed.actionPlan30Days : []
+              }
+            };
+          }
+        } catch (_) {}
+      }
     }
+
+    if (isGroqAvailable) {
+      const groqModels = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "mixtral-8x7b-32768"];
+      for (const model of groqModels) {
+        try {
+          const res = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${groqKey}`
+            },
+            body: JSON.stringify({
+              model,
+              messages: [{ role: "user", content: prompt }],
+              response_format: { type: "json_object" },
+              temperature: 0.2
+            })
+          });
+          const data = await res.json();
+          if (data.choices?.[0]?.message?.content) {
+            const raw = data.choices[0].message.content;
+            const parsed = JSON.parse(raw);
+            return {
+              feedback: {
+                executiveSummary: parsed.executiveSummary || 'Assessment completed.',
+                demonstratedStrengths: Array.isArray(parsed.demonstratedStrengths) ? parsed.demonstratedStrengths : [],
+                priorityGrowthAreas: Array.isArray(parsed.priorityGrowthAreas) ? parsed.priorityGrowthAreas : [],
+                actionPlan30Days: Array.isArray(parsed.actionPlan30Days) ? parsed.actionPlan30Days : []
+              }
+            };
+          }
+        } catch (_) {}
+      }
+    }
+
+    throw new Error('Cloud AI evaluation models unavailable.');
   }
 }
 
@@ -614,7 +652,12 @@ export function extractCleanJson(rawText: string): any {
   try {
     return JSON.parse(cleaned);
   } catch (err) {
-    return { raw: rawText, error: 'JSON parse error' };
+    try {
+      const repaired = cleaned.replace(/,\s*([}\]])/g, '$1');
+      return JSON.parse(repaired);
+    } catch (_) {
+      return { raw: rawText, error: 'JSON parse error' };
+    }
   }
 }
 

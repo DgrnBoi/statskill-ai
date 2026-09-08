@@ -1,7 +1,11 @@
 import request from 'supertest';
 import app from '../src/index';
+import { userDb } from '../src/db/UserDatabase';
 
 describe('Pillar 2: Personalized Recommendation Engine & 4-Tier ZPD Pathways', () => {
+  beforeAll(() => {
+    userDb.seedSampleUsers();
+  });
   it('TC_REC_001: Returns targeted authentic course recommendation for a single topic deficit', async () => {
     const res = await request(app)
       .post('/api/recommend/course')

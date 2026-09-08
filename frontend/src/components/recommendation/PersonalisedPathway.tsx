@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { apiUrl } from '../../lib/api';
 import {
   BookOpen,
@@ -71,6 +72,8 @@ interface PersonalisedPathwayProps {
   designation: string;
   proficiencies: Record<string, number>;
   onSelectCourseForQuiz?: (courseTitle: string) => void;
+  assessmentsTaken?: number;
+  onNavigateTab?: (tab: 'home' | 'overview' | 'dashboard' | 'discover' | 'competency' | 'analytics' | 'admin') => void;
 }
 
 const TIER_METADATA: Record<number, {
@@ -119,11 +122,18 @@ export const PersonalisedPathway: React.FC<PersonalisedPathwayProps> = ({
   designation,
   proficiencies,
   onSelectCourseForQuiz,
+  assessmentsTaken,
+  onNavigateTab,
 }) => {
   const [pathway, setPathway] = useState<PathwayData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    if (assessmentsTaken === 0) {
+      setIsLoading(false);
+      return;
+    }
+
     let isMounted = true;
     const controller = new AbortController();
 
@@ -286,7 +296,40 @@ export const PersonalisedPathway: React.FC<PersonalisedPathwayProps> = ({
       isMounted = false;
       controller.abort();
     };
-  }, [designation, proficiencies]);
+  }, [designation, proficiencies, assessmentsTaken]);
+
+  if (assessmentsTaken === 0) {
+    return (
+      <Card className="border border-amber-200/90 bg-amber-50/30 p-8 sm:p-10 text-center shadow-xs font-body">
+        <div className="mx-auto w-12 h-12 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-800 mb-4">
+          <Compass className="w-6 h-6" aria-hidden="true" />
+        </div>
+        <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
+          <Badge variant="saffron">Pillar 2: Prescriptive Recommendations</Badge>
+          <Badge variant="neutral" className="bg-amber-100 text-amber-900 border-amber-200 font-mono text-[10px]">
+            ZPD Scaffolding
+          </Badge>
+        </div>
+        <h3 className="text-lg font-bold text-slate-900 font-display mb-2">
+          No Diagnostic Baseline Established
+        </h3>
+        <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed mb-6 font-body">
+          Complete your initial diagnostic assessment to calculate your FRAC competency levels and generate an algorithmic Zone of Proximal Development (ZPD) learning pathway tailored for <strong className="text-slate-900">{designation}</strong>.
+        </p>
+        {onNavigateTab && (
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => onNavigateTab('dashboard')}
+            className="inline-flex items-center gap-2"
+          >
+            <span>Start First Assessment</span>
+            <BookOpen className="w-4 h-4" aria-hidden="true" />
+          </Button>
+        )}
+      </Card>
+    );
+  }
 
   if (isLoading && !pathway) {
     return (

@@ -1,4 +1,4 @@
-﻿// @vitest-environment jsdom
+// @vitest-environment jsdom
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -122,6 +122,7 @@ describe('Pillar 2: Personalised 4-Tier Learning Pathway Component', () => {
       <PersonalisedPathway
         designation="Junior Statistical Officer (JSO)"
         proficiencies={{ 'Survey Design & Sampling': 2 }}
+        assessmentsTaken={1}
       />
     );
 
@@ -162,6 +163,7 @@ describe('Pillar 2: Personalised 4-Tier Learning Pathway Component', () => {
       <PersonalisedPathway
         designation="Senior Statistical Officer (SSO)"
         proficiencies={{}}
+        assessmentsTaken={1}
       />
     );
 
@@ -172,5 +174,25 @@ describe('Pillar 2: Personalised 4-Tier Learning Pathway Component', () => {
     // Verify fallback tiers are present
     expect(screen.getByText(/Tier 1: Foundation & Prerequisite/i)).toBeDefined();
     expect(screen.getByText(/Tier 2: Operational Reinforcement/i)).toBeDefined();
+  });
+
+  it('renders empty state card when assessmentsTaken is 0', () => {
+    const handleNavigateTab = vi.fn();
+    render(
+      <PersonalisedPathway
+        designation="Junior Statistical Officer (JSO)"
+        proficiencies={{}}
+        assessmentsTaken={0}
+        onNavigateTab={handleNavigateTab}
+      />
+    );
+
+    expect(screen.getByText('No Diagnostic Baseline Established')).toBeDefined();
+    expect(screen.getByText(/Complete your initial diagnostic assessment/i)).toBeDefined();
+    const startButton = screen.getByText('Start First Assessment');
+    expect(startButton).toBeDefined();
+
+    startButton.click();
+    expect(handleNavigateTab).toHaveBeenCalledWith('dashboard');
   });
 });

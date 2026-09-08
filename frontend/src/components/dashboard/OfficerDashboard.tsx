@@ -141,8 +141,9 @@ export function OfficerDashboard({
                 <div className="overview-level-list">
                   {skills.map((skill) => {
                     const level = getLevel(proficiency, skill);
-                    const percent = Math.min(100, (level / 5) * 100);
-                    return <div key={skill.id}><div><span>{skill.skillName}</span><strong>{level} / {skill.targetLevel}</strong></div><div className="overview-progress" aria-label={`${skill.skillName}: level ${level} of target ${skill.targetLevel}`}><span style={{ width: `${percent}%` }} /><i style={{ left: `${Math.min(100, skill.targetLevel * 20)}%` }} /></div></div>;
+                    const percent = Math.min(100, Math.max(0, (level / 5) * 100));
+                    const targetPercent = Math.min(100, Math.max(0, ((skill.targetLevel || 3) / 5) * 100));
+                    return <div key={skill.id}><div><span>{skill.skillName}</span><strong>{level} / {skill.targetLevel || 3}</strong></div><div className="overview-progress" aria-label={`${skill.skillName}: level ${level} of target ${skill.targetLevel || 3}`}><span style={{ width: `${percent}%` }} /><i style={{ left: `${targetPercent}%` }} /></div></div>;
                   })}
                 </div>
               </div>

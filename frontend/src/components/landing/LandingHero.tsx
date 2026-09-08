@@ -19,8 +19,12 @@ export function LandingHero({ onLaunchAssessment, onExploreCourses }: LandingHer
           <p className="landing-hero-description">{t('heroDescription')}</p>
           <p className="landing-hero-context">{t('heroContext')}</p>
           <div className="landing-hero-actions">
-            <Button onClick={onLaunchAssessment}>{t('startAssessment')} <ArrowRight size={16} aria-hidden="true" /></Button>
-            <Button variant="outline" onClick={onExploreCourses}>{t('exploreCourses')}</Button>
+            <Button variant="primary" size="lg" onClick={onLaunchAssessment} className="font-bold shadow-md">
+              {t('startAssessment')} <ArrowRight size={18} aria-hidden="true" />
+            </Button>
+            <Button variant="outline" size="lg" onClick={onExploreCourses} className="font-bold">
+              {t('exploreCourses')}
+            </Button>
           </div>
           <p className="landing-hero-note">{t('heroCadreNote')}</p>
         </div>

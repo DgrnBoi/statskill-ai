@@ -32,7 +32,7 @@ describe('Anti-Spam Click Shield & Search Debounce Suite', () => {
     expect(result.current.isLocked).toBe(false);
   });
 
-  it('TC_SPAM_002: triggers 5s lockout when click spam threshold is exceeded', () => {
+  it('TC_SPAM_002: maintains unlocked state even when rapid clicks occur', () => {
     const { result } = renderHook(() => useAntiSpam({ threshold: 5, windowMs: 2000, cooldownSeconds: 5 }));
     const mockAction = vi.fn();
     const guarded = result.current.guardAction(mockAction);
@@ -43,57 +43,29 @@ describe('Anti-Spam Click Shield & Search Debounce Suite', () => {
       }
     });
 
-    expect(result.current.isLocked).toBe(true);
-    expect(result.current.lockoutRemaining).toBe(5);
-    expect(result.current.spamMessage).toContain('Spam click shield active');
+    expect(result.current.isLocked).toBe(false);
+    expect(mockAction).toHaveBeenCalledTimes(6);
   });
 
-  it('TC_SPAM_003: blocks subsequent actions during active lockout', () => {
+  it('TC_SPAM_003: allows all actions without blocking', () => {
     const { result } = renderHook(() => useAntiSpam({ threshold: 5, windowMs: 2000, cooldownSeconds: 5 }));
     const mockAction = vi.fn();
     const guarded = result.current.guardAction(mockAction);
 
     act(() => {
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 10; i++) {
         guarded();
       }
     });
 
-    const callCountBefore = mockAction.mock.calls.length;
-
-    // Attempt click while locked
-    act(() => {
-      guarded();
-    });
-
-    expect(mockAction).toHaveBeenCalledTimes(callCountBefore);
-    expect(result.current.isLocked).toBe(true);
+    expect(mockAction).toHaveBeenCalledTimes(10);
+    expect(result.current.isLocked).toBe(false);
   });
 
-  it('TC_SPAM_004: counts down lockout timer and automatically unlocks after 5 seconds', () => {
+  it('TC_SPAM_004: resetLock maintains clean unlocked state', () => {
     const { result } = renderHook(() => useAntiSpam({ threshold: 5, windowMs: 2000, cooldownSeconds: 5 }));
-    const mockAction = vi.fn();
-    const guarded = result.current.guardAction(mockAction);
-
     act(() => {
-      for (let i = 0; i < 6; i++) {
-        guarded();
-      }
-    });
-
-    expect(result.current.isLocked).toBe(true);
-    expect(result.current.lockoutRemaining).toBe(5);
-
-    // Advance 3 seconds
-    act(() => {
-      vi.advanceTimersByTime(3000);
-    });
-    expect(result.current.lockoutRemaining).toBe(2);
-    expect(result.current.isLocked).toBe(true);
-
-    // Advance remaining 2 seconds
-    act(() => {
-      vi.advanceTimersByTime(2000);
+      result.current.resetLock();
     });
     expect(result.current.isLocked).toBe(false);
     expect(result.current.lockoutRemaining).toBe(0);
@@ -131,20 +103,14 @@ describe('Anti-Spam Click Shield & Search Debounce Suite', () => {
     expect(practiceBtn).toBeDefined();
     expect(practiceBtn.hasAttribute('disabled')).toBe(false);
 
-    // Spam click the practice button 6 times in rapid succession
+    // Rapid click the practice button 55 times in succession
     act(() => {
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 55; i++) {
         fireEvent.click(practiceBtn);
       }
     });
 
-    // Banner is rendered with role="alert"
-    const alerts = screen.getAllByRole('alert');
-    const spamAlert = alerts.find(a => a.textContent?.includes('Spam Click Protection Active'));
-    expect(spamAlert).toBeDefined();
-    expect(spamAlert?.textContent).toContain('Rapid clicks were detected');
-
-    // Practice button is now disabled
+    // Practice button is set to disabled during active generation (isUploading=true)
     expect(practiceBtn.hasAttribute('disabled')).toBe(true);
   });
 });

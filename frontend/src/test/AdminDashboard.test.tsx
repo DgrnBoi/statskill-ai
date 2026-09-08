@@ -159,7 +159,7 @@ describe('Pillar 5: Admin Command Center & ACBP Dossier', () => {
     });
 
     // Admin Command Center is now active
-    expect(screen.getByText(/MoSPI Cadre Capacity & Readiness Command Center/i)).toBeDefined();
+    expect(screen.getByText(/MoSPI Cadre Capacity & Officer Telemetry Control Center/i)).toBeDefined();
     vi.useRealTimers();
   });
 });

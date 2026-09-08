@@ -31,8 +31,8 @@ export async function assessDeviceCapability(): Promise<DeviceCapability> {
     isNetworkPoor = true;
   }
 
-  // Decide if the device is a "potato" or has bad network
-  if (ram < 4 || cores <= 2 || duration > 30 || isNetworkPoor) {
+  // Decide if the device is offline
+  if (!navigator.onLine) {
     return 'POTATO_DEVICE';
   }
   

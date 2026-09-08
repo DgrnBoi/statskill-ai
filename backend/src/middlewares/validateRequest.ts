@@ -20,6 +20,7 @@ export function validateBody(schema: z.ZodSchema) {
 
 // Pre-defined Zod Schemas for Authentication & User Registration
 export const RegisterUserSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(2, 'Name must be at least 2 characters long'),
   designation: z.string().min(2, 'Designation is required'),
   division: z.string().optional(),

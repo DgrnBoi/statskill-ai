@@ -7,6 +7,7 @@ import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 export interface XApiStatementPayload {
   actor: {
     name: string;
+    mbox?: string;
     account: {
       homePage: string;
       name: string;

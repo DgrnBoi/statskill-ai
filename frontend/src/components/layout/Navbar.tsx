@@ -43,6 +43,7 @@ const baseTabs = [
   { id: 'discover' as const, label: 'Discover (880+ Catalog)', icon: BookOpen },
   { id: 'competency' as const, label: 'FRAC Competency Profile', icon: Shield },
   { id: 'analytics' as const, label: 'MoSPI Analytics', icon: BarChart3 },
+  { id: 'admin' as const, label: 'HQ Admin Command', icon: Building2 },
 ];
 
 export function Navbar({
@@ -53,7 +54,7 @@ export function Navbar({
   onOpenLogin,
   officerName,
   officerCadreId,
-  isAdminUnlocked = false,
+  isAdminUnlocked = true,
   onOpenSecretAdmin,
   onOpenAccessibility,
   onOpenAiModel,
@@ -63,9 +64,7 @@ export function Navbar({
 }: NavbarProps) {
   const { adjustFontScale, fontScale, t, toggleLanguage } = useUiPreferences();
   const [emblemClicks, setEmblemClicks] = useState(0);
-  const tabs = isAdminUnlocked || activeTab === 'admin'
-    ? [...baseTabs, { id: 'admin' as const, label: t('navAdminTab'), icon: Building2 }]
-    : baseTabs;
+  const tabs = baseTabs;
 
   const handleEmblemClick = () => {
     const clicks = emblemClicks + 1;
@@ -107,17 +106,7 @@ export function Navbar({
               <button type="button" aria-label={t('resetTextSize')} onClick={() => adjustFontScale('reset')} className="px-1.5 py-1 text-xs text-[#183b56]">A</button>
               <button type="button" aria-label={t('increaseTextSize')} disabled={fontScale >= 1.4} onClick={() => adjustFontScale('increase')} className="px-1.5 py-1 text-xs text-[#183b56] disabled:opacity-40">A+</button>
             </div>
-            {onOpenAiModel && (
-              <button
-                type="button"
-                onClick={onOpenAiModel}
-                aria-label="Open AI Engine & Inference Gateway Settings"
-                title="AI Engine Gateway"
-                className="nav-icon-button flex items-center gap-1 text-[#0B2E63] hover:bg-blue-50"
-              >
-                <Cpu className="h-4 w-4 text-[#0B2E63]" aria-hidden="true" />
-              </button>
-            )}
+
             <button type="button" onClick={onOpenAccessibility} aria-label="Open accessibility settings (Alt+A)" title="Accessibility (Alt+A)" className="nav-icon-button">
               <Eye className="h-4 w-4" aria-hidden="true" />
             </button>

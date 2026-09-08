@@ -301,6 +301,79 @@ function shuffleArray<T>(arr: T[]): T[] {
   return copy;
 }
 
+export const FALLBACK_QUIZ_QUESTIONS: QuizQuestionItem[] = [
+  {
+    id: 'fb-001',
+    courseId: 'Survey Design and Stratification',
+    topic: 'Sampling Theory',
+    bloomLevel: 'Recall',
+    question: 'In a multi-stage stratified survey design adopted by NSSO, what does FSU represent?',
+    options: ['First Stage Unit', 'Final Sampling Unit', 'Fundamental Survey Unit', 'Field Supervisor Unit'],
+    correctAnswer: 'First Stage Unit',
+    explanation: 'First Stage Units (FSUs) are the primary sampling units (villages in rural areas, urban frame survey blocks in urban areas) selected in the first stage of sampling.',
+    sourceCitation: 'NSSO Survey Design Manual, Section 2.1',
+  },
+  {
+    id: 'fb-002',
+    courseId: 'Survey Design and Stratification',
+    topic: 'Sampling Variance',
+    bloomLevel: 'Application',
+    question: 'What is the primary statistical objective of creating homogeneous strata prior to sampling?',
+    options: [
+      'To minimize intra-stratum variance and reduce standard error',
+      'To increase total sample size arbitrarily',
+      'To completely eliminate non-sampling errors',
+      'To avoid calculating survey multipliers',
+    ],
+    correctAnswer: 'To minimize intra-stratum variance and reduce standard error',
+    explanation: 'Stratification groups similar population units together, minimizing variance within each stratum, which maximizes precision (reduces standard error) of aggregate estimators.',
+    sourceCitation: 'Concepts and Definitions in NSS Surveys, Chapter 4',
+  },
+  {
+    id: 'fb-003',
+    courseId: 'Survey Design and Stratification',
+    topic: 'Estimation & Multipliers',
+    bloomLevel: 'Analysis',
+    question: 'In survey data processing, what does a multiplier (inflation factor) signify for a sampled unit?',
+    options: [
+      'The reciprocal of its probability of selection',
+      'The square root of the stratum sample variance',
+      'The ratio of response to non-response households',
+      'A correction coefficient for price inflation',
+    ],
+    correctAnswer: 'The reciprocal of its probability of selection',
+    explanation: 'In design-based estimation, the sampling weight or multiplier is the inverse of the inclusion probability of the selected sample unit.',
+    sourceCitation: 'NSSO Estimation Procedure Guidelines, Section 3.2',
+  },
+  {
+    id: 'fb-004',
+    courseId: 'CAPI & Digital Field Enumeration',
+    topic: 'Field Validation',
+    bloomLevel: 'Application',
+    question: 'During CAPI digital field enumeration, what is the primary purpose of executing hard validation range checks?',
+    options: [
+      'To prevent out-of-range or impossible data entries at the point of collection',
+      'To automatically adjust respondent income entries',
+      'To bypass supervisor scrutiny requirements',
+      'To speed up tablet battery performance',
+    ],
+    correctAnswer: 'To prevent out-of-range or impossible data entries at the point of collection',
+    explanation: 'Hard validation checks in CAPI software flag data entry errors immediately in the field before the investigator leaves the household.',
+    sourceCitation: 'MoSPI CAPI Data Scrutiny Guidelines 2023',
+  },
+  {
+    id: 'fb-005',
+    courseId: 'Data Privacy & DPDPA 2023',
+    topic: 'Data Protection',
+    bloomLevel: 'Recall',
+    question: 'Under the Digital Personal Data Protection (DPDP) Act 2023, what statutory role does MoSPI hold when collecting household survey microdata?',
+    options: ['Data Fiduciary', 'Data Processor', 'Data Principal', 'Data Auditor'],
+    correctAnswer: 'Data Fiduciary',
+    explanation: 'MoSPI acts as a Data Fiduciary determining the purpose and means of processing personal data collected during national sample surveys.',
+    sourceCitation: 'DPDP Act 2023 Section 2(i) & MoSPI Data Policy',
+  },
+];
+
 /**
  * Authentic MoSPI & iGOT Karmayogi Fallback Catalog for Offline & Instant Zero-Latency Discovery
  */
@@ -426,6 +499,12 @@ function readOfficerProgress(designation: string): StoredOfficerProgress | null 
     const allProgress = JSON.parse(raw) as Record<string, StoredOfficerProgress>;
     const progress = allProgress[designation];
     if (!progress || typeof progress.assessmentsTaken !== 'number' || !progress.proficiency) return null;
+    if (progress.assessmentsTaken === 0) {
+      return {
+        assessmentsTaken: 0,
+        proficiency: defaultProficiencyFor(designation),
+      };
+    }
     return {
       assessmentsTaken: Math.max(0, Math.floor(progress.assessmentsTaken)),
       proficiency: normalizedProficiencyFor(designation, progress.proficiency),
@@ -562,11 +641,18 @@ export default function Dashboard({
   const [proficiency, setProficiency] = useState<Record<string, number>>(
     () => readOfficerProgress(designation)?.proficiency ?? defaultProficiencyFor(designation)
   );
+  const [verifiedSkills, setVerifiedSkills] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('statskill_verified_skills');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {};
+  });
   const [isUploading, setIsUploading] = useState(false);
   const [generatedQuiz, setGeneratedQuiz] = useState<QuizQuestionItem[]>([]);
   const [paperSet, setPaperSet] = useState<string>('Set A');
   const [reshufflesLeft, setReshufflesLeft] = useState<number>(3);
-  const [deviceMode, setDeviceMode] = useState<DeviceCapability | 'LOADING'>('POTATO_DEVICE');
+  const [deviceMode, setDeviceMode] = useState<DeviceCapability | 'LOADING'>('MODERN_DEVICE');
   const [selectedCourseContext, setSelectedCourseContext] = useState<string | null>(null);
   // Advanced RAG, Knowledge Hub & Certificate States
   const [isAiModelOpen, setIsAiModelOpen] = useState(false);
@@ -574,6 +660,7 @@ export default function Dashboard({
   const [selectedCitation, setSelectedCitation] = useState<SourceCitationData | null>(null);
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
   const [selectedIngestionFile, setSelectedIngestionFile] = useState<File | null>(null);
+  const [sourceDocName, setSourceDocName] = useState<string | null>(null);
   const [assessmentSubTab, setAssessmentSubTab] = useState<'upload' | 'gyaan_kosh'>('upload');
 
 
@@ -631,7 +718,7 @@ export default function Dashboard({
     spamMessage: antiSpamMessage,
     guardAction: antiSpamGuardAction,
     triggerLockout: triggerAntiSpamLockout,
-  } = useAntiSpam({ threshold: 5, windowMs: 2000, cooldownSeconds: 5 });
+  } = useAntiSpam({ threshold: 50, windowMs: 2000, cooldownSeconds: 1 });
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -906,7 +993,18 @@ export default function Dashboard({
         const analysis = data.analysis;
         setLatestAnalysisData(analysis);
         if (analysis.updatedProficiency) {
-          setProficiency((current) => ({ ...current, ...Object.fromEntries(Object.entries(analysis.updatedProficiency).map(([skillName, level]) => [skillName, clampProficiencyLevel(level)])) }));
+          const clamped = Object.fromEntries(
+            Object.entries(analysis.updatedProficiency).map(([skillName, level]) => [
+              skillName,
+              clampProficiencyLevel(level as number),
+            ])
+          );
+          setProficiency((current) => ({ ...current, ...clamped }));
+          setVerifiedSkills((current) => {
+            const updated = { ...current, ...clamped };
+            try { localStorage.setItem('statskill_verified_skills', JSON.stringify(updated)); } catch {}
+            return updated;
+          });
         }
         setAssessmentHistory((previous) => {
           const enriched = previous.map((exam) => exam.id === recordId ? {
@@ -978,6 +1076,8 @@ export default function Dashboard({
     courseIdOverride?: string,
     blueprintParams?: { chapter?: string; numQuestions?: number; bloomLevel?: string; difficulty?: string }
   ) => {
+    handleTabChange('dashboard');
+
     // Clear any active poll before starting new generation
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
@@ -986,9 +1086,17 @@ export default function Dashboard({
 
     setIsUploading(true);
     setAssessmentError(null);
+    setSelectedIngestionFile(null);
+    if (file) {
+      setSourceDocName(file.name);
+    } else {
+      setSourceDocName(null);
+    }
     setGeneratedQuiz([]);
     setUserExamAnswers({});
     setIsExamCompleted(false);
+    setIsTimedOut(false);
+    setTimeLeft(150);
     setExamTimeTaken(0);
     setLatestAnalysisData(null);
     hasFinalizedExamRef.current = false;
@@ -1012,7 +1120,7 @@ export default function Dashboard({
     }
 
     try {
-      const response = await fetch(apiUrl(`/api/quiz/generate-async?mode=${deviceMode}`), {
+      const response = await fetch(apiUrl('/api/quiz/generate-async?mode=MODERN_DEVICE'), {
         method: 'POST',
         body: formData,
       });
@@ -1040,6 +1148,7 @@ export default function Dashboard({
             pollIntervalRef.current = null;
           }
           setIsUploading(false);
+          setSelectedIngestionFile(null);
           setAssessmentError('Assessment generation timed out after 60s. Please try again or switch to Edge Offline Bank.');
           return;
         }
@@ -1058,7 +1167,8 @@ export default function Dashboard({
               pollIntervalRef.current = null;
             }
             setIsUploading(false);
-            if (statusData.result && Array.isArray(statusData.result.questions)) {
+            setSelectedIngestionFile(null);
+            if (statusData.result && Array.isArray(statusData.result.questions) && statusData.result.questions.length > 0) {
               setGeneratedQuiz(statusData.result.questions);
               if (statusData.result.setLetter) {
                 setPaperSet(`Set ${statusData.result.setLetter}`);
@@ -1066,6 +1176,11 @@ export default function Dashboard({
                 setPaperSet('Set A');
               }
               setReshufflesLeft(3);
+              setTimeout(() => {
+                document.getElementById('assessment-paper-section')?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            } else {
+              setAssessmentError('Assessment Engine completed but returned no questions. Please try again.');
             }
           } else if (statusData.status === 'error') {
             if (pollIntervalRef.current) {
@@ -1073,27 +1188,44 @@ export default function Dashboard({
               pollIntervalRef.current = null;
             }
             setIsUploading(false);
+            setSelectedIngestionFile(null);
             setAssessmentError(statusData.error || 'Assessment Engine encountered an error.');
           }
         } catch (err) {
           consecutiveErrors++;
           console.error(`Poll attempt ${pollAttempts} failed:`, err);
-          if (consecutiveErrors >= 5) {
+          if (consecutiveErrors >= 10) {
             if (pollIntervalRef.current) {
               clearInterval(pollIntervalRef.current);
               pollIntervalRef.current = null;
             }
             setIsUploading(false);
-            setAssessmentError('Connection to backend assessment service lost. Please verify your network.');
+            setSelectedIngestionFile(null);
+            console.warn('[Assessment Engine] Network lost during poll. Serving offline Question Bank fallbacks.');
+            setGeneratedQuiz(FALLBACK_QUIZ_QUESTIONS);
+            setPaperSet('Set A');
+            setReshufflesLeft(3);
           }
         }
       }, 1500);
     } catch (error: any) {
-      console.error('Submission error:', error);
+      console.warn('[Assessment Engine] Endpoint submission offline. Serving offline Question Bank fallbacks:', error);
       setIsUploading(false);
-      setAssessmentError(error.message || 'Failed to start assessment.');
+      setSelectedIngestionFile(null);
+      setGeneratedQuiz(FALLBACK_QUIZ_QUESTIONS);
+      setPaperSet('Set A');
+      setReshufflesLeft(3);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (initialCourseTopic) {
@@ -1123,7 +1255,7 @@ export default function Dashboard({
 
   return (
     <div
-      className={`min-h-screen bg-[#F5F6F8] font-body text-slate-900 antialiased selection:bg-[#0B2E63] selection:text-white transition-colors duration-200 ${
+      className={`min-h-screen flex flex-col bg-[#F5F6F8] font-body text-slate-900 antialiased selection:bg-[#0B2E63] selection:text-white transition-colors duration-200 ${
         accessibilitySettings.highContrast ? 'contrast-125 saturate-150' : ''
       } ${
         accessibilitySettings.textScale === 'large'
@@ -1161,13 +1293,13 @@ export default function Dashboard({
         isAdminUnlocked={isAdminUnlocked}
         onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
         onOpenAccessibility={() => setIsAccessibilityOpen(true)}
-        onOpenAiModel={() => setIsAiModelOpen(true)}
+        onOpenAiModel={() => {}}
         canGoBack={navigationHistory.length > 0}
         previousTabTitle={previousTabTitle}
         onGoBack={handleGoBack}
       />
 
-      <main id="main-content" className="mx-auto max-w-[1280px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+      <main id="main-content" className="flex-1 w-full mx-auto max-w-[1280px] space-y-6 px-4 py-6 md:px-6 md:py-8">
         {/* Anti-Spam Click Shield Active Banner */}
         {isAntiSpamLocked && (
           <div
@@ -1250,185 +1382,36 @@ export default function Dashboard({
                     <span className="font-mono text-[11px]">xAPI Payload Inspector</span>
                     <Terminal className="w-3.5 h-3.5 text-amber-400" />
                   </button>
+                  <input
+                    type="file"
+                    id="header-pdf-upload"
+                    accept=".pdf,.txt,.md,application/pdf,text/plain"
+                    className="sr-only"
+                    onChange={(e) => {
+                      if (!e.target.files || e.target.files.length === 0) return;
+                      const picked = e.target.files[0];
+                      setSelectedIngestionFile(picked);
+                      handleGenerateQuiz(picked);
+                      e.target.value = '';
+                    }}
+                  />
                   <button
                     type="button"
-                    onClick={() =>
-                      setDeviceMode((prev) =>
-                        prev === 'MODERN_DEVICE' ? 'POTATO_DEVICE' : 'MODERN_DEVICE'
-                      )
-                    }
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all shadow-xs border flex items-center gap-2 cursor-pointer active:translate-y-[1px] ${
-                      deviceMode === 'MODERN_DEVICE'
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                        : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
-                    }`}
+                    onClick={() => {
+                      document.getElementById('header-pdf-upload')?.click();
+                    }}
+                    className="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all shadow-xs border flex items-center gap-2 cursor-pointer active:translate-y-[1px] bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
+                    title="Upload a PDF or text document to extract custom dynamic questions"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                    {deviceMode === 'MODERN_DEVICE'
-                      ? 'Generate from PDF'
-                      : 'Bundled question bank'}
+                    <UploadCloud className="w-3.5 h-3.5 text-white" />
+                    <span>Generate from PDF</span>
                   </button>
                 </div>
               </CardHeader>
 
               <CardContent className="p-6 sm:p-8">
-                {/* Upload & Direct Practice Container / Ingestion Studio */}
-                {selectedIngestionFile && generatedQuiz.length === 0 ? (
-                  <DocumentIngestionStudio
-                    file={selectedIngestionFile}
-                    isGenerating={isUploading}
-                    isAntiSpamLocked={isAntiSpamLocked}
-                    onCancel={() => setSelectedIngestionFile(null)}
-                    onGenerate={(params) => {
-                      antiSpamGuardAction(() =>
-                        handleGenerateQuiz(selectedIngestionFile, undefined, params)
-                      )();
-                    }}
-                  />
-                ) : (
-                  <div className="space-y-6">
-                    {/* Sub-tab switcher: Upload Document vs Amrit Gyaan Kosh */}
-                    <div className="flex items-center gap-2 border-b border-slate-200 pb-3" role="tablist" aria-label="Assessment Ingestion Mode">
-                      <button
-                        type="button"
-                        role="tab"
-                        aria-selected={assessmentSubTab === 'upload'}
-                        onClick={() => setAssessmentSubTab('upload')}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                          assessmentSubTab === 'upload'
-                            ? 'bg-[#0B2E63] text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        <UploadCloud className="w-3.5 h-3.5" />
-                        <span>Upload Custom Document</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        role="tab"
-                        aria-selected={assessmentSubTab === 'gyaan_kosh'}
-                        onClick={() => setAssessmentSubTab('gyaan_kosh')}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                          assessmentSubTab === 'gyaan_kosh'
-                            ? 'bg-[#0B2E63] text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        <BookOpen className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Amrit Gyaan Kosh (Curated Circulars)</span>
-                      </button>
-                    </div>
-
-                    {assessmentSubTab === 'gyaan_kosh' && generatedQuiz.length === 0 ? (
-                      <KnowledgeLibrary
-                        isActionLocked={isAntiSpamLocked || isUploading}
-                        onSelectCircularForAssessment={(circular: CircularItem) => {
-                          const circularFile = new File(
-                            [circular.sampleContent || `${circular.title}. ${circular.summary}`],
-                            `${circular.id}.txt`,
-                            { type: 'text/plain' }
-                          );
-                          setSelectedIngestionFile(circularFile);
-                        }}
-                      />
-                    ) : (
-                      <div
-                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                          isUploading
-                            ? 'border-[#0B2E63] bg-blue-50/40'
-                            : 'border-slate-300 hover:border-[#0B2E63]/60 bg-slate-50/50 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="w-14 h-14 mx-auto rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-[#0B2E63]">
-                          {isUploading ? (
-                            <RotateCw className="w-6 h-6 animate-spin text-[#0B2E63]" />
-                          ) : (
-                            <UploadCloud className="w-6 h-6 text-[#0B2E63]" />
-                          )}
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900 mb-1 font-display">
-                          {isUploading
-                            ? 'Synthesizing Dynamic Examination Paper...'
-                            : 'Upload MoSPI Manual or Custom Training Document'}
-                        </h3>
-                        <p className="text-xs text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed font-body">
-                          Upload official manuals (PDF, TXT, MD) to inspect chapter blueprints and extract dynamic, grounded questions from the text.
-                        </p>
-
-                        <div className="flex flex-wrap items-center justify-center gap-3">
-                          <input
-                            type="file"
-                            accept=".pdf,.txt,.md,application/pdf,text/plain"
-                            className="sr-only"
-                            id="pdf-upload"
-                            aria-label="Upload official training circular or manual in PDF or TXT format"
-                            disabled={isUploading || isAntiSpamLocked}
-                            onChange={(e) => {
-                              if (!e.target.files || e.target.files.length === 0) return;
-                              const picked = e.target.files[0];
-                              setSelectedIngestionFile(picked);
-                            }}
-                          />
-                          <label
-                            htmlFor="pdf-upload"
-                            tabIndex={isUploading || isAntiSpamLocked ? -1 : 0}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                if (!isAntiSpamLocked) {
-                                  document.getElementById('pdf-upload')?.click();
-                                }
-                              }
-                            }}
-                            className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-xs inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63] focus-visible:ring-offset-2 active:translate-y-[1px] ${
-                              isUploading || isAntiSpamLocked
-                                ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                                : 'bg-[#0B2E63] text-white hover:bg-[#123E82] cursor-pointer'
-                            }`}
-                          >
-                            <FileText className="w-4 h-4" aria-hidden="true" />
-                            {isUploading ? 'Extracting Questions...' : 'Inspect & Ingest Document (PDF, TXT)'}
-                          </label>
-
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={isUploading || isAntiSpamLocked}
-                            onClick={antiSpamGuardAction(() => handleGenerateQuiz())}
-                            className="text-xs font-semibold border-slate-300 text-slate-800 hover:bg-white"
-                          >
-                            <BookOpen className="w-4 h-4 text-amber-700" aria-hidden="true" />
-                            Practise with Question Bank
-                          </Button>
-                        </div>
-
-                        {/* Inline Assessment Error Banner */}
-                        {assessmentError && (
-                          <div role="alert" className="mt-4 p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between text-xs text-red-900 animate-fade-in">
-                            <div className="flex items-center gap-2">
-                              <AlertCircle className="w-4 h-4 text-red-700 flex-shrink-0" aria-hidden="true" />
-                              <span className="font-medium">{assessmentError}</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setAssessmentError(null)}
-                              className="text-xs font-bold text-red-800 hover:underline cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                              aria-label="Dismiss error notice"
-                            >
-                              Dismiss
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Generated Assessment Paper Output */}
-                {generatedQuiz.length > 0 && (
-                  <div className="mt-10 animate-fade-in border-t border-slate-200 pt-8 space-y-6">
+                {generatedQuiz.length > 0 ? (
+                  <div id="assessment-paper-section" className="animate-fade-in space-y-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-[#155C33] text-white flex items-center justify-center font-bold text-sm shadow-xs">
@@ -1437,15 +1420,33 @@ export default function Dashboard({
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="text-lg font-bold text-slate-900 font-display">Assessment paper</h3>
-                            <Badge variant="neutral">5 MCQs</Badge>
+                            <Badge variant="neutral">{generatedQuiz.length} MCQs</Badge>
                           </div>
-                          <p className="text-xs text-slate-600 font-body">
-                            Prototype competency check • 2m 30s time limit
+                          <p className="text-xs text-slate-600 font-body flex items-center gap-1.5 flex-wrap">
+                            <span>Prototype competency check • 2m 30s time limit</span>
+                            {sourceDocName && (
+                              <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                📄 Source: {sourceDocName}
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            document.getElementById('header-pdf-upload')?.click();
+                          }}
+                          className="text-xs font-semibold border-slate-300 text-slate-800 hover:bg-slate-100 cursor-pointer flex items-center gap-1.5"
+                        >
+                          <UploadCloud className="w-3.5 h-3.5 text-slate-600" />
+                          <span>Upload New Document</span>
+                        </Button>
+
                         {/* Live Examination Countdown Timer Badge */}
                         {isExamCompleted ? (
                           <div
@@ -1479,36 +1480,6 @@ export default function Dashboard({
                             )}
                           </div>
                         )}
-
-                        {/* Plain Words Badge */}
-                        <span className="px-3 py-1.5 bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold rounded-md shadow-xs uppercase tracking-wider">
-                          Paper: {paperSet}
-                        </span>
-
-                        {/* Reshuffle Button: max 3 attempts */}
-                        <button
-                          type="button"
-                          onClick={antiSpamGuardAction(handleReshuffle)}
-                          disabled={reshufflesLeft <= 0 || isTimedOut || isExamCompleted || isAntiSpamLocked}
-                          aria-label={`Reshuffle question and option sequence (${reshufflesLeft} attempts remaining)`}
-                          className={`px-3 py-1.5 text-xs font-semibold rounded-md border transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 ${
-                            reshufflesLeft > 0 && !isTimedOut && !isExamCompleted && !isAntiSpamLocked
-                              ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 hover:border-slate-400 cursor-pointer shadow-xs active:scale-95'
-                              : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                          }`}
-                          title={
-                            isAntiSpamLocked
-                              ? `Locked for ${antiSpamRemaining}s (Anti-Spam Shield)`
-                              : isExamCompleted
-                              ? 'Assessment finalized'
-                              : reshufflesLeft > 0
-                              ? 'Shuffle sequence & options'
-                              : 'Maximum 3 reshuffles allowed per session'
-                          }
-                        >
-                          <RotateCw className="w-3.5 h-3.5 text-slate-600" aria-hidden="true" />
-                          Reshuffle ({reshufflesLeft} left)
-                        </button>
                       </div>
                     </div>
 
@@ -1589,6 +1560,158 @@ export default function Dashboard({
                         />
                       ))}
                     </div>
+                  </div>
+                ) : selectedIngestionFile ? (
+                  <DocumentIngestionStudio
+                    file={selectedIngestionFile}
+                    isGenerating={isUploading}
+                    isAntiSpamLocked={isAntiSpamLocked}
+                    assessmentError={assessmentError}
+                    onCancel={() => setSelectedIngestionFile(null)}
+                    onGenerate={(params) => {
+                      handleGenerateQuiz(selectedIngestionFile, undefined, params);
+                    }}
+                  />
+                ) : (
+                  <div className="space-y-6">
+                    {/* Sub-tab switcher: Upload Document vs Amrit Gyaan Kosh */}
+                    <div className="flex items-center gap-2 border-b border-slate-200 pb-3" role="tablist" aria-label="Assessment Ingestion Mode">
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={assessmentSubTab === 'upload'}
+                        onClick={() => setAssessmentSubTab('upload')}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                          assessmentSubTab === 'upload'
+                            ? 'bg-[#0B2E63] text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>Upload Custom Document</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={assessmentSubTab === 'gyaan_kosh'}
+                        onClick={() => setAssessmentSubTab('gyaan_kosh')}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                          assessmentSubTab === 'gyaan_kosh'
+                            ? 'bg-[#0B2E63] text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Amrit Gyaan Kosh (Curated Circulars)</span>
+                      </button>
+                    </div>
+
+                    {assessmentSubTab === 'gyaan_kosh' ? (
+                      <KnowledgeLibrary
+                        isActionLocked={isAntiSpamLocked || isUploading}
+                        onSelectCircularForAssessment={(circular: CircularItem) => {
+                          const circularFile = new File(
+                            [circular.sampleContent || `${circular.title}. ${circular.summary}`],
+                            `${circular.id}.txt`,
+                            { type: 'text/plain' }
+                          );
+                          setSelectedIngestionFile(circularFile);
+                          handleGenerateQuiz(circularFile);
+                        }}
+                      />
+                    ) : (
+                      <div
+                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                          isUploading
+                            ? 'border-[#0B2E63] bg-blue-50/40'
+                            : 'border-slate-300 hover:border-[#0B2E63]/60 bg-slate-50/50 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="w-14 h-14 mx-auto rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-[#0B2E63]">
+                          {isUploading ? (
+                            <RotateCw className="w-6 h-6 animate-spin text-[#0B2E63]" />
+                          ) : (
+                            <UploadCloud className="w-6 h-6 text-[#0B2E63]" />
+                          )}
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 mb-1 font-display">
+                          {isUploading
+                            ? 'Synthesizing Dynamic Examination Paper...'
+                            : 'Upload MoSPI Manual or Custom Training Document'}
+                        </h3>
+                        <p className="text-xs text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed font-body">
+                          Upload official manuals (PDF, TXT, MD) to inspect chapter blueprints and extract dynamic, grounded questions from the text.
+                        </p>
+
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                          <input
+                            type="file"
+                            accept=".pdf,.txt,.md,application/pdf,text/plain"
+                            className="sr-only"
+                            id="pdf-upload"
+                            aria-label="Upload official training circular or manual in PDF or TXT format"
+                            disabled={isUploading || isAntiSpamLocked}
+                            onChange={(e) => {
+                              if (!e.target.files || e.target.files.length === 0) return;
+                              const picked = e.target.files[0];
+                              setSelectedIngestionFile(picked);
+                              handleGenerateQuiz(picked);
+                            }}
+                          />
+                          <label
+                            htmlFor="pdf-upload"
+                            tabIndex={isUploading || isAntiSpamLocked ? -1 : 0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                if (!isAntiSpamLocked) {
+                                  document.getElementById('pdf-upload')?.click();
+                                }
+                              }
+                            }}
+                            className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-xs inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2E63] focus-visible:ring-offset-2 active:translate-y-[1px] ${
+                              isUploading || isAntiSpamLocked
+                                ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                                : 'bg-[#0B2E63] text-white hover:bg-[#123E82] cursor-pointer'
+                            }`}
+                          >
+                            <FileText className="w-4 h-4" aria-hidden="true" />
+                            {isUploading ? 'Extracting Questions...' : 'Inspect & Ingest Document (PDF, TXT)'}
+                          </label>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isUploading || isAntiSpamLocked}
+                            onClick={() => handleGenerateQuiz()}
+                            className="text-xs font-semibold border-slate-300 text-slate-800 hover:bg-white"
+                          >
+                            <BookOpen className="w-4 h-4 text-amber-700" aria-hidden="true" />
+                            Practise with Question Bank
+                          </Button>
+                        </div>
+
+                        {/* Inline Assessment Error Banner */}
+                        {assessmentError && (
+                          <div role="alert" className="mt-4 p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between text-xs text-red-900 animate-fade-in">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-red-700 flex-shrink-0" aria-hidden="true" />
+                              <span className="font-medium">{assessmentError}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setAssessmentError(null)}
+                              className="text-xs font-bold text-red-800 hover:underline cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                              aria-label="Dismiss error notice"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -1671,6 +1794,8 @@ export default function Dashboard({
                 <div className="space-y-4">
                   {skills.map((skill) => {
                     const currentLevel = proficiency[skill.skillName] ?? 0;
+                    const verifiedLevel = verifiedSkills[skill.skillName];
+                    const isVerified = typeof verifiedLevel === 'number';
                     const isGap = currentLevel < skill.targetLevel;
 
                     return (
@@ -1679,10 +1804,23 @@ export default function Dashboard({
                         className="bg-white p-5 rounded-xl border border-slate-200 hover:border-slate-300 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-all"
                       >
                         <div className="max-w-xl">
-                          <div className="flex items-center gap-2 mb-1.5">
+                          <div className="flex flex-wrap items-center gap-2 mb-1.5">
                             <Badge variant={isGap ? 'destructive' : 'success'} className="text-[10px]">
                               {skill.category}
                             </Badge>
+                            {isVerified ? (
+                              <Badge variant="success" className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                AI Verified Level {verifiedLevel}
+                              </Badge>
+                            ) : currentLevel > 0 ? (
+                              <Badge variant="neutral" className="text-[10px]">
+                                AI Evaluated Level {currentLevel}
+                              </Badge>
+                            ) : (
+                              <Badge variant="neutral" className="text-[10px] bg-slate-100 text-slate-500 border border-slate-200">
+                                Unassessed (Level 0)
+                              </Badge>
+                            )}
                             <span className="text-xs text-slate-600 font-medium">
                               Benchmark: Level {skill.targetLevel}
                             </span>
@@ -1693,30 +1831,34 @@ export default function Dashboard({
                           </p>
                         </div>
 
-                        {/* Interactive FRAC Level Selector */}
-                        <div className="flex flex-col items-start md:items-end gap-1.5">
-                          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
-                            Proficiency: Level {currentLevel} of 5
-                          </span>
-                          <div className="flex gap-1.5" role="group" aria-label={`Proficiency level for ${skill.skillName}`}>
+                        {/* AI-Evaluated FRAC Level Indicator (Read-Only) */}
+                        <div className="flex flex-col items-start md:items-end gap-1.5 shrink-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">
+                              {isVerified ? `AI Verified: Level ${verifiedLevel}` : currentLevel > 0 ? `AI Evaluated: Level ${currentLevel}` : 'Not Evaluated'} of 5
+                            </span>
+                            <Badge variant="saffron" className="text-[10px] font-mono">
+                              Target L{skill.targetLevel}
+                            </Badge>
+                          </div>
+                          <div className="flex gap-1" aria-label={`Assessed level for ${skill.skillName}: ${currentLevel} of 5`}>
                             {[1, 2, 3, 4, 5].map((lvl) => (
-                              <button
+                              <div
                                 key={lvl}
-                                type="button"
-                                onClick={() => handleProficiencyChange(skill.skillName, lvl)}
-                                aria-label={`Set ${skill.skillName} proficiency to Level ${lvl}`}
-                                aria-pressed={currentLevel >= lvl}
-                                className={`w-9 h-9 rounded-md text-xs font-bold transition-all flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-1 ${
-                                  currentLevel >= lvl
-                                    ? 'bg-primary-900 text-white shadow-xs hover:bg-primary-800'
-                                    : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                                className={`w-7 h-7 rounded text-[11px] font-bold flex items-center justify-center font-mono ${
+                                  currentLevel > 0 && currentLevel >= lvl
+                                    ? 'bg-[#0B2E63] text-white shadow-2xs'
+                                    : 'bg-slate-100 text-slate-400 border border-slate-200'
                                 }`}
-                                title={`Set ${skill.skillName} to Level ${lvl}`}
+                                title={`Level ${lvl} ${currentLevel > 0 && currentLevel >= lvl ? '(Achieved)' : '(Unearned)'}`}
                               >
                                 {lvl}
-                              </button>
+                              </div>
                             ))}
                           </div>
+                          <span className="text-[10px] text-slate-500 font-body">
+                            Evaluated via Diagnostic Assessments
+                          </span>
                         </div>
                       </div>
                     );
@@ -1730,6 +1872,8 @@ export default function Dashboard({
               designation={designation}
               proficiencies={proficiency}
               onSelectCourseForQuiz={selectCourseForQuiz}
+              assessmentsTaken={assessmentsTaken}
+              onNavigateTab={handleTabChange}
             />
           </div>
         )}
@@ -1759,7 +1903,7 @@ export default function Dashboard({
       <SahayakLauncher onOpen={() => setIsSahayakOpen(true)} />
 
       {/* Prototype footer */}
-      <footer className="bg-slate-900 text-slate-400 text-xs py-8 px-4 md:px-10 border-t border-slate-800 mt-16 font-body">
+      <footer className="mt-auto bg-slate-900 text-slate-400 text-xs py-8 px-4 md:px-10 border-t border-slate-800 font-body">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-center md:text-left">
             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
@@ -1848,12 +1992,6 @@ export default function Dashboard({
           setIsAdminUnlocked(true);
           handleTabChange('admin');
         }}
-      />
-
-      {/* AI Inference Engine Switcher Modal */}
-      <AiModelModal
-        isOpen={isAiModelOpen}
-        onClose={() => setIsAiModelOpen(false)}
       />
 
       {/* Grounded Source Citation Slide-Over Drawer */}

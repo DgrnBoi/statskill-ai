@@ -41,7 +41,7 @@ export interface UserRecord {
   updatedAt: string;
 }
 
-const INITIAL_SEEDED_USERS: UserRecord[] = [
+export const SAMPLE_DEMO_USERS: UserRecord[] = [
   {
     id: 'usr_1042',
     parichayId: 'PARICHAY_1042_NSSO',
@@ -53,27 +53,9 @@ const INITIAL_SEEDED_USERS: UserRecord[] = [
     cadre: 'Subordinate Statistical Service (SSS)',
     location: 'Navi Mumbai',
     experienceYears: 2,
-    proficiency: {
-      'Survey Design & Sampling': 3,
-      'CAPI & Digital Field Enumeration': 3,
-      'Data Privacy & DPDPA 2023': 2,
-      'Public Ethics & Field Communication': 3,
-    },
-    assessmentHistory: [
-      {
-        id: 'eval-1042-01',
-        courseId: 'Survey Design and Stratification',
-        courseTitle: 'NSSO Multistage Stratified Sampling Masterclass',
-        category: 'Statistical Competencies',
-        score: 80,
-        totalScore: 100,
-        scorePercentage: 80,
-        status: 'passed',
-        durationMinutes: 12,
-        date: '2026-09-05',
-      },
-    ],
-    enrolledCourses: ['igot-surv-01', 'nssta-stat-02'],
+    proficiency: {},
+    assessmentHistory: [],
+    enrolledCourses: [],
     createdAt: '2026-01-15T09:00:00.000Z',
     updatedAt: '2026-09-05T14:30:00.000Z',
   },
@@ -88,27 +70,9 @@ const INITIAL_SEEDED_USERS: UserRecord[] = [
     cadre: 'Subordinate Statistical Service (SSS)',
     location: 'Kolkata',
     experienceYears: 6,
-    proficiency: {
-      'Survey Design & Sampling Weights': 4,
-      'Statistical Data Analytics (R & Python)': 3,
-      'Cyber Security & Data Fiduciary': 3,
-      'Supervisory Leadership & Audit': 4,
-    },
-    assessmentHistory: [
-      {
-        id: 'eval-2088-01',
-        courseId: 'Microdata Processing and Tabulation',
-        courseTitle: 'Automated Microdata Cleaning & Anonymization Pipelines',
-        category: 'Technical Competencies',
-        score: 85,
-        totalScore: 100,
-        scorePercentage: 85,
-        status: 'passed',
-        durationMinutes: 15,
-        date: '2026-09-04',
-      },
-    ],
-    enrolledCourses: ['igot-tech-04'],
+    proficiency: {},
+    assessmentHistory: [],
+    enrolledCourses: [],
     createdAt: '2026-01-10T09:00:00.000Z',
     updatedAt: '2026-09-04T11:00:00.000Z',
   },
@@ -119,20 +83,15 @@ const INITIAL_SEEDED_USERS: UserRecord[] = [
     email: 'rohan.iyer@mospi.gov.in',
     mobile: '9876543212',
     designation: 'Assistant Director (ISS)',
-    division: 'National Accounts Division (NAD)',
+    division: 'National Accounts Division (NAD), CSO',
     cadre: 'Indian Statistical Service (ISS)',
     location: 'New Delhi',
     experienceYears: 4,
-    proficiency: {
-      'National Accounts & Macro Indices': 4,
-      'Time Series & Seasonal Adjustment': 4,
-      'National Data Governance Framework': 3,
-      'Evidence-Based Policy Writing': 4,
-    },
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['nssta-nad-01'],
-    createdAt: '2026-02-01T09:00:00.000Z',
-    updatedAt: '2026-09-01T10:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2026-01-08T09:00:00.000Z',
+    updatedAt: '2026-09-03T11:00:00.000Z',
   },
   {
     id: 'usr_4820',
@@ -143,18 +102,13 @@ const INITIAL_SEEDED_USERS: UserRecord[] = [
     designation: 'Director (ISS)',
     division: 'Data Informatics & Innovation Division (DIID)',
     cadre: 'Indian Statistical Service (ISS)',
-    location: 'New Delhi',
-    experienceYears: 14,
-    proficiency: {
-      'Official Statistics Architecture': 5,
-      'Big Data, Cloud & AI/ML Architecture': 5,
-      'Digital Personal Data Protection & Sovereign Clouds': 5,
-      'Strategic Leadership & Change Management': 5,
-    },
+    location: 'Kolkata',
+    experienceYears: 12,
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['igot-gov-01'],
-    createdAt: '2026-01-05T09:00:00.000Z',
-    updatedAt: '2026-09-02T16:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-11-20T09:00:00.000Z',
+    updatedAt: '2026-09-02T11:00:00.000Z',
   },
   {
     id: 'usr_5914',
@@ -165,18 +119,13 @@ const INITIAL_SEEDED_USERS: UserRecord[] = [
     designation: 'Joint Director [SDRD] (ISS)',
     division: 'Survey Design & Research Division (SDRD), NSSO',
     cadre: 'Indian Statistical Service (ISS)',
-    location: 'Kolkata',
-    experienceYears: 11,
-    proficiency: {
-      'Survey Design & Sampling Theory': 5,
-      'Questionnaire & Instrument Design': 4,
-      'Non-Sampling Error & Variance Estimation': 5,
-      'Methodological Research & Policy Direction': 5,
-    },
+    location: 'New Delhi',
+    experienceYears: 16,
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['nssta-stat-01'],
-    createdAt: '2026-01-12T09:00:00.000Z',
-    updatedAt: '2026-09-03T12:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-08-15T09:00:00.000Z',
+    updatedAt: '2026-09-01T11:00:00.000Z',
   },
   {
     id: 'usr_6120',
@@ -189,150 +138,117 @@ const INITIAL_SEEDED_USERS: UserRecord[] = [
     cadre: 'Indian Statistical Service (ISS)',
     location: 'New Delhi',
     experienceYears: 8,
-    proficiency: {
-      'Price Statistics & Index Number Theory': 4,
-      'High-Frequency Econometric Modeling': 4,
-      'Official Dissemination & Data Governance': 4,
-      'Inter-Ministerial Stakeholder Consultation': 4,
-    },
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['nssta-price-01'],
-    createdAt: '2026-02-10T09:00:00.000Z',
-    updatedAt: '2026-09-04T15:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-10-10T09:00:00.000Z',
+    updatedAt: '2026-08-28T11:00:00.000Z',
   },
   {
-    id: 'usr_7145',
-    parichayId: 'PARICHAY_7145_ISS',
-    name: 'Sunita Deshpande',
-    email: 'sunita.deshpande@mospi.gov.in',
+    id: 'usr_7015',
+    parichayId: 'PARICHAY_7015_NSSTA',
+    name: 'Sunita Agarwal',
+    email: 'sunita.agarwal@mospi.gov.in',
     mobile: '9876543216',
-    designation: 'Director [Training] (ISS)',
+    designation: 'Faculty & Senior Officer',
     division: 'National Statistical Systems Training Academy (NSSTA)',
     cadre: 'Indian Statistical Service (ISS)',
     location: 'Greater Noida',
-    experienceYears: 15,
-    proficiency: {
-      'Official Statistics Architecture': 5,
-      'Curriculum Design & CBC Standards': 5,
-      'Statistical Capacity Diagnostics': 5,
-      'Strategic Leadership & Change Management': 5,
-    },
+    experienceYears: 10,
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['nssta-stat-01', 'nssta-nad-01'],
-    createdAt: '2026-01-08T09:00:00.000Z',
-    updatedAt: '2026-09-01T09:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-09-12T09:00:00.000Z',
+    updatedAt: '2026-08-20T11:00:00.000Z',
   },
   {
-    id: 'usr_8230',
-    parichayId: 'PARICHAY_8230_ISS',
-    name: 'Arvind Swaminathan',
-    email: 'arvind.swaminathan@mospi.gov.in',
+    id: 'usr_8102',
+    parichayId: 'PARICHAY_8102_SSD',
+    name: 'Amit Verma',
+    email: 'amit.verma@mospi.gov.in',
     mobile: '9876543217',
-    designation: 'Assistant Director [Environment Statistics] (ISS)',
-    division: 'Economic Statistics Division (ESD), MoSPI',
+    designation: 'Assistant Director (SSD)',
+    division: 'Social Statistics Division (SSD)',
     cadre: 'Indian Statistical Service (ISS)',
-    location: 'Bengaluru',
+    location: 'New Delhi',
     experienceYears: 5,
-    proficiency: {
-      'Environmental Economic Accounting (SEEA)': 4,
-      'Energy Statistics & Balance Sheets': 3,
-      'Geospatial Statistical Integration': 4,
-      'Evidence-Based Policy Writing': 3,
-    },
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['nssta-stat-02'],
-    createdAt: '2026-02-15T09:00:00.000Z',
-    updatedAt: '2026-09-02T14:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-07-04T09:00:00.000Z',
+    updatedAt: '2026-08-15T11:00:00.000Z',
   },
   {
-    id: 'usr_9312',
-    parichayId: 'PARICHAY_9312_NSSO',
-    name: 'Meera Sengupta',
-    email: 'meera.sengupta@mospi.gov.in',
+    id: 'usr_9234',
+    parichayId: 'PARICHAY_9234_PSD',
+    name: 'Meera Joshi',
+    email: 'meera.joshi@mospi.gov.in',
     mobile: '9876543218',
-    designation: 'Junior Statistical Officer (JSO)',
-    division: 'Field Operations Division (FOD), NSSO',
-    cadre: 'Subordinate Statistical Service (SSS)',
-    location: 'Guwahati',
-    experienceYears: 1,
-    proficiency: {
-      'Survey Design & Sampling': 2,
-      'CAPI & Digital Field Enumeration': 3,
-      'Data Privacy & DPDPA 2023': 2,
-      'Public Ethics & Field Communication': 2,
-    },
+    designation: 'Joint Director (Price Statistics)',
+    division: 'Price Statistics Division (PSD)',
+    cadre: 'Indian Statistical Service (ISS)',
+    location: 'New Delhi',
+    experienceYears: 14,
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['igot-surv-01'],
-    createdAt: '2026-03-01T09:00:00.000Z',
-    updatedAt: '2026-09-01T10:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-06-18T09:00:00.000Z',
+    updatedAt: '2026-08-10T11:00:00.000Z',
   },
   {
-    id: 'usr_1045',
-    parichayId: 'PARICHAY_1045_NSSO',
-    name: 'Tarun Banerjee',
-    email: 'tarun.banerjee@mospi.gov.in',
+    id: 'usr_9410',
+    parichayId: 'PARICHAY_9410_CPD',
+    name: 'Suresh Kumar',
+    email: 'suresh.kumar@mospi.gov.in',
     mobile: '9876543219',
+    designation: 'Director (Publications)',
+    division: 'Coordination & Publication Division (CPD)',
+    cadre: 'Indian Statistical Service (ISS)',
+    location: 'New Delhi',
+    experienceYears: 15,
+    proficiency: {},
+    assessmentHistory: [],
+    enrolledCourses: [],
+    createdAt: '2025-05-11T09:00:00.000Z',
+    updatedAt: '2026-08-01T11:00:00.000Z',
+  },
+  {
+    id: 'usr_9522',
+    parichayId: 'PARICHAY_9522_SDRD',
+    name: 'Priya Sengupta',
+    email: 'priya.sengupta@mospi.gov.in',
+    mobile: '9876543220',
     designation: 'Senior Statistical Officer (SSO)',
-    division: 'Data Processing Division (DPD), NSSO',
+    division: 'Survey Design and Research Division (SDRD)',
     cadre: 'Subordinate Statistical Service (SSS)',
     location: 'Kolkata',
     experienceYears: 7,
-    proficiency: {
-      'Survey Design & Sampling Weights': 4,
-      'Statistical Data Analytics (R & Python)': 4,
-      'Cyber Security & Data Fiduciary': 3,
-      'Supervisory Leadership & Audit': 3,
-    },
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['igot-tech-04'],
-    createdAt: '2026-01-20T09:00:00.000Z',
-    updatedAt: '2026-09-03T11:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-04-01T09:00:00.000Z',
+    updatedAt: '2026-07-25T11:00:00.000Z',
   },
   {
-    id: 'usr_2190',
-    parichayId: 'PARICHAY_2190_ISS',
-    name: 'Dr. Fatima Sheikh',
-    email: 'fatima.sheikh@mospi.gov.in',
-    mobile: '9876543220',
-    designation: 'Joint Director [Economic Census] (ISS)',
-    division: 'Data Informatics & Innovation Division (DIID)',
-    cadre: 'Indian Statistical Service (ISS)',
-    location: 'Hyderabad',
-    experienceYears: 12,
-    proficiency: {
-      'Official Statistics Architecture': 5,
-      'Enterprise Register & Business Statistics': 5,
-      'Big Data, Cloud & AI/ML Architecture': 4,
-      'Strategic Leadership & Change Management': 4,
-    },
-    assessmentHistory: [],
-    enrolledCourses: ['igot-gov-01'],
-    createdAt: '2026-01-18T09:00:00.000Z',
-    updatedAt: '2026-09-02T13:00:00.000Z',
-  },
-  {
-    id: 'usr_3310',
-    parichayId: 'PARICHAY_3310_NSSO',
-    name: 'Harpreet Singh',
-    email: 'harpreet.singh@mospi.gov.in',
+    id: 'usr_9630',
+    parichayId: 'PARICHAY_9630_NSO',
+    name: 'Alok Pandey',
+    email: 'alok.pandey@mospi.gov.in',
     mobile: '9876543221',
-    designation: 'Junior Statistical Officer (JSO)',
-    division: 'Field Operations Division (FOD), NSSO',
-    cadre: 'Subordinate Statistical Service (SSS)',
-    location: 'Chandigarh',
-    experienceYears: 3,
-    proficiency: {
-      'Survey Design & Sampling': 3,
-      'CAPI & Digital Field Enumeration': 4,
-      'Data Privacy & DPDPA 2023': 3,
-      'Public Ethics & Field Communication': 3,
-    },
+    designation: 'Deputy Director General (NSO)',
+    division: 'National Statistical Office (NSO)',
+    cadre: 'Indian Statistical Service (ISS)',
+    location: 'New Delhi',
+    experienceYears: 22,
+    proficiency: {},
     assessmentHistory: [],
-    enrolledCourses: ['igot-surv-01'],
-    createdAt: '2026-02-05T09:00:00.000Z',
-    updatedAt: '2026-09-05T10:00:00.000Z',
+    enrolledCourses: [],
+    createdAt: '2025-01-10T09:00:00.000Z',
+    updatedAt: '2026-07-10T11:00:00.000Z',
   },
 ];
+
+const INITIAL_SEEDED_USERS: UserRecord[] = SAMPLE_DEMO_USERS;
 
 export class UserDatabase {
   private static instance: UserDatabase;
@@ -358,6 +274,12 @@ export class UserDatabase {
 
   public resetDatabase(): void {
     this.seedInitialUsers();
+  }
+
+  public seedSampleUsers(): void {
+    for (const u of SAMPLE_DEMO_USERS) {
+      this.users.set(u.id, { ...u, proficiency: { ...u.proficiency }, assessmentHistory: [...u.assessmentHistory], enrolledCourses: [...u.enrolledCourses] });
+    }
   }
 
   public getAllUsers(query?: { division?: string; cadre?: string; search?: string }): UserRecord[] {
@@ -437,13 +359,8 @@ export class UserDatabase {
     const location = payload.location?.trim() || 'New Delhi';
     const experienceYears = typeof payload.experienceYears === 'number' ? payload.experienceYears : 3;
 
-    // Default initial proficiencies based on designation
-    const defaultProf: Record<string, number> = payload.proficiency || {
-      'Survey Design & Sampling': designation.includes('Director') ? 4 : 2,
-      'CAPI & Digital Field Enumeration': designation.includes('Director') ? 4 : 3,
-      'Data Privacy & DPDPA 2023': 2,
-      'Public Ethics & Field Communication': 3,
-    };
+    // Default initial proficiencies (empty until assessments taken)
+    const defaultProf: Record<string, number> = payload.proficiency || {};
 
     const now = new Date().toISOString();
     const newUser: UserRecord = {
@@ -498,6 +415,14 @@ export class UserDatabase {
 
     this.users.set(userId, updatedUser);
     return { ...updatedUser, proficiency: { ...updatedUser.proficiency }, assessmentHistory: [...newHistory] };
+  }
+
+  public deleteUser(id: string): boolean {
+    return this.users.delete(id);
+  }
+
+  public clearAllUsers(): void {
+    this.users.clear();
   }
 }
 

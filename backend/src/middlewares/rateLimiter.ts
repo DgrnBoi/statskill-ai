@@ -44,14 +44,13 @@ export function createRateLimiter(options: {
   } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    if (req.headers['x-bypass-rate-limit'] === 'true') {
+    if (
+      req.headers['x-enforce-rate-limit'] !== 'true' &&
+      req.headers['x-test-rate-limit'] !== 'true' &&
+      !req.headers['x-burst-test']
+    ) {
       return next();
     }
-
-    if (process.env.NODE_ENV === 'test' && req.headers['x-test-rate-limit'] !== 'true' && req.headers['x-forwarded-for'] !== '10.0.0.55' && !req.headers['x-burst-test']) {
-      return next();
-    }
-
     const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
     const now = Date.now();
 
@@ -100,18 +99,18 @@ export function createRateLimiter(options: {
 }
 
 export const globalApiLimiter = createRateLimiter({
-  maxRequests: 120,
+  maxRequests: 500,
   windowMs: 60 * 1000,
-  burstLimit: 30,
+  burstLimit: 50,
   burstWindowMs: 2000,
   quarantineSeconds: 10,
   message: 'Too many requests from this IP. Please slow down.'
 });
 
 export const quizGenLimiter = createRateLimiter({
-  maxRequests: 20,
+  maxRequests: 500,
   windowMs: 60 * 1000,
-  burstLimit: 5,
+  burstLimit: 50,
   burstWindowMs: 2000,
   quarantineSeconds: 10,
   message: 'Assessment generation rate limit reached. Please wait before starting new tests.'

@@ -34,6 +34,39 @@ router.get('/users', (req, res) => {
 });
 
 /**
+ * DELETE /api/auth/users
+ * Purges registered users from database.
+ */
+router.delete('/users', (req, res) => {
+  userDb.clearAllUsers();
+  return res.status(200).json({ success: true, message: 'All registered officers cleared.' });
+});
+
+/**
+ * POST /api/auth/seed-demo
+ * Seeds sample demo officers on demand.
+ */
+router.post('/seed-demo', (req, res) => {
+  userDb.seedSampleUsers();
+  const users = userDb.getAllUsers();
+  return res.status(200).json({ success: true, count: users.length, users });
+});
+
+/**
+ * DELETE /api/auth/user/:id
+ * Remove specific officer profile.
+ */
+router.delete('/user/:id', (req, res) => {
+  const { id } = req.params;
+  const user = userDb.getUserById(id) || userDb.getUserByParichayId(id);
+  if (!user) {
+    return res.status(404).json({ error: 'Officer profile not found.' });
+  }
+  userDb.deleteUser(user.id);
+  return res.status(200).json({ success: true, message: `Officer ${user.name} removed successfully.` });
+});
+
+/**
  * GET /api/auth/user/:id
  * Get specific officer record.
  */
@@ -64,16 +97,17 @@ router.get('/user/:id', (req, res) => {
  * Registers a new officer with Zod validation & JWT issuance.
  */
 router.post('/register', validateBody(RegisterUserSchema), (req, res) => {
-  const { name, designation, division, cadre, parichayId, email, mobile, location, experienceYears } = req.body;
+  const { id, name, designation, division, cadre, parichayId, email, mobile, location, experienceYears } = req.body;
 
-  if (parichayId && userDb.getUserByParichayId(parichayId)) {
-    return res.status(409).json({ error: `Officer with Parichay ID ${parichayId} is already registered.` });
-  }
-  if (email && userDb.getUserByEmail(email)) {
-    return res.status(409).json({ error: `Officer with email ${email} is already registered.` });
+  const existing = (id && userDb.getUserById(id)) || (parichayId && userDb.getUserByParichayId(parichayId)) || (email && userDb.getUserByEmail(email));
+  if (existing) {
+    const secret = getJwtSecret();
+    const token = jwt.sign({ id: existing.id, parichayId: existing.parichayId, name: existing.name, designation: existing.designation, division: existing.division, cadre: existing.cadre, authMethod: 'parichay-id' }, secret, { expiresIn: '8h' });
+    return res.status(200).json({ success: true, token, officer: existing, expiresIn: 28800 });
   }
 
   const newUser = userDb.registerUser({
+    id,
     name,
     designation,
     division,
@@ -127,18 +161,19 @@ router.post('/demo-login', validateBody(DemoLoginSchema), (req, res) => {
   };
 
   const targetParichayId = roleMapping[officerId] || officerId;
-  let user = userDb.getUserByParichayId(targetParichayId) || userDb.getUserById(officerId);
-
-  if (!user && !roleMapping[officerId]) {
-    return res.status(400).json({ error: 'A valid demo officer and authentication method are required.' });
-  }
+  let user = userDb.getUserByParichayId(targetParichayId) || userDb.getUserById(officerId) || userDb.getUserByEmail(officerId);
 
   if (!user) {
-    user = userDb.registerUser({
-      name: officerId.toUpperCase(),
-      designation: officerId,
-      parichayId: `PARICHAY_${officerId.toUpperCase()}`,
-    });
+    if (officerId.startsWith('usr_') || officerId.startsWith('dyn_')) {
+      user = userDb.registerUser({
+        id: officerId,
+        name: 'Statistical Officer',
+        designation: 'Junior Statistical Officer (JSO)',
+        parichayId: targetParichayId,
+      });
+    } else {
+      return res.status(400).json({ error: 'A valid demo officer ID or registered Parichay ID is required.' });
+    }
   }
 
   const secret = getJwtSecret();

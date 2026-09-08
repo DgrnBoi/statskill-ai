@@ -187,12 +187,12 @@ export class CompetencyEngine {
       if (fs.existsSync(matrixPath)) {
         const raw = fs.readFileSync(matrixPath, 'utf-8');
         const data = JSON.parse(raw);
-        const matchedCadre = (data.cadres || []).find((c: any) =>
-          c.designation?.toLowerCase() === normDesignation ||
-          c.id?.toLowerCase() === normDesignation ||
-          c.designation?.toLowerCase().includes(normDesignation) ||
-          normDesignation.includes(c.designation?.toLowerCase() || '')
-        );
+        const matchedCadre = (data.cadres || []).find((c: any) => {
+          const d = typeof c.designation === 'string' ? c.designation.toLowerCase().trim() : '';
+          const id = typeof c.id === 'string' ? c.id.toLowerCase().trim() : '';
+          if (!d && !id) return false;
+          return d === normDesignation || id === normDesignation || (d && normDesignation.includes(d)) || (d && d.includes(normDesignation));
+        });
 
         if (matchedCadre && Array.isArray(matchedCadre.competencies) && matchedCadre.competencies.length > 0) {
           return matchedCadre.competencies.map((comp: any) => ({

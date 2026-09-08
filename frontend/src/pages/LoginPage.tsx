@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, ChevronRight, Landmark, LockKeyhole, Smartphone, UserRound, UserPlus, Search, ShieldCheck, RefreshCw, Sparkles } from 'lucide-react';
+import { ArrowLeft, Building2, ChevronRight, Landmark, LockKeyhole, Smartphone, UserRound, UserPlus, Search, ShieldCheck, RefreshCw, Sparkles, Trash2, X } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -6,27 +6,9 @@ import { IndianFlag } from '../components/ui/IndianFlag';
 import { useUiPreferences } from '../contexts/UiPreferencesContext';
 import { apiUrl } from '../lib/api';
 
-export interface DemoOfficer {
-  id: string;
-  name: string;
-  designation: string;
-  division: string;
-  cadre: string;
-  parichayId: string;
-  email?: string;
-  mobile?: string;
-  location?: string;
-  experienceYears?: number;
-}
-
-export const DEMO_OFFICERS: DemoOfficer[] = [
-  { id: 'jso', name: 'Rajesh Sharma', designation: 'Junior Statistical Officer (JSO)', division: 'Field Operations Division (FOD), NSSO', cadre: 'Subordinate Statistical Service (SSS)', parichayId: 'PARICHAY_1042_NSSO' },
-  { id: 'sso', name: 'Ananya Mehta', designation: 'Senior Statistical Officer (SSO)', division: 'Data Processing Division (DPD), NSSO', cadre: 'Subordinate Statistical Service (SSS)', parichayId: 'PARICHAY_2088_NSSO' },
-  { id: 'assistant-director', name: 'Rohan Iyer', designation: 'Assistant Director (ISS)', division: 'National Accounts Division (NAD)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_3612_ISS' },
-  { id: 'director', name: 'Kavita Rao', designation: 'Director (ISS)', division: 'Data Informatics & Innovation Division (DIID)', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_4820_ISS' },
-  { id: 'joint-director', name: 'Dr. Rajeshwari Nair', designation: 'Joint Director [SDRD] (ISS)', division: 'Survey Design & Research Division (SDRD), NSSO', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_5914_ISS' },
-  { id: 'deputy-director', name: 'Dr. Vikram Seth', designation: 'Deputy Director [Price Statistics] (ISS)', division: 'Economic Statistics Division (ESD), MoSPI', cadre: 'Indian Statistical Service (ISS)', parichayId: 'PARICHAY_6120_ISS' },
-];
+import { DemoOfficer, DEMO_OFFICERS, SAMPLE_DEMO_OFFICERS } from '../data/demoOfficers';
+export type { DemoOfficer };
+export { DEMO_OFFICERS };
 
 const MOSPI_DIVISIONS = [
   'All Divisions',
@@ -65,8 +47,8 @@ interface LoginPageProps {
 export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
   const { t } = useUiPreferences();
   const [method, setMethod] = useState<'parichay-id' | 'mobile-otp'>('parichay-id');
-  const [officersList, setOfficersList] = useState<DemoOfficer[]>(DEMO_OFFICERS);
-  const [selectedOfficer, setSelectedOfficer] = useState<DemoOfficer>(DEMO_OFFICERS[0]);
+  const [officersList, setOfficersList] = useState<DemoOfficer[]>([]);
+  const [selectedOfficer, setSelectedOfficer] = useState<DemoOfficer | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
@@ -93,14 +75,32 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
   const [regMobile, setRegMobile] = useState('');
   const [regEmail, setRegEmail] = useState('');
 
-  // Fetch registered officers dynamically from backend database
-  const fetchRegisteredOfficers = async () => {
+  const handleRemoveOfficer = (officerId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    fetch(apiUrl(`/api/auth/user/${officerId}`), { method: 'DELETE' }).catch(() => {});
+    setOfficersList((prev) => {
+      const updated = prev.filter((o) => o.id !== officerId);
+      if (selectedOfficer?.id === officerId) {
+        setSelectedOfficer(updated.length > 0 ? updated[0] : null);
+      }
+      return updated;
+    });
+  };
+
+  const handleClearAllUsers = () => {
+    fetch(apiUrl('/api/auth/users'), { method: 'DELETE' }).catch(() => {});
+    setOfficersList([]);
+    setSelectedOfficer(null);
+    setSuccessNotice('All user profiles cleared successfully. Register a new officer or select a profile to log in.');
+  };
+
+  const handleLoadDemoProfiles = async () => {
     setIsLoadingUsers(true);
     try {
-      const res = await fetch(apiUrl('/api/auth/users'));
+      const res = await fetch(apiUrl('/api/auth/seed-demo'), { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.users) && data.users.length > 0) {
+        if (data.users && Array.isArray(data.users) && data.users.length > 0) {
           const mapped: DemoOfficer[] = data.users.map((u: any) => ({
             id: u.id,
             name: u.name,
@@ -113,17 +113,50 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             location: u.location,
             experienceYears: u.experienceYears,
           }));
-          const merged = [...DEMO_OFFICERS];
-          mapped.forEach((m) => {
-            if (!merged.some((e) => e.id === m.id || e.parichayId === m.parichayId)) {
-              merged.push(m);
-            }
-          });
-          setOfficersList(merged);
+          setOfficersList(mapped);
+          setSelectedOfficer(mapped.length > 0 ? mapped[0] : null);
+          setSuccessNotice('Loaded sample MoSPI cadre profiles into directory.');
+          return;
         }
       }
     } catch {
-      // Retain DEMO_OFFICERS fallback on network failure
+      // Fallback below
+    } finally {
+      setIsLoadingUsers(false);
+    }
+    setOfficersList(SAMPLE_DEMO_OFFICERS);
+    setSelectedOfficer(SAMPLE_DEMO_OFFICERS[0]);
+    setSuccessNotice('Loaded sample MoSPI cadre profiles into directory.');
+  };
+
+  // Fetch registered officers dynamically from backend database
+  const fetchRegisteredOfficers = async () => {
+    setIsLoadingUsers(true);
+    try {
+      const res = await fetch(apiUrl('/api/auth/users'));
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.users)) {
+          const mapped: DemoOfficer[] = data.users.map((u: any) => ({
+            id: u.id,
+            name: u.name,
+            designation: u.designation,
+            division: u.division,
+            cadre: u.cadre,
+            parichayId: u.parichayId,
+            email: u.email,
+            mobile: u.mobile,
+            location: u.location,
+            experienceYears: u.experienceYears,
+          }));
+          const initialTwo = mapped.slice(0, 2);
+          const finalOfficers = initialTwo.length > 0 ? initialTwo : SAMPLE_DEMO_OFFICERS;
+          setOfficersList(finalOfficers);
+          setSelectedOfficer((prev) => (prev && finalOfficers.some((m) => m.id === prev.id) ? prev : (finalOfficers.length > 0 ? finalOfficers[0] : null)));
+        }
+      }
+    } catch {
+      // Retain current state on network failure
     } finally {
       setIsLoadingUsers(false);
     }
@@ -198,7 +231,6 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
         }
       }
 
-      setOfficersList((prev) => [quickOfficer, ...prev]);
       setSelectedOfficer(quickOfficer);
       await onAuthenticate?.(quickOfficer, method);
     } catch (cause) {
@@ -213,6 +245,10 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
   };
 
   const authenticate = async () => {
+    if (!selectedOfficer) {
+      setError('Please select or register an officer profile before logging in.');
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     try {
@@ -259,20 +295,23 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
         body: JSON.stringify(newOfficerPayload),
       });
 
+      let registeredOfficer = newOfficerPayload;
       if (res.ok) {
         const data = await res.json();
         if (data.token) {
           window.localStorage.setItem('auth_token', data.token);
         }
+        if (data.officer) {
+          registeredOfficer = data.officer;
+        }
       }
 
-      // 2. Add to active officer list
-      setOfficersList((prev) => [newOfficerPayload, ...prev]);
-      setSelectedOfficer(newOfficerPayload);
-      setSuccessNotice(`Officer ${newOfficerPayload.name} registered successfully with Parichay ID: ${newOfficerPayload.parichayId}`);
+      // 2. Set selected officer and notice (do not pollute directory listing with extra cards)
+      setSelectedOfficer(registeredOfficer);
+      setSuccessNotice(`Officer ${registeredOfficer.name} registered successfully with Parichay ID: ${registeredOfficer.parichayId}`);
 
-      // 3. Authenticate and redirect
-      await onAuthenticate?.(newOfficerPayload, method);
+      // 3. Authenticate and redirect directly to active workspace
+      await onAuthenticate?.(registeredOfficer, method);
     } catch (cause) {
       setSelectedOfficer(newOfficerPayload);
       try {
@@ -295,11 +334,26 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               <h1>{t('loginPortalTitle')}</h1>
             </div>
           </div>
-          {onBack && (
-            <Button variant="ghost" size="sm" onClick={onBack} aria-label={t('backToPortal')}>
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> {t('backToPortal')}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                window.history.pushState({}, '', '/admin');
+                window.dispatchEvent(new Event('popstate'));
+              }}
+              aria-label="Open HQ Admin Control Center"
+              className="text-xs font-bold border-amber-500/40 text-amber-900 bg-amber-50/80 hover:bg-amber-100 cursor-pointer"
+            >
+              <Building2 className="h-4 w-4 mr-1 text-amber-700" aria-hidden="true" />
+              HQ Admin Dashboard
             </Button>
-          )}
+            {onBack && (
+              <Button variant="ghost" size="sm" onClick={onBack} aria-label={t('backToPortal')}>
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" /> {t('backToPortal')}
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -328,17 +382,17 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             </div>
           </div>
 
-          {/* Mode Switcher: Directory vs Quick Role Access vs Full Registration */}
-          <div className="flex rounded-lg bg-slate-100 p-1 mb-4 border border-slate-200" role="tablist">
+          {/* Mode Switcher: Directory vs Full Registration */}
+          <div className="flex rounded-xl bg-slate-100 p-1 mb-5 border border-slate-200 shadow-inner" role="tablist">
             <button
               type="button"
               role="tab"
               aria-selected={mode === 'select'}
               onClick={() => { setMode('select'); setError(null); }}
-              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 mode === 'select'
-                  ? 'bg-white text-[#0B2E63] shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#0B2E63] text-white shadow-md'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
               }`}
             >
               <UserRound className="h-3.5 w-3.5" />
@@ -347,26 +401,12 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             <button
               type="button"
               role="tab"
-              aria-selected={mode === 'quick'}
-              onClick={() => { setMode('quick'); setError(null); }}
-              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                mode === 'quick'
-                  ? 'bg-white text-[#0B2E63] shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              <span>{t('loginTabQuickRole')}</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
               aria-selected={mode === 'register'}
               onClick={() => { setMode('register'); setError(null); }}
-              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 mode === 'register'
-                  ? 'bg-white text-[#0B2E63] shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#0B2E63] text-white shadow-md'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
               }`}
             >
               <UserPlus className="h-3.5 w-3.5" />
@@ -374,106 +414,16 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
             </button>
           </div>
 
-          {/* Authentication Method Selector */}
-          <div className="login-methods" role="group" aria-label="Authentication method">
-            <button
-              type="button"
-              aria-pressed={method === 'parichay-id'}
-              onClick={() => setMethod('parichay-id')}
-            >
-              <UserRound className="h-4 w-4" aria-hidden="true" /> {t('loginMethodParichay')}
-            </button>
-            <button
-              type="button"
-              aria-pressed={method === 'mobile-otp'}
-              onClick={() => setMethod('mobile-otp')}
-            >
-              <Smartphone className="h-4 w-4" aria-hidden="true" /> {t('loginMethodOtp')}
-            </button>
+          {/* Sovereign Authentication Badge */}
+          <div className="flex items-center justify-between p-2.5 mb-4 bg-gradient-to-r from-[#0B2E63]/10 to-amber-500/10 border border-[#0B2E63]/20 rounded-lg text-xs font-bold text-[#0B2E63]">
+            <span className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" aria-hidden="true" />
+              <span>Jan Parichay SSO Authentication</span>
+            </span>
+            <Badge variant="saffron" className="text-[10px] uppercase font-extrabold px-2 py-0.5">Govt Verified</Badge>
           </div>
 
-          {mode === 'quick' ? (
-            <form onSubmit={handleQuickRoleStart} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {t('loginSelectRole')} <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={isCustomRole ? 'Custom Role / Other Designation...' : quickRole}
-                  onChange={(e) => {
-                    if (e.target.value === 'Custom Role / Other Designation...') {
-                      setIsCustomRole(true);
-                    } else {
-                      setIsCustomRole(false);
-                      setQuickRole(e.target.value);
-                    }
-                  }}
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0B2E63]"
-                  aria-label="Select official role"
-                >
-                  {PRESET_DESIGNATIONS.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-
-              {isCustomRole && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {t('loginCustomRole')} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., Agricultural Statistics Specialist, Macro Nowcasting Modeler..."
-                    value={customRoleInput}
-                    onChange={(e) => setCustomRoleInput(e.target.value)}
-                    className="w-full px-3 py-2 bg-amber-50/50 border border-amber-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    aria-label="Custom role designation"
-                  />
-                  <p className="text-[11px] text-amber-700 mt-1">
-                    {t('loginCustomRoleHint')}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {t('loginOfficerName')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('loginOfficerNamePlaceholder')}
-                  value={quickName}
-                  onChange={(e) => setQuickName(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0B2E63]"
-                  aria-label="Officer name"
-                />
-              </div>
-
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600 space-y-1">
-                <div className="flex items-center gap-1.5 font-bold text-[#0B2E63]">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>{t('loginDynamicEngine')}</span>
-                </div>
-                <p>{t('loginDynamicEngineDesc')}</p>
-              </div>
-
-              {error && <p role="alert" className="login-error">{error}</p>}
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                isLoading={isSubmitting}
-                className="w-full mt-1"
-              >
-                <Sparkles className="h-4 w-4 mr-1.5 text-amber-300" />
-                {t('loginLaunchDynamic')}
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </form>
-          ) : mode === 'select' ? (
+          {mode === 'select' ? (
             <>
               {/* Filter and Search Controls */}
               <div className="space-y-2 mb-3">
@@ -498,6 +448,15 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${isLoadingUsers ? 'animate-spin' : ''}`} />
                   </button>
+                  <button
+                    type="button"
+                    onClick={handleClearAllUsers}
+                    title="Clear all officer profiles"
+                    className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Clear All</span>
+                  </button>
                 </div>
 
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px]">
@@ -517,54 +476,124 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
               </div>
 
               {/* Officer Cards List */}
-              <fieldset className="login-roles max-h-[280px] overflow-y-auto pr-1">
+              <fieldset className="login-roles max-h-[260px] overflow-y-auto pr-1">
                 <legend className="sr-only">Choose a registered officer profile</legend>
                 {filteredOfficers.length === 0 ? (
-                  <div className="p-4 text-center bg-slate-50 border border-dashed border-slate-200 rounded-lg text-xs text-slate-500">
-                    {t('loginNoOfficers')}
+                  <div className="p-4 text-center bg-slate-50/90 border border-dashed border-slate-300 rounded-xl space-y-2.5 my-1 font-body">
+                    <div className="text-slate-800 text-xs font-bold font-display flex items-center justify-center gap-1.5">
+                      <UserRound className="w-4 h-4 text-slate-500" />
+                      <span>0 Registered Officers in Directory</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed max-w-xs mx-auto">
+                      No profiles currently exist. Register a new officer profile or load sample demo profiles dynamically.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => { setMode('register'); setError(null); }}
+                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-[#0B2E63] text-white hover:bg-[#082147] transition shadow-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>Register New Officer</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleLoadDemoProfiles}
+                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition shadow-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Load Sample Demo Officers</span>
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  filteredOfficers.map((officer) => (
-                    <button
-                      type="button"
-                      key={officer.id}
-                      aria-pressed={selectedOfficer.id === officer.id || selectedOfficer.parichayId === officer.parichayId}
-                      aria-label={`${officer.designation}, ${officer.division}`}
-                      onClick={() => { setSelectedOfficer(officer); setError(null); }}
-                      className="relative text-left transition-all"
-                    >
-                      <span className="flex flex-col gap-0.5">
-                        <span className="flex items-center gap-2">
-                          <strong className="text-slate-900 text-xs">{officer.name}</strong>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded border border-slate-200">
-                            {officer.parichayId}
+                  filteredOfficers.map((officer) => {
+                    const isSelected = selectedOfficer?.id === officer.id || selectedOfficer?.parichayId === officer.parichayId;
+                    return (
+                      <button
+                        type="button"
+                        key={officer.id}
+                        aria-pressed={isSelected}
+                        aria-label={`${officer.name}, ${officer.designation}, ${officer.division}`}
+                        onClick={() => { setSelectedOfficer(officer); setError(null); }}
+                        className={`relative text-left transition-all p-3 rounded-lg border flex items-center justify-between cursor-pointer mb-2 w-full ${
+                          isSelected
+                            ? 'border-[#0B2E63] bg-blue-50/70 ring-2 ring-[#0B2E63]/30 shadow-xs'
+                            : 'border-slate-200 bg-white hover:bg-slate-50'
+                        }`}
+                      >
+                        <span className="flex flex-col gap-0.5">
+                          <span className="flex items-center gap-2">
+                            <strong className="text-slate-900 text-xs font-bold">{officer.name}</strong>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded border border-slate-200">
+                              {officer.parichayId}
+                            </span>
+                          </span>
+                          <strong className="text-[#0B2E63] font-semibold text-[11px]">{officer.designation}</strong>
+                          <small className="text-slate-500 text-[10px] leading-tight">{officer.division}</small>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Log in as ${officer.name}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOfficer(officer);
+                              setError(null);
+                              authenticate();
+                            }}
+                            className={`text-[11px] font-bold px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1 ${
+                              isSelected ? 'bg-[#0B2E63] text-white hover:bg-[#082147]' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            }`}
+                          >
+                            <LockKeyhole className="w-3 h-3 text-amber-400" />
+                            {isSelected ? 'LOG IN NOW' : 'Select'}
+                          </span>
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Remove ${officer.name}`}
+                            onClick={(e) => handleRemoveOfficer(officer.id, e)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleRemoveOfficer(officer.id, e as any); }}
+                            title={`Remove ${officer.name}`}
+                            className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded cursor-pointer transition-colors"
+                          >
+                            <X className="w-4 h-4" />
                           </span>
                         </span>
-                        <strong className="text-[#0B2E63] font-semibold text-[11px]">{officer.designation}</strong>
-                        <small className="text-slate-500 text-[10px] leading-tight">{officer.division}</small>
-                      </span>
-                      <Building2 className="h-4 w-4 text-slate-400 flex-shrink-0" aria-hidden="true" />
-                    </button>
-                  ))
+                      </button>
+                    );
+                  })
                 )}
               </fieldset>
 
               {successNotice && (
-                <p role="status" className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 font-medium">
+                <p role="status" className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 font-medium mt-2">
                   {successNotice}
                 </p>
               )}
 
-              {error && <p role="alert" className="login-error">{error}</p>}
+              {error && <p role="alert" className="login-error mt-2">{error}</p>}
 
               <Button
                 variant="primary"
                 size="lg"
+                disabled={!selectedOfficer || isSubmitting}
                 isLoading={isSubmitting}
-                className="w-full mt-2"
+                className={`w-full mt-3 font-black shadow-lg text-white py-3.5 text-sm tracking-wide rounded-xl flex items-center justify-center gap-2 border ${
+                  !selectedOfficer
+                    ? 'bg-slate-400 border-slate-500 cursor-not-allowed opacity-65'
+                    : 'bg-[#0B2E63] hover:bg-[#082147] cursor-pointer border-blue-400/30'
+                }`}
                 onClick={authenticate}
               >
-                {t('loginContinueAs')} {selectedOfficer.designation}
+                <LockKeyhole className="h-4 w-4 text-amber-400" aria-hidden="true" />
+                <span>
+                  {selectedOfficer
+                    ? `LOG IN TO WORKSPACE (${selectedOfficer.name})`
+                    : 'NO OFFICER SELECTED (REGISTER OR SELECT PROFILE)'}
+                </span>
                 <ChevronRight className="h-4 w-4 ml-1" aria-hidden="true" />
               </Button>
             </>
@@ -666,18 +695,30 @@ export default function LoginPage({ onAuthenticate, onBack }: LoginPageProps) {
                 </div>
               </div>
 
-              {error && <p role="alert" className="login-error">{error}</p>}
+              {error && <p role="alert" className="login-error mt-1">{error}</p>}
 
               <Button
                 type="submit"
-                variant="primary"
+                variant="saffron"
                 size="lg"
                 isLoading={isSubmitting}
-                className="w-full mt-2"
+                className="w-full mt-3 font-extrabold shadow-md text-white py-3.5 bg-[#D97706] hover:bg-[#B45309] cursor-pointer text-sm tracking-wide rounded-xl flex items-center justify-center gap-2"
               >
                 <ShieldCheck className="h-4 w-4 mr-1.5" />
-                {t('loginRegisterLaunch')}
+                <span>REGISTER & LOG IN TO WORKSPACE ({regName.trim() || 'NEW OFFICER'})</span>
+                <ChevronRight className="h-4 w-4 ml-1" aria-hidden="true" />
               </Button>
+
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => { setMode('select'); setError(null); }}
+                  className="text-xs text-[#0B2E63] hover:underline font-bold cursor-pointer inline-flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Already have an officer account? Return to Directory Login</span>
+                </button>
+              </div>
             </form>
           )}
         </section>

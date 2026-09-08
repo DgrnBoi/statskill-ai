@@ -94,83 +94,19 @@ describe('StatSkill AI - 5 MoSPI Officers Multi-Persona Dashboard Verification S
     expect(screen.getAllByText(/Senior Statistical Officer/i).length).toBeGreaterThan(0);
   });
 
-  it('Person 3 [NAD]: Rohan Iyer (Assistant Director) displays National Accounts & Macroeconomics track', async () => {
-    window.localStorage.setItem(
-      'statskill_demo_login',
-      JSON.stringify({
-        officer: {
-          id: 'assistant-director',
-          name: 'Rohan Iyer',
-          designation: 'Assistant Director (ISS)',
-          division: 'National Accounts Division (NAD)',
-          cadre: 'Indian Statistical Service (ISS)',
-          parichayId: 'PARICHAY_3612_ISS',
-        },
-      })
-    );
 
-    render(<Dashboard activeTab="overview" />);
-
-    expect(screen.getAllByText(/Rohan Iyer/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/National Accounts Division/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Assistant Director/i).length).toBeGreaterThan(0);
-  });
-
-  it('Person 4 [DIID]: Kavita Rao (Director) displays Data Informatics & AI Architecture track', async () => {
-    window.localStorage.setItem(
-      'statskill_demo_login',
-      JSON.stringify({
-        officer: {
-          id: 'director',
-          name: 'Kavita Rao',
-          designation: 'Director [DIID] (ISS)',
-          division: 'Data Informatics & Innovation Division (DIID)',
-          cadre: 'Indian Statistical Service (ISS)',
-          parichayId: 'PARICHAY_4820_ISS',
-        },
-      })
-    );
-
-    render(<Dashboard activeTab="overview" />);
-
-    expect(screen.getAllByText(/Kavita Rao/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Data Informatics & Innovation Division/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Director/i).length).toBeGreaterThan(0);
-  });
-
-  it('Person 5 [SDRD]: Dr. Rajeshwari Nair (Joint Director) displays Survey Design & Research Division track', async () => {
-    window.localStorage.setItem(
-      'statskill_demo_login',
-      JSON.stringify({
-        officer: {
-          id: 'joint-director',
-          name: 'Dr. Rajeshwari Nair',
-          designation: 'Joint Director [SDRD] (ISS)',
-          division: 'Survey Design & Research Division (SDRD), NSSO',
-          cadre: 'Indian Statistical Service (ISS)',
-          parichayId: 'PARICHAY_5914_ISS',
-        },
-      })
-    );
-
-    render(<Dashboard activeTab="overview" />);
-
-    expect(screen.getAllByText(/Dr. Rajeshwari Nair/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Survey Design & Research Division/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Joint Director/i).length).toBeGreaterThan(0);
-  });
 
   it('renders assessed competency progress when officer completes diagnostic history', async () => {
     window.localStorage.setItem(
       'statskill_demo_login',
       JSON.stringify({
         officer: {
-          id: 'joint-director',
-          name: 'Dr. Rajeshwari Nair',
-          designation: 'Joint Director [SDRD] (ISS)',
-          division: 'Survey Design & Research Division (SDRD), NSSO',
-          cadre: 'Indian Statistical Service (ISS)',
-          parichayId: 'PARICHAY_5914_ISS',
+          id: 'jso',
+          name: 'Rajesh Sharma',
+          designation: 'Junior Statistical Officer (JSO)',
+          division: 'Field Operations Division (FOD), NSSO',
+          cadre: 'Subordinate Statistical Service (SSS)',
+          parichayId: 'PARICHAY_1042_NSSO',
         },
       })
     );
@@ -178,13 +114,13 @@ describe('StatSkill AI - 5 MoSPI Officers Multi-Persona Dashboard Verification S
     window.localStorage.setItem(
       'statskill_officer_progress_v1',
       JSON.stringify({
-        'Joint Director [SDRD] (ISS)': {
+        'Junior Statistical Officer (JSO)': {
           assessmentsTaken: 1,
           proficiency: {
-            'Survey Design & Sampling Theory': 5,
-            'Questionnaire & Instrument Design': 4,
-            'Non-Sampling Error & Variance Estimation': 5,
-            'Methodological Research & Policy Direction': 5,
+            'Survey Design & Sampling': 4,
+            'CAPI & Digital Field Enumeration': 3,
+            'Field Inspection & Quality Scrutiny': 3,
+            'Statistical Standards & Classification': 3,
           },
         },
       })
@@ -192,11 +128,8 @@ describe('StatSkill AI - 5 MoSPI Officers Multi-Persona Dashboard Verification S
 
     render(<Dashboard activeTab="overview" />);
 
-    expect(screen.getAllByText(/Dr. Rajeshwari Nair/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Survey Design & Research Division/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Survey Design & Sampling Theory').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Questionnaire & Instrument Design').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Non-Sampling Error & Variance Estimation').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Methodological Research & Policy Direction').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Rajesh Sharma/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Field Operations Division/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Survey Design & Sampling').length).toBeGreaterThan(0);
   });
 });

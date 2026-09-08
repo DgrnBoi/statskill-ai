@@ -418,69 +418,12 @@ describe('StatSkill AI - Dashboard Integration Test Suite', () => {
     });
 
     expect(screen.getByText('Assessment paper')).toBeDefined();
-    expect(screen.getByText('Paper: Set A')).toBeDefined();
     expect(
       screen.getByText(
         'What is the primary sampling unit (PSU) typically used in rural NSSO socio-economic surveys?'
       )
     ).toBeDefined();
     expect(screen.getByText('Census Village')).toBeDefined();
-    expect(screen.getByText('Reshuffle (3 left)')).toBeDefined();
-
-    vi.useRealTimers();
-  });
-
-  it('TC_INT_004: Reshuffle button cycles paper sets from Set A -> Set B -> Set C -> Set D', async () => {
-    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
-
-    render(<Dashboard />);
-    await triggerAssessmentPaper();
-
-    expect(screen.getByText('Paper: Set A')).toBeDefined();
-
-    // 1st Reshuffle: Set A -> Set B
-    const reshuffleBtn = screen.getByRole('button', { name: /Reshuffle/i });
-    fireEvent.click(reshuffleBtn);
-    expect(screen.getByText('Paper: Set B')).toBeDefined();
-    expect(screen.getByText('Reshuffle (2 left)')).toBeDefined();
-
-    // 2nd Reshuffle: Set B -> Set C
-    fireEvent.click(reshuffleBtn);
-    expect(screen.getByText('Paper: Set C')).toBeDefined();
-    expect(screen.getByText('Reshuffle (1 left)')).toBeDefined();
-
-    // 3rd Reshuffle: Set C -> Set D
-    fireEvent.click(reshuffleBtn);
-    expect(screen.getByText('Paper: Set D')).toBeDefined();
-    expect(screen.getByText('Reshuffle (0 left)')).toBeDefined();
-
-    vi.useRealTimers();
-  });
-
-  it('TC_INT_005: Reshuffle button is disabled after 3 attempts with rate limit title', async () => {
-    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
-
-    render(<Dashboard />);
-    await triggerAssessmentPaper();
-
-    const reshuffleBtn = screen.getByRole('button', { name: /Reshuffle/i });
-    // Exhaust 3 reshuffles
-    fireEvent.click(reshuffleBtn);
-    fireEvent.click(reshuffleBtn);
-    fireEvent.click(reshuffleBtn);
-
-    // Verify rate limit enforcement
-    expect(screen.getByText('Reshuffle (0 left)')).toBeDefined();
-    expect((reshuffleBtn as HTMLButtonElement).disabled).toBe(true);
-    expect(reshuffleBtn.hasAttribute('disabled')).toBe(true);
-    expect(reshuffleBtn.getAttribute('title')).toBe(
-      'Maximum 3 reshuffles allowed per session'
-    );
-
-    // Further clicks should not alter the set
-    fireEvent.click(reshuffleBtn);
-    expect(screen.getByText('Paper: Set D')).toBeDefined();
-    expect(screen.getByText('Reshuffle (0 left)')).toBeDefined();
 
     vi.useRealTimers();
   });

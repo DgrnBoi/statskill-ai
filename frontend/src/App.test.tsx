@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { apiUrl } from './lib/api';
 
+import { SAMPLE_DEMO_OFFICERS } from './data/demoOfficers';
+
 describe('App login handoff', () => {
   afterEach(() => vi.unstubAllGlobals());
 
@@ -14,13 +16,14 @@ describe('App login handoff', () => {
     });
     window.history.pushState({}, '', '/login');
     window.localStorage.clear();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: 'signed-demo-token' }) }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ success: true, token: 'signed-demo-token', users: SAMPLE_DEMO_OFFICERS }) }));
     render(<App />);
 
-    const selectDirectorBtn = await screen.findByRole('button', { name: /Director \(ISS\).*DIID/i });
+    await waitFor(() => expect(screen.getAllByText('Rajesh Sharma').length).toBeGreaterThan(0));
+    const selectDirectorBtn = screen.getAllByRole('button', { name: /Rajesh Sharma/i })[0];
     fireEvent.click(selectDirectorBtn);
     await act(async () => {
-      const continueBtn = await screen.findByRole('button', { name: /Continue as Director \(ISS\)/i });
+      const continueBtn = await screen.findByRole('button', { name: /LOG IN TO WORKSPACE/i });
       fireEvent.click(continueBtn);
     });
 

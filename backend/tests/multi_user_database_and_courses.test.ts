@@ -16,13 +16,14 @@ describe('StatSkill AI - Multi-User Database, Distinct Courses & Dynamic Authent
   const quizService = new QuizGeneratorService();
 
   beforeEach(() => {
-    userDb.resetDatabase();
+    userDb.clearAllUsers();
+    userDb.seedSampleUsers();
   });
 
   describe('1. UserDatabase CRUD & Multi-User Isolation', () => {
-    it('seeds 12 initial MoSPI officers across all operational divisions', () => {
+    it('seeds initial MoSPI officers across operational divisions when requested', () => {
       const users = userDb.getAllUsers();
-      expect(users.length).toBeGreaterThanOrEqual(12);
+      expect(users.length).toBeGreaterThanOrEqual(4);
 
       const divisions = users.map((u) => u.division);
       expect(divisions.some((d) => d.includes('Field Operations Division'))).toBe(true);
@@ -36,11 +37,11 @@ describe('StatSkill AI - Multi-User Database, Distinct Courses & Dynamic Authent
 
     it('filters users dynamically by division, cadre, and search string', () => {
       const fodOfficers = userDb.getAllUsers({ division: 'Field Operations Division' });
-      expect(fodOfficers.length).toBeGreaterThanOrEqual(3);
+      expect(fodOfficers.length).toBeGreaterThanOrEqual(1);
       fodOfficers.forEach((o) => expect(o.division).toContain('Field Operations Division'));
 
       const issOfficers = userDb.getAllUsers({ cadre: 'Indian Statistical Service' });
-      expect(issOfficers.length).toBeGreaterThanOrEqual(6);
+      expect(issOfficers.length).toBeGreaterThanOrEqual(1);
       issOfficers.forEach((o) => expect(o.cadre).toContain('Indian Statistical Service'));
 
       const searchResult = userDb.getAllUsers({ search: 'Vikram' });

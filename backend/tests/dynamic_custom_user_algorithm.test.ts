@@ -4,12 +4,15 @@ import app from '../src/index';
 import { CourseMatcherService, AssessmentAnswerSubmission } from '../src/services/recommendation/CourseMatcher';
 import { CompetencyEngine } from '../src/services/CompetencyEngine';
 
+import { userDb } from '../src/db/UserDatabase';
+
 describe('StatSkill AI - Zero-Mock Algorithmic Dynamism & Custom User Proof Suite', () => {
   let matcher: CourseMatcherService;
   let competencyEngine: CompetencyEngine;
 
   beforeAll(() => {
     process.env.JWT_SECRET = 'statskill_sih_secret_key_2026_test';
+    userDb.seedSampleUsers();
     matcher = new CourseMatcherService();
     competencyEngine = new CompetencyEngine();
   });

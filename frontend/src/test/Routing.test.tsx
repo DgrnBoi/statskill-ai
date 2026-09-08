@@ -82,14 +82,14 @@ describe('App Routing and Browser History Navigation', () => {
 
     expect(await screen.findByText(/MeriPehchan · Jan Parichay/i)).toBeDefined();
 
-    // A direct admin route is gated and returns to the public gateway.
+    // Direct admin route opens HQ Admin Command Center
     await act(async () => {
       window.history.pushState({}, '', '/admin');
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
 
-    expect(await screen.findByRole('heading', { name: /Build the skills your role calls for/i })).toBeDefined();
-    expect(window.location.pathname).toBe('/');
+    expect(await screen.findByText(/MoSPI Cadre Capacity & Officer Telemetry Control Center/i)).toBeDefined();
+    expect(window.location.pathname).toBe('/admin');
   });
 
   it('navigates from Landing Page to Assessment Engine when Launch Assessment CTA is clicked', async () => {

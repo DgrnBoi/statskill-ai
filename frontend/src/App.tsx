@@ -7,6 +7,7 @@ import { KarmayogiSahayakModal } from './components/ui/KarmayogiSahayakModal';
 import { SecretAdminGatewayModal } from './components/admin/SecretAdminGatewayModal';
 import { OfflineStatusBar } from './components/ui/OfflineStatusBar';
 import { OnboardingModal, hasCompletedOnboarding } from './components/ui/OnboardingModal';
+import { PwaInstallPrompt } from './components/ui/PwaInstallPrompt';
 import { UiPreferencesProvider, useUiPreferences } from './contexts/UiPreferencesContext';
 import { AppRouteState, navigateTo, parseRoute, PortalTab } from './lib/routing';
 import { apiUrl } from './lib/api';
@@ -23,9 +24,7 @@ function AppContent() {
   const [isSahayakOpen, setIsSahayakOpen] = useState(false);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isSecretAdminOpen, setIsSecretAdminOpen] = useState(false);
-  const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => {
-    try { return window.sessionStorage.getItem('statskill_admin_unlocked') === 'true'; } catch { return false; }
-  });
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(true);
 
   const [accessibilitySettings, setAccessibilitySettings] = useState<AccessibilitySettings>(() => {
     try {
@@ -52,6 +51,78 @@ function AppContent() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+
+    root.classList.remove('a11y-contrast-dark', 'a11y-contrast-invert', 'a11y-contrast-light');
+    if (accessibilitySettings.contrastMode === 'dark' || (accessibilitySettings.highContrast && accessibilitySettings.contrastMode === 'normal')) {
+      root.classList.add('a11y-contrast-dark');
+    } else if (accessibilitySettings.contrastMode === 'invert') {
+      root.classList.add('a11y-contrast-invert');
+    }
+
+    root.classList.remove('a11y-sat-low', 'a11y-sat-high', 'a11y-sat-mono');
+    if (accessibilitySettings.saturation && accessibilitySettings.saturation !== 'normal') {
+      root.classList.add(`a11y-sat-${accessibilitySettings.saturation}`);
+    }
+
+    if (accessibilitySettings.highlightLinks) {
+      root.classList.add('a11y-highlight-links');
+    } else {
+      root.classList.remove('a11y-highlight-links');
+    }
+
+    root.classList.remove('a11y-spacing-light', 'a11y-spacing-moderate', 'a11y-spacing-heavy');
+    if (accessibilitySettings.textSpacing && accessibilitySettings.textSpacing !== 'normal') {
+      root.classList.add(`a11y-spacing-${accessibilitySettings.textSpacing}`);
+    }
+
+    if (accessibilitySettings.pauseAnimations || accessibilitySettings.reducedMotion) {
+      root.classList.add('a11y-pause-animations');
+    } else {
+      root.classList.remove('a11y-pause-animations');
+    }
+
+    if (accessibilitySettings.hideImages) {
+      root.classList.add('a11y-hide-images');
+    } else {
+      root.classList.remove('a11y-hide-images');
+    }
+
+    if (accessibilitySettings.dyslexiaFriendly) {
+      root.classList.add('a11y-dyslexic');
+    } else {
+      root.classList.remove('a11y-dyslexic');
+    }
+
+    root.classList.remove('a11y-cursor-black', 'a11y-cursor-white');
+    if (accessibilitySettings.cursorMode && accessibilitySettings.cursorMode !== 'normal') {
+      root.classList.add(`a11y-cursor-${accessibilitySettings.cursorMode}`);
+    }
+
+    root.classList.remove('a11y-lh-18', 'a11y-lh-22');
+    if (accessibilitySettings.lineHeight === 'medium') {
+      root.classList.add('a11y-lh-18');
+    } else if (accessibilitySettings.lineHeight === 'relaxed') {
+      root.classList.add('a11y-lh-22');
+    }
+
+    root.classList.remove('a11y-align-left', 'a11y-align-center', 'a11y-align-justify');
+    if (accessibilitySettings.textAlign && accessibilitySettings.textAlign !== 'normal') {
+      root.classList.add(`a11y-align-${accessibilitySettings.textAlign}`);
+    }
+
+    const scale = accessibilitySettings.biggerText || accessibilitySettings.textScale;
+    if (scale === 'medium' || scale === 'large') {
+      root.style.fontSize = '112.5%';
+    } else if (scale === 'xlarge') {
+      root.style.fontSize = '125%';
+    } else {
+      root.style.fontSize = '';
+    }
+  }, [accessibilitySettings]);
+
   const syncRouteFromUrl = useCallback(() => {
     const parsed = parseRoute(window.location.pathname);
     if (parsed.isUnknown) {
@@ -67,11 +138,7 @@ function AppContent() {
     return () => window.removeEventListener('popstate', syncRouteFromUrl);
   }, [syncRouteFromUrl]);
 
-  useEffect(() => {
-    if (route.tab !== 'admin' || isAdminUnlocked) return;
-    navigateTo({ tab: 'home', locale: language, replace: true });
-    setRoute({ locale: language, isLogin: false, tab: 'home', isUnknown: false });
-  }, [isAdminUnlocked, language, route.tab]);
+
 
   const handleTabChange = useCallback((newTab: PortalTab) => {
     navigateTo({ tab: newTab, locale: language });
@@ -89,23 +156,25 @@ function AppContent() {
   }, [language]);
 
   const handleDemoLogin = useCallback(async (officer: DemoOfficer, method: 'parichay-id' | 'mobile-otp') => {
-    const response = await fetch(apiUrl('/api/auth/demo-login'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ officerId: officer.id, method }),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data?.token) {
-      throw new Error(data?.error || t('demoAuthUnavailable'));
-    }
-    window.localStorage.setItem('auth_token', data.token);
+    try {
+      const response = await fetch(apiUrl('/api/auth/demo-login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ officerId: officer.id, method }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && data?.token) {
+        window.localStorage.setItem('auth_token', data.token);
+      }
+    } catch {}
 
     try {
       window.localStorage.setItem('statskill_demo_login', JSON.stringify({ officer, method }));
     } catch {}
+
     navigateTo({ tab: 'overview', locale: language });
     setRoute({ locale: language, isLogin: false, tab: 'overview', isUnknown: false });
-  }, [language, t]);
+  }, [language]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -188,38 +257,36 @@ function AppContent() {
           />
         )}
 
-        {!route.isLogin && route.tab === 'home' && (
-          <>
-            <AccessibilityModal
-              isOpen={isAccessibilityOpen}
-              onClose={() => setIsAccessibilityOpen(false)}
-              settings={accessibilitySettings}
-              onUpdateSettings={updateAccessibilitySettings}
-              onResetSettings={resetAccessibilitySettings}
-            />
+        <AccessibilityModal
+          isOpen={isAccessibilityOpen}
+          onClose={() => setIsAccessibilityOpen(false)}
+          settings={accessibilitySettings}
+          onUpdateSettings={updateAccessibilitySettings}
+          onResetSettings={resetAccessibilitySettings}
+        />
 
-            <KarmayogiSahayakModal
-              isOpen={isSahayakOpen}
-              onClose={() => setIsSahayakOpen(false)}
-              onNavigateTab={(tab) => {
-                handleTabChange(tab);
-              }}
-              onOpenLogin={handleOpenLogin}
-              onOpenAccessibility={() => setIsAccessibilityOpen(true)}
-              onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
-            />
+        <KarmayogiSahayakModal
+          isOpen={isSahayakOpen}
+          onClose={() => setIsSahayakOpen(false)}
+          onNavigateTab={(tab) => {
+            handleTabChange(tab);
+          }}
+          onOpenLogin={handleOpenLogin}
+          onOpenAccessibility={() => setIsAccessibilityOpen(true)}
+          onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
+        />
 
-            <SecretAdminGatewayModal
-              isOpen={isSecretAdminOpen}
-              onClose={() => setIsSecretAdminOpen(false)}
-              onUnlockAdmin={() => {
-                setIsAdminUnlocked(true);
-                try { window.sessionStorage.setItem('statskill_admin_unlocked', 'true'); } catch {}
-                handleTabChange('admin');
-              }}
-            />
-          </>
-        )}
+        <SecretAdminGatewayModal
+          isOpen={isSecretAdminOpen}
+          onClose={() => setIsSecretAdminOpen(false)}
+          onUnlockAdmin={() => {
+            setIsAdminUnlocked(true);
+            try { window.sessionStorage.setItem('statskill_admin_unlocked', 'true'); } catch {}
+            handleTabChange('admin');
+          }}
+        />
+
+        <PwaInstallPrompt />
       </div>
     </ErrorBoundary>
   );

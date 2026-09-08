@@ -1,10 +1,12 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from '../src/index';
+import { userDb } from '../src/db/UserDatabase';
 
 describe('Jan Parichay demo authentication', () => {
   beforeAll(() => {
     process.env.JWT_SECRET = 'test-signing-secret';
+    userDb.seedSampleUsers();
   });
 
   it('issues a signed token containing server-owned JSO claims', async () => {

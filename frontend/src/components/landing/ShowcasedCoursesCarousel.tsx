@@ -87,8 +87,24 @@ export function ShowcasedCoursesCarousel({
   const scrollBy = (direction: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    const amount = el.clientWidth * 0.8 * direction;
-    el.scrollBy({ left: amount, behavior: 'smooth' });
+
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const currentScroll = el.scrollLeft;
+    const scrollStep = 340; // Card width + gap
+
+    if (direction === 1) {
+      if (currentScroll >= maxScroll - 20) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: scrollStep, behavior: 'smooth' });
+      }
+    } else {
+      if (currentScroll <= 20) {
+        el.scrollTo({ left: maxScroll, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: -scrollStep, behavior: 'smooth' });
+      }
+    }
   };
 
   return (

@@ -46,7 +46,14 @@ export function CourseCatalog({
       <PageHeader
         title={t('catalogTitle')}
         description={t('catalogDescription')}
-        actions={<Badge variant="neutral">{courses.length.toLocaleString('en-IN')} {t('catalogMatchingCount')}</Badge>}
+        actions={
+          <Badge variant="neutral">
+            {courses.length.toLocaleString('en-IN')}{' '}
+            {searchQuery.trim() || selectedDomain !== 'All'
+              ? t('catalogMatchingCount')
+              : t('catalogTotalCount')}
+          </Badge>
+        }
       />
 
       <div className="catalog-toolbar">

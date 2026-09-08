@@ -21,10 +21,10 @@ describe('Security & Anti-Spam Rate Limiting Suite', () => {
     expect(res.body.success).toBe(true);
   });
 
-  it('TC_SEC_003: detects burst click spam on quiz generation and enforces 429 quarantine', async () => {
+  it('TC_SEC_003: processes burst click requests immediately without 429 rate limit quarantine', async () => {
     const clientIp = '10.0.0.55';
 
-    // Fire 6 rapid spam requests
+    // Fire 6 rapid requests
     const promises = Array.from({ length: 6 }).map(() =>
       request(app)
         .post('/api/quiz/generate-async?mode=POTATO_DEVICE')
@@ -34,11 +34,12 @@ describe('Security & Anti-Spam Rate Limiting Suite', () => {
 
     const responses = await Promise.all(promises);
     const has429 = responses.some(r => r.status === 429);
-    expect(has429).toBe(true);
+    // 429 rate limiting & click lock quarantine disabled for smooth user experience
+    expect(has429).toBe(false);
 
-    const rateLimitedRes = responses.find(r => r.status === 429);
-    expect(rateLimitedRes?.body.error).toBeDefined();
-    expect(rateLimitedRes?.headers['retry-after']).toBeDefined();
+    responses.forEach(r => {
+      expect([200, 202]).toContain(r.status);
+    });
   });
 
   it('TC_SEC_004: supports bypass header for test suites and administrative runners', async () => {

@@ -51,17 +51,94 @@ export class LocalQuestionExtractor {
       if (uniqueQuestions.length >= targetCount) break;
     }
 
+    if (uniqueQuestions.length < targetCount) {
+      this.extractSentenceFallbackQuestions(sentences, uniqueQuestions, targetCount, courseTitle, seenStems);
+    }
+
     return uniqueQuestions;
+  }
+  public static isMeaningfulSentence(s: string): boolean {
+    if (!s || s.length < 15 || s.length > 350) return false;
+    if (s.startsWith('--') || s.toLowerCase().startsWith('page')) return false;
+
+    const lower = s.toLowerCase();
+    // Exclude emails, web links, and phone numbers
+    if (lower.includes('@') || lower.includes('gmail') || lower.includes('email')) return false;
+    if (lower.includes('http://') || lower.includes('https://') || lower.includes('www.') || lower.includes('linkedin.com') || lower.includes('github.com')) return false;
+    if (/\b\d{10}\b/.test(s) || /\+91/.test(s) || lower.includes('mobile') || lower.includes('phone') || lower.includes('linkedin')) return false;
+
+    // Must contain at least 4 real words
+    const words = s.split(/\s+/).filter(w => w.length > 1);
+    if (words.length < 4) return false;
+
+    return true;
+  }
+
+  // Fallback: If still under targetCount, generate sentence comprehension questions from available sentences
+  private static extractSentenceFallbackQuestions(
+    sentences: string[],
+    uniqueQuestions: QuestionItem[],
+    targetCount: number,
+    courseTitle: string,
+    seenStems: Set<string>
+  ): void {
+    if (uniqueQuestions.length >= targetCount || sentences.length === 0) return;
+
+    const stemTemplates = [
+      `Which of the following details or technical specifications is directly confirmed by the uploaded document?`,
+      `According to the uploaded reference document, which core responsibility or operational principle is established?`,
+      `Based on the uploaded document text, which achievement or project requirement is explicitly verified?`,
+      `Which of the following statements is directly supported by the uploaded reference material?`,
+      `According to the document text, which key requirement or skill area is explicitly established?`
+    ];
+
+    for (let i = 0; i < sentences.length && uniqueQuestions.length < targetCount; i++) {
+      const sentence = sentences[i];
+      if (!this.isMeaningfulSentence(sentence)) continue;
+
+      const stem = stemTemplates[uniqueQuestions.length % stemTemplates.length];
+      const stemKey = `${stem}-${sentence.slice(0, 20)}`.toLowerCase();
+
+      if (seenStems.has(stemKey)) continue;
+      seenStems.add(stemKey);
+
+      const otherSentences = sentences.filter((_, idx) => idx !== i && this.isMeaningfulSentence(sentences[idx]));
+      const distractors = this.buildDistractors(sentence, otherSentences, 'Document Concept');
+      const options = this.shuffle([sentence.slice(0, 140), ...distractors.slice(0, 3)]);
+
+      const distractorAnalysis: Record<string, DistractorDiagnostic> = {};
+      for (const opt of distractors.slice(0, 3)) {
+        distractorAnalysis[opt] = {
+          misconception: `Selecting an unverified statement or alternative clause from another section of the document.`,
+          remedialSkill: courseTitle,
+          recommendedCourseId: 'document-review-mastery',
+          recommendedCourseTitle: courseTitle
+        };
+      }
+
+      uniqueQuestions.push({
+        id: `loc-extracted-${Date.now()}-${uniqueQuestions.length + 1}`,
+        courseId: courseTitle,
+        topic: 'Document Key Concepts',
+        bloomLevel: 'Understanding',
+        question: stem,
+        options,
+        correctAnswer: sentence.slice(0, 140),
+        explanation: `Verified excerpt from uploaded document: "${sentence.slice(0, 120)}"`,
+        sourceCitation: `Uploaded Document Excerpt`,
+        distractorAnalysis
+      });
+    }
   }
 
   /**
-   * Helper: Splits text into meaningful complete sentences
+   * Helper: Splits text into meaningful complete sentences or structured document clauses
    */
   private static extractSentences(text: string): string[] {
     return text
-      .split(/(?<=[.?!])\s+(?=[A-Z0-9])|\n\n+/)
-      .map(s => s.trim())
-      .filter(s => s.length >= 35 && s.length <= 350 && !s.startsWith('--') && !s.toLowerCase().startsWith('page'));
+      .split(/(?<=[.?!])\s+(?=[A-Z0-9])|\n+|\r\n+|[•|\-]/)
+      .map(s => s.trim().replace(/\s+/g, ' '))
+      .filter(s => this.isMeaningfulSentence(s));
   }
 
   /**
@@ -248,27 +325,26 @@ export class LocalQuestionExtractor {
     difficulty: string
   ): QuestionItem[] {
     const questions: QuestionItem[] = [];
-    const statisticalSentences = sentences.filter(s => 
-      /\b(sample|survey|stratum|strata|fsu|ssu|household|cpi|gdp|gva|index|nss|mospi|asi|plfs|rate|percentage|ratio)\b/i.test(s)
-    );
+    // Accept all clean sentences from the document without restrictive keyword filtering
+    const cleanSentences = sentences.filter(s => s.length >= 35 && s.length <= 250);
 
-    for (let i = 0; i < Math.min(statisticalSentences.length, 6); i++) {
-      const sentence = statisticalSentences[i];
+    for (let i = 0; i < Math.min(cleanSentences.length, 10); i++) {
+      const sentence = cleanSentences[i];
       const correctAnswer = sentence;
 
-      const otherStatistical = statisticalSentences
+      const otherSentences = cleanSentences
         .filter((_, idx) => idx !== i)
         .slice(0, 3);
 
-      if (otherStatistical.length < 3) continue;
+      if (otherSentences.length < 3) continue;
 
-      const distractors = otherStatistical.map(os => os.slice(0, 140));
+      const distractors = otherSentences.map(os => os.slice(0, 140));
       const options = [correctAnswer.slice(0, 140), ...distractors];
 
       const distractorAnalysis: Record<string, DistractorDiagnostic> = {};
       for (const opt of distractors) {
         distractorAnalysis[opt] = {
-          misconception: `Selecting an unrelated statistical statement from another part of the manual.`,
+          misconception: `Selecting an alternative statement from another section of the uploaded document.`,
           remedialSkill: courseTitle,
           recommendedCourseId: 'document-review-mastery',
           recommendedCourseTitle: courseTitle
@@ -278,13 +354,13 @@ export class LocalQuestionExtractor {
       questions.push({
         id: `qb-doc-fact-${Date.now()}-${i + 1}`,
         courseId: courseTitle,
-        topic: 'Document Findings & Standards',
+        topic: 'Document Concepts & Principles',
         bloomLevel: 'Understanding',
-        question: `Which of the following statements is directly confirmed by the uploaded training document?`,
+        question: `Which of the following statements is directly confirmed by the uploaded document?`,
         options: this.shuffle(options),
         correctAnswer: correctAnswer.slice(0, 140),
-        explanation: `Direct quote from the uploaded text: "${sentence}".`,
-        sourceCitation: `Uploaded Document: Body Section`,
+        explanation: `Direct excerpt from the uploaded document: "${sentence}".`,
+        sourceCitation: `Uploaded Document: Section ${i + 1}`,
         distractorAnalysis
       });
     }
@@ -306,16 +382,18 @@ export class LocalQuestionExtractor {
       if (unique.size >= 3) break;
     }
 
-    // Fallback synthetic distractors if the document is concise
+    // Fallback synthetic distractors derived dynamically from document context (never hardcoded survey jargon)
     const fallbacks = [
-      `Applies only when variance thresholds exceed statutory limits for ${term}.`,
-      `Computed using unweighted arithmetic aggregations without non-response adjustments.`,
-      `Deprecated methodology superseded by legacy census baseline procedures.`
+      `Not specified or explicitly recorded in the uploaded reference document.`,
+      `Optional secondary specification requiring external verification for ${term.slice(0, 30)}.`,
+      `Deprecated guideline superseded by updated reference document protocols.`
     ];
 
     for (const fb of fallbacks) {
       if (unique.size >= 3) break;
-      unique.add(fb);
+      if (fb !== correct) {
+        unique.add(fb);
+      }
     }
 
     return Array.from(unique).slice(0, 3);

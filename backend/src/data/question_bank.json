@@ -946,5 +946,501 @@
         "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
       }
     }
+  },
+  {
+    "id": "qb-doc-fact-1788887887569-1",
+    "courseId": "NSS_Weights_Instruction.txt",
+    "topic": "Document Concepts & Principles",
+    "bloomLevel": "Understanding",
+    "question": "Which of the following statements is directly confirmed by the uploaded document?",
+    "options": [
+      "Data fiduciaries must comply with Digital Personal Data Protection mandates by redacting informant identifiers.",
+      "Section A: NSS Sampling Weights Formulation",
+      "The non-sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers.",
+      "In stratified two-stage sampling designs, the multiplier for household h in FSU i is calculated as M_ih = (1 / P_i) * (H_i / h_i)."
+    ],
+    "correctAnswer": "Section A: NSS Sampling Weights Formulation",
+    "explanation": "Direct excerpt from the uploaded document: \"Section A: NSS Sampling Weights Formulation\".",
+    "sourceCitation": "Uploaded Document: Section 1",
+    "distractorAnalysis": {
+      "In stratified two-stage sampling designs, the multiplier for household h in FSU i is calculated as M_ih = (1 / P_i) * (H_i / h_i).": {
+        "misconception": "Selecting an alternative statement from another section of the uploaded document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      },
+      "The non-sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers.": {
+        "misconception": "Selecting an alternative statement from another section of the uploaded document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      },
+      "Data fiduciaries must comply with Digital Personal Data Protection mandates by redacting informant identifiers.": {
+        "misconception": "Selecting an alternative statement from another section of the uploaded document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-fact-1788889892460-1",
+    "courseId": "cir-nss-78.txt",
+    "topic": "Document Findings & Standards",
+    "bloomLevel": "Understanding",
+    "question": "Which of the following statements is directly confirmed by the uploaded training document?",
+    "options": [
+      "The first stage units (FSU) are the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector.",
+      "Chapter 1: Sampling Design and Estimation Procedure for NSS 78th Round.",
+      "The sample allocation between rural and urban sectors is made in proportion to the population as per Census 2011.",
+      "Within each stratum, FSUs are selected by circular systematic sampling with probability proportional to size (PPS)."
+    ],
+    "correctAnswer": "Chapter 1: Sampling Design and Estimation Procedure for NSS 78th Round.",
+    "explanation": "Direct quote from the uploaded text: \"Chapter 1: Sampling Design and Estimation Procedure for NSS 78th Round.\".",
+    "sourceCitation": "Uploaded Document: Body Section",
+    "distractorAnalysis": {
+      "The first stage units (FSU) are the census villages in the rural sector and Urban Frame Survey (UFS) blocks in the urban sector.": {
+        "misconception": "Selecting an unrelated statistical statement from another part of the manual.",
+        "remedialSkill": "cir-nss-78.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "cir-nss-78.txt"
+      },
+      "The sample allocation between rural and urban sectors is made in proportion to the population as per Census 2011.": {
+        "misconception": "Selecting an unrelated statistical statement from another part of the manual.",
+        "remedialSkill": "cir-nss-78.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "cir-nss-78.txt"
+      },
+      "Within each stratum, FSUs are selected by circular systematic sampling with probability proportional to size (PPS).": {
+        "misconception": "Selecting an unrelated statistical statement from another part of the manual.",
+        "remedialSkill": "cir-nss-78.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "cir-nss-78.txt"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788895013744-3",
+    "courseId": "NSS_Weights_Instruction.txt",
+    "topic": "NSS_Weights_Instruction.txt",
+    "bloomLevel": "Application",
+    "question": "According to the uploaded reference material, what operational principle is established in Section 3?",
+    "options": [
+      "Section A: NSS Sampling Weights Formulation",
+      "Field interview schedules do not require supervisor verification before processing.",
+      "Annual survey multipliers are calculated without stratification weights.",
+      "Respondent microdata can be disclosed publicly without anonymization."
+    ],
+    "correctAnswer": "Section A: NSS Sampling Weights Formulation",
+    "explanation": "Verified verbatim sentence from uploaded text: \"Section A: NSS Sampling Weights Formulation...\"",
+    "sourceCitation": "Uploaded Document Excerpt"
+  },
+  {
+    "id": "loc-extracted-1788895980963-2",
+    "courseId": "RESUME_ESHAAN_SUNTHANKAR.pdf",
+    "topic": "RESUME_ESHAAN_SUNTHANKAR.pdf",
+    "bloomLevel": "Application",
+    "question": "According to the uploaded reference material, what operational principle is established in Section 2?",
+    "options": [
+      "+91-8788097621| sunthankare@gmail.com| linkedin.com/in/eshaan-sunthankar| github.com/dgrnboi",
+      "Field interview schedules do not require supervisor verification before processing.",
+      "Annual survey multipliers are calculated without stratification weights.",
+      "Respondent microdata can be disclosed publicly without anonymization."
+    ],
+    "correctAnswer": "+91-8788097621| sunthankare@gmail.com| linkedin.com/in/eshaan-sunthankar| github.com/dgrnboi",
+    "explanation": "Verified verbatim sentence from uploaded text: \"+91-8788097621| sunthankare@gmail.com| linkedin.com/in/eshaan-sunthankar| github.com/dgrnboi...\"",
+    "sourceCitation": "Uploaded Document Excerpt"
+  },
+  {
+    "id": "loc-extracted-1788895980964-4",
+    "courseId": "RESUME_ESHAAN_SUNTHANKAR.pdf",
+    "topic": "RESUME_ESHAAN_SUNTHANKAR.pdf",
+    "bloomLevel": "Application",
+    "question": "According to the uploaded reference material, what operational principle is established in Section 4?",
+    "options": [
+      "B.Tech in Artificial Intelligence & Machine Learning; CGPA: 8.86/10.0Aug 2024 – May 2028",
+      "Field interview schedules do not require supervisor verification before processing.",
+      "Annual survey multipliers are calculated without stratification weights.",
+      "Respondent microdata can be disclosed publicly without anonymization."
+    ],
+    "correctAnswer": "B.Tech in Artificial Intelligence & Machine Learning; CGPA: 8.86/10.0Aug 2024 – May 2028",
+    "explanation": "Verified verbatim sentence from uploaded text: \"B.Tech in Artificial Intelligence & Machine Learning; CGPA: 8.86/10.0Aug 2024 – May 2028...\"",
+    "sourceCitation": "Uploaded Document Excerpt"
+  },
+  {
+    "id": "loc-extracted-1788895980964-5",
+    "courseId": "RESUME_ESHAAN_SUNTHANKAR.pdf",
+    "topic": "RESUME_ESHAAN_SUNTHANKAR.pdf",
+    "bloomLevel": "Application",
+    "question": "According to the uploaded reference material, what operational principle is established in Section 5?",
+    "options": [
+      "Relevant Coursework: Data Structures & Algorithms (C++), Deep Learning, Computer Vision, Database Systems",
+      "Field interview schedules do not require supervisor verification before processing.",
+      "Annual survey multipliers are calculated without stratification weights.",
+      "Respondent microdata can be disclosed publicly without anonymization."
+    ],
+    "correctAnswer": "Relevant Coursework: Data Structures & Algorithms (C++), Deep Learning, Computer Vision, Database Systems",
+    "explanation": "Verified verbatim sentence from uploaded text: \"Relevant Coursework: Data Structures & Algorithms (C++), Deep Learning, Computer Vision, Database Sy...\"",
+    "sourceCitation": "Uploaded Document Excerpt"
+  },
+  {
+    "id": "qb-doc-meth-1788896064845-12",
+    "courseId": "NSS 78th Round Manual",
+    "topic": "Section 2.1 Guidelines",
+    "bloomLevel": "Understanding",
+    "question": "Based on the provisions for \"Section 2.1 Guidelines\" in the document, which procedural requirement is explicitly stated?",
+    "options": [
+      "The National Statistical Office (NSO) conducts nationwide sample surveys to generate reliable estimates of macroeconomic and socio",
+      "CHAPTER 1: INTRODUCTION AND OBJECTIVES",
+      "economic indicators.",
+      "the total sample size of FSUs was allocated to the States and UTs in proportion to their population as per Census 2011"
+    ],
+    "correctAnswer": "the total sample size of FSUs was allocated to the States and UTs in proportion to their population as per Census 2011",
+    "explanation": "The document explicitly states: \"As per Section 2.1 Guidelines, the total sample size of FSUs was allocated to the States and UTs in proportion to their population as per Census 2011.\".",
+    "sourceCitation": "Uploaded Document: Rule under Section 2.1 Guidelines",
+    "distractorAnalysis": {
+      "CHAPTER 1: INTRODUCTION AND OBJECTIVES": {
+        "misconception": "Misattributing procedural guidelines under \"Section 2.1 Guidelines\".",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "The National Statistical Office (NSO) conducts nationwide sample surveys to generate reliable estimates of macroeconomic and socio": {
+        "misconception": "Misattributing procedural guidelines under \"Section 2.1 Guidelines\".",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      },
+      "economic indicators.": {
+        "misconception": "Misattributing procedural guidelines under \"Section 2.1 Guidelines\".",
+        "remedialSkill": "NSS 78th Round Manual",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS 78th Round Manual"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896066507-3",
+    "courseId": "NSS_Weights_Instruction.txt",
+    "topic": "Section A: NSS Sampling Weights For...",
+    "bloomLevel": "Understanding",
+    "question": "According to the uploaded reference document, which detail is explicitly recorded regarding \"Section A: NSS Sampling Weights For...\"?",
+    "options": [
+      "sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers.",
+      "stage sampling designs, the multiplier for household h in FSU i is calculated as M_ih = (1 / P_i) * (H_i / h_i).",
+      "Section A: NSS Sampling Weights Formulation",
+      "In stratified two"
+    ],
+    "correctAnswer": "Section A: NSS Sampling Weights Formulation",
+    "explanation": "Verified excerpt from uploaded document: \"Section A: NSS Sampling Weights Formulation\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "In stratified two": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      },
+      "stage sampling designs, the multiplier for household h in FSU i is calculated as M_ih = (1 / P_i) * (H_i / h_i).": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      },
+      "sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers.": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896108870-2",
+    "courseId": "Profile.pdf",
+    "topic": "8788097621 (Mobile)",
+    "bloomLevel": "Understanding",
+    "question": "According to the uploaded reference document, which detail is explicitly recorded regarding \"8788097621 (Mobile)\"?",
+    "options": [
+      "www.linkedin.com/in/eshaansunthankar",
+      "8788097621 (Mobile)",
+      "sunthankare@gmail.com",
+      "265054327 (LinkedIn)"
+    ],
+    "correctAnswer": "8788097621 (Mobile)",
+    "explanation": "Verified excerpt from uploaded document: \"8788097621 (Mobile)\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "sunthankare@gmail.com": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "www.linkedin.com/in/eshaansunthankar": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "265054327 (LinkedIn)": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896108870-3",
+    "courseId": "Profile.pdf",
+    "topic": "sunthankare@gmail.com",
+    "bloomLevel": "Understanding",
+    "question": "According to the uploaded reference document, which detail is explicitly recorded regarding \"sunthankare@gmail.com\"?",
+    "options": [
+      "265054327 (LinkedIn)",
+      "www.linkedin.com/in/eshaansunthankar",
+      "8788097621 (Mobile)",
+      "sunthankare@gmail.com"
+    ],
+    "correctAnswer": "sunthankare@gmail.com",
+    "explanation": "Verified excerpt from uploaded document: \"sunthankare@gmail.com\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "8788097621 (Mobile)": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "www.linkedin.com/in/eshaansunthankar": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "265054327 (LinkedIn)": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896108870-4",
+    "courseId": "Profile.pdf",
+    "topic": "www.linkedin.com/in/eshaansunthankar",
+    "bloomLevel": "Understanding",
+    "question": "According to the uploaded reference document, which detail is explicitly recorded regarding \"www.linkedin.com/in/eshaansunthankar\"?",
+    "options": [
+      "8788097621 (Mobile)",
+      "www.linkedin.com/in/eshaansunthankar",
+      "265054327 (LinkedIn)",
+      "sunthankare@gmail.com"
+    ],
+    "correctAnswer": "www.linkedin.com/in/eshaansunthankar",
+    "explanation": "Verified excerpt from uploaded document: \"www.linkedin.com/in/eshaansunthankar\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "8788097621 (Mobile)": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "sunthankare@gmail.com": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "265054327 (LinkedIn)": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896108870-5",
+    "courseId": "Profile.pdf",
+    "topic": "265054327 (LinkedIn)",
+    "bloomLevel": "Understanding",
+    "question": "According to the uploaded reference document, which detail is explicitly recorded regarding \"265054327 (LinkedIn)\"?",
+    "options": [
+      "265054327 (LinkedIn)",
+      "sunthankare@gmail.com",
+      "8788097621 (Mobile)",
+      "www.linkedin.com/in/eshaansunthankar"
+    ],
+    "correctAnswer": "265054327 (LinkedIn)",
+    "explanation": "Verified excerpt from uploaded document: \"265054327 (LinkedIn)\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "8788097621 (Mobile)": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "sunthankare@gmail.com": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      },
+      "www.linkedin.com/in/eshaansunthankar": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "Profile.pdf",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "Profile.pdf"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896172104-3",
+    "courseId": "NSS_Weights_Instruction.txt",
+    "topic": "Document Key Concepts",
+    "bloomLevel": "Understanding",
+    "question": "Based on the uploaded document text, which achievement or project requirement is explicitly verified?",
+    "options": [
+      "Data fiduciaries must comply with Digital Personal Data Protection mandates by redacting informant identifiers.",
+      "sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers.",
+      "Section A: NSS Sampling Weights Formulation",
+      "stage sampling designs, the multiplier for household h in FSU i is calculated as M_ih = (1 / P_i) * (H_i / h_i)."
+    ],
+    "correctAnswer": "Section A: NSS Sampling Weights Formulation",
+    "explanation": "Verified excerpt from uploaded document: \"Section A: NSS Sampling Weights Formulation\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "stage sampling designs, the multiplier for household h in FSU i is calculated as M_ih = (1 / P_i) * (H_i / h_i).": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      },
+      "sampling error is minimized through rigorous field scrutiny by Senior Statistical Officers.": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      },
+      "Data fiduciaries must comply with Digital Personal Data Protection mandates by redacting informant identifiers.": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "NSS_Weights_Instruction.txt",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "NSS_Weights_Instruction.txt"
+      }
+    }
+  },
+  {
+    "id": "qb-doc-def-1788896935490-1",
+    "courseId": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+    "topic": "trustworthy journey and",
+    "bloomLevel": "Recall",
+    "question": "According to the uploaded document, what is the operational definition or purpose of \"trustworthy journey and\"?",
+    "options": [
+      "Not specified or explicitly recorded in the uploaded reference document.",
+      "the other channels as future",
+      "Optional secondary specification requiring external verification for trustworthy journey and.",
+      "Deprecated guideline superseded by updated reference document protocols."
+    ],
+    "correctAnswer": "the other channels as future",
+    "explanation": "The uploaded manual specifies: \"trustworthy journey and refers to the other channels as future\".",
+    "sourceCitation": "Uploaded Document: Section on trustworthy journey and",
+    "distractorAnalysis": {
+      "Not specified or explicitly recorded in the uploaded reference document.": {
+        "misconception": "Confusing the definition of \"trustworthy journey and\" with related statistical concepts in the manual.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      },
+      "Optional secondary specification requiring external verification for trustworthy journey and.": {
+        "misconception": "Confusing the definition of \"trustworthy journey and\" with related statistical concepts in the manual.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      },
+      "Deprecated guideline superseded by updated reference document protocols.": {
+        "misconception": "Confusing the definition of \"trustworthy journey and\" with related statistical concepts in the manual.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896935492-4",
+    "courseId": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+    "topic": "Document Key Concepts",
+    "bloomLevel": "Understanding",
+    "question": "Which of the following statements is directly supported by the uploaded reference material?",
+    "options": [
+      "**Official Problem ID:** 26097",
+      "**Official Theme:** Agriculture, FoodTech & Rural Development",
+      "**Organization:** Ministry of Social Justice and Empowerment",
+      "# Kaushal Saathi — Revised Master Plan for SIH26097"
+    ],
+    "correctAnswer": "**Official Problem ID:** 26097",
+    "explanation": "Verified excerpt from uploaded document: \"**Official Problem ID:** 26097\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "# Kaushal Saathi — Revised Master Plan for SIH26097": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      },
+      "**Official Theme:** Agriculture, FoodTech & Rural Development": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      },
+      "**Organization:** Ministry of Social Justice and Empowerment": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      }
+    }
+  },
+  {
+    "id": "loc-extracted-1788896935493-5",
+    "courseId": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+    "topic": "Document Key Concepts",
+    "bloomLevel": "Understanding",
+    "question": "According to the document text, which key requirement or skill area is explicitly established?",
+    "options": [
+      "**Official Theme:** Agriculture, FoodTech & Rural Development",
+      "# Kaushal Saathi — Revised Master Plan for SIH26097",
+      "**Organization:** Ministry of Social Justice and Empowerment",
+      "**Official Problem ID:** 26097"
+    ],
+    "correctAnswer": "**Official Theme:** Agriculture, FoodTech & Rural Development",
+    "explanation": "Verified excerpt from uploaded document: \"**Official Theme:** Agriculture, FoodTech & Rural Development\"",
+    "sourceCitation": "Uploaded Document Excerpt",
+    "distractorAnalysis": {
+      "# Kaushal Saathi — Revised Master Plan for SIH26097": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      },
+      "**Official Problem ID:** 26097": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      },
+      "**Organization:** Ministry of Social Justice and Empowerment": {
+        "misconception": "Selecting an unverified statement or alternative clause from another section of the document.",
+        "remedialSkill": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md",
+        "recommendedCourseId": "document-review-mastery",
+        "recommendedCourseTitle": "KAUSHAL_SAATHI_REVISED_MASTER_PLAN.md"
+      }
+    }
   }
 ]
