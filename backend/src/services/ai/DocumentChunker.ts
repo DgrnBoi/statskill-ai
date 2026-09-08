@@ -205,14 +205,29 @@ export class DocumentChunker {
     // 3. Sort chunks descending by score
     const sorted = [...chunks].sort((a, b) => (b.score || 0) - (a.score || 0));
 
-    // 4. Greedily assemble chunks within budget, maintaining original document sequence
+    // 4. Stratified Selection: Pick at least 1 top-scoring chunk from EVERY unique section heading first
     const selected: DocumentChunk[] = [];
+    const seenSections = new Set<string>();
     let currentLength = 0;
 
+    // Pass A: Guarantee 1 top chunk per section heading across the whole document
     for (const chunk of sorted) {
-      if (currentLength + chunk.text.length <= totalBudgetChars || selected.length === 0) {
-        selected.push(chunk);
-        currentLength += chunk.text.length;
+      if (!seenSections.has(chunk.sectionTitle)) {
+        if (currentLength + chunk.text.length <= totalBudgetChars || selected.length === 0) {
+          selected.push(chunk);
+          seenSections.add(chunk.sectionTitle);
+          currentLength += chunk.text.length;
+        }
+      }
+    }
+
+    // Pass B: Fill remaining character budget with secondary high-scoring chunks across sections
+    for (const chunk of sorted) {
+      if (!selected.some(s => s.id === chunk.id)) {
+        if (currentLength + chunk.text.length <= totalBudgetChars) {
+          selected.push(chunk);
+          currentLength += chunk.text.length;
+        }
       }
     }
 
