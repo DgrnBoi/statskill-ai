@@ -85,11 +85,11 @@ export class LocalQuestionExtractor {
     if (uniqueQuestions.length >= targetCount || sentences.length === 0) return;
 
     const stemTemplates = [
-      `Which of the following details or technical specifications is directly confirmed by the uploaded document?`,
-      `According to the uploaded reference document, which core responsibility or operational principle is established?`,
-      `Based on the uploaded document text, which achievement or project requirement is explicitly verified?`,
-      `Which of the following statements is directly supported by the uploaded reference material?`,
-      `According to the document text, which key requirement or skill area is explicitly established?`
+      `When analyzing the technical specifications outlined in the uploaded document, which core finding is explicitly confirmed?`,
+      `According to the operational framework established in the reference document, which key requirement must be prioritized?`,
+      `Based on the methodology presented in the uploaded reference material, which statement is directly supported by evidence?`,
+      `When evaluating project parameters against the uploaded reference text, which achievement or specification is verified?`,
+      `Under the statutory guidelines detailed in the document, which operational principle is explicitly established?`
     ];
 
     for (let i = 0; i < sentences.length && uniqueQuestions.length < targetCount; i++) {
